@@ -11,10 +11,10 @@ INCLUDES=-I@DIRINST@/include/ -I.
 SOURCES= logserv.c log_processing.c
 OBJECTS= logserv.o log_processing.o
 TARGET= logserv.so
-DOCS=README.LogServ
+DOCS=LogServ.README LogServ.README.html
 SCRIPTS=OnisDoLogs.sh onisconfig
 DATA=
-DISTFILES=$(SOURCES) $(DOCS) $(SCRIPTS) *.in configure install-sh ChangeLog *.h lgs_help.c
+DISTFILES=$(SOURCES) $(DOCS) $(SCRIPTS) *.in configure install-sh ChangeLog *.h lgs_help.c LICENSE
 distdir= @PACKAGE@-@VERSION@
 
 all:	 module
