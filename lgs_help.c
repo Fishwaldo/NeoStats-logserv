@@ -36,7 +36,7 @@ const char *ls_about[] = {
 };
 
 const char *lgs_help_add[] = {
-	"Syntax: \2CHANS \37ADD <Channame> <\"public\"/\"private\"> <url>\37\2",
+	"Syntax: \2ADD \37<Channame> <\"public\"/\"private\"> <url>\37\2",
 	"",
 	"Adds a channel to LogServ for Monitoring. You must specify:",
 	"The Channel Name",
@@ -48,7 +48,7 @@ const char *lgs_help_add[] = {
 };
 
 const char *lgs_help_del[] = {
-	"Syntax: \2CHANS \37DEL <Channame>\37\2",
+	"Syntax: \2DEL \37<Channame>\37\2",
 	"",
 	"Deletes a logged channel from LogServ",
 	"Requires the channel name",
@@ -56,14 +56,14 @@ const char *lgs_help_del[] = {
 };
 
 const char *lgs_help_list[] = {
-	"Syntax: \2CHANS \37LIST\37\2",
+	"Syntax: \2LIST2",
 	"",
 	"Lists the channels that LogServ is currently logging",
 	NULL
 };
 
 const char *lgs_help_url[] = {
-	"Syntax: \2CHANS \37SET URL <url>\37\2",
+	"Syntax: \2URL \37<url>\37\2",
 	"",
 	"Modifies the URL for the stats on that channel",
 	NULL
