@@ -26,6 +26,7 @@
  */
 
 #include <stdio.h>
+#include "modconfig.h"
 #include "logserv.h"
 
 /* forward decl */
@@ -54,7 +55,7 @@ logtype_proc logging_funcs[] = {
 ModuleInfo __module_info = {
 	"LogServ",
 	"Channel Logging Bot",
-	"1.2",
+	MODULE_VERSION,
 	__DATE__,
 	__TIME__
 };
