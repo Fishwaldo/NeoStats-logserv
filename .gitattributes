@@ -10,7 +10,6 @@
 /NEWS -text
 /OnisDoLogs.sh -text
 /README.LogServ -text
-/config.status -text
 /configure -text
 /configure.in -text
 /install-sh -text
