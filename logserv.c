@@ -33,10 +33,12 @@ Bot *lgs_bot;
 Module *lgs_module;
 
 /* forward decl */
-static int lgs_chans (CmdParams* cmdparams);
+static int lgs_cmd_add (CmdParams* cmdparams);
+static int lgs_cmd_del (CmdParams* cmdparams);
+static int lgs_cmd_list (CmdParams* cmdparams);
+static int lgs_cmd_url (CmdParams* cmdparams);
 static int lgs_stats (CmdParams* cmdparams);
 static void lgs_save_channels_data(ChannelLog *cl);
-ChannelLog *lgs_newchanlog(CmdParams* cmdparams);
 ChannelLog *lgs_findactchanlog(Channel *c);
 
 /** Copyright info */
@@ -65,9 +67,12 @@ ModuleInfo module_info = {
 
 bot_cmd lgs_commands[]=
 {
-	{"CHANS",			lgs_chans,		1, 	NS_ULEVEL_OPER,		lgs_help_chan, 		 	lgs_help_chan_oneline},
-	{"STATS",			lgs_stats,		0, 	0,			lgs_help_stats, 		lgs_help_stats_oneline},
-	{NULL,				NULL,			0, 	0,			NULL, 				NULL}
+	{"ADD",		lgs_cmd_add ,	3, 	NS_ULEVEL_OPER,		lgs_help_add, 		 	lgs_help_add_oneline},
+	{"DEL",		lgs_cmd_del,	1, 	NS_ULEVEL_OPER,		lgs_help_del, 		 	lgs_help_del_oneline},
+	{"LIST",	lgs_cmd_list,	0, 	NS_ULEVEL_OPER,		lgs_help_list, 		 	lgs_help_list_oneline},
+	{"URL",		lgs_cmd_url,	2, 	NS_ULEVEL_OPER,		lgs_help_url, 		 	lgs_help_url_oneline},
+	{"STATS",	lgs_stats,		0, 	NS_ULEVEL_OPER,		lgs_help_stats, 		lgs_help_stats_oneline},
+	{NULL,		NULL,			0, 	0,			NULL, 				NULL}
 };
 
 bot_setting lgs_settings[]=
@@ -183,30 +188,7 @@ static int lgs_event_newchan (CmdParams* cmdparams)
 	return NS_SUCCESS;
 }	
 
-
-/** BotInfo */
-static BotInfo ls_botinfo = 
-{
-	"LogServ", 
-	"LogServ1", 
-	"LS", 
-	BOT_COMMON_HOST, 
-	"Channel Logging Bot", 	
-	BOT_FLAG_SERVICEBOT|BOT_FLAG_ONLY_OPERS, 
-	lgs_commands, 
-	lgs_settings,
-};
-
-/** @brief ModSynch
- *
- *  Startup handler
- *
- *  @param none
- *
- *  @return NS_SUCCESS if suceeds else NS_FAILURE
- */
-
-int ModSynch (void)
+void LoadLogChannels (void)
 {
 	ChannelLog *cl;
 	hnode_t *cn;
@@ -214,10 +196,7 @@ int ModSynch (void)
 	int count;
 	Channel *c;
 	char *tmp;
-	/* Introduce a bot onto the network */
-	lgs_bot = init_bot(&ls_botinfo);		
 
-	/* load Channels and join them */
 	if (GetTableData("Channel", &row) > 0) {
 		for (count = 0; row[count] != NULL; count++) {
 			dlog (DEBUG1, "Loading Channel %s", row[count]);
@@ -249,10 +228,38 @@ int ModSynch (void)
 			hash_insert(lgschans, cn, cl->channame);
 		}	
 	}
-	
+}
+
+/** BotInfo */
+static BotInfo ls_botinfo = 
+{
+	"LogServ", 
+	"LogServ1", 
+	"LS", 
+	BOT_COMMON_HOST, 
+	"Channel Logging Bot", 	
+	BOT_FLAG_SERVICEBOT|BOT_FLAG_ONLY_OPERS, 
+	lgs_commands, 
+	lgs_settings,
+};
+
+/** @brief ModSynch
+ *
+ *  Startup handler
+ *
+ *  @param none
+ *
+ *  @return NS_SUCCESS if suceeds else NS_FAILURE
+ */
+
+int ModSynch (void)
+{
+	/* Introduce a bot onto the network */
+	lgs_bot = init_bot(&ls_botinfo);		
+	/* load Channels and join them */
+	LoadLogChannels ();
 	/* start a timer to scan the logs for rotation */
 	add_timer (TIMER_TYPE_INTERVAL, lgs_RotateLogs, "lgs_RotateLogs", 300);
-		
 	return NS_SUCCESS;
 };
 
@@ -367,157 +374,40 @@ void ModFini()
 
 /* ok, now here are logservs functions */
 
-
-/* @brief manipulate the logged channels
- *
- * @param u The user requesting channel data
- * @param av the text sent
- * @param ac the number of words in av
- * @returns NS_SUCCESS or NS_FAILURE
- */
-static int lgs_chans(CmdParams* cmdparams)
-{
-	hscan_t hs;
-	hnode_t *hn;
-	ChannelLog *cl;
-
-	if (!ircstrcasecmp (cmdparams->av[0], "LIST")) {
-		irc_prefmsg (lgs_bot, cmdparams->source, "Monitored Channel List:");
-		hash_scan_begin(&hs, lgschans);
-		while ((hn = hash_scan_next(&hs)) != NULL) {
-			cl = hnode_get(hn);
-			if ((cl->flags & LGSPUBSTATS) || (UserLevel(cmdparams->source) >= NS_ULEVEL_LOCOPER)) {
-				/* its a priv channel, only show to opers */
-				irc_prefmsg (lgs_bot, cmdparams->source, "%s (%c) URL: %s", cl->channame, (cl->flags & LGSACTIVE) ? '*' : '-', (cl->statsurl[0] != 0) ? cl->statsurl : "None");
-			}							
-		}
-		irc_prefmsg (lgs_bot, cmdparams->source, "End Of List.");				
-		return NS_SUCCESS;
-	} else if (!ircstrcasecmp (cmdparams->av[0], "DEL")) {
-		if (cmdparams->ac < 2) {
-			irc_prefmsg (lgs_bot, cmdparams->source, "Syntax error: insufficient parameters");
-			irc_prefmsg (lgs_bot, cmdparams->source, "/msg %s HELP CHANS for more information", lgs_bot->name);
-			return NS_FAILURE;
-		}
-		hn = hash_lookup(lgschans, cmdparams->av[1]);
-		if (!hn) {
-			irc_prefmsg (lgs_bot, cmdparams->source, "Can not find channel %s in Logging System", cmdparams->av[1]);
-			return NS_FAILURE;
-		}
-		cl = hnode_get(hn);
-		if (!cl) {
-			irc_prefmsg (lgs_bot, cmdparams->source, "Can not find Channel %s in Logging System", cmdparams->av[1]);
-			return NS_FAILURE;
-		}
-		/* rotate out the file */
-		
-		if (cl->flags & LGSACTIVE) {
-			lgs_switch_file(cl);
-		}
-		if (cl->c) {
-			cl->c->moddata[lgs_module->modnum] = NULL;
-		}
-		hash_delete(lgschans, hn);
-		hnode_destroy(hn);
-		irc_part (lgs_bot, cl->channame);
-		ns_free (cl);
-		DelRow("Channel", cmdparams->av[1]);
-		irc_prefmsg (lgs_bot, cmdparams->source, "Deleted Channel %s", cmdparams->av[1]);
-		irc_chanalert (lgs_bot, "%s deleted %s from Channel Logging", cmdparams->source->name, cmdparams->av[1]);
-		return NS_SUCCESS;
-	} else if (!ircstrcasecmp (cmdparams->av[0], "ADD")) {
-		if (cmdparams->ac < 4) {
-			irc_prefmsg (lgs_bot, cmdparams->source, "Syntax error: insufficient parameters");
-			irc_prefmsg (lgs_bot, cmdparams->source, "/msg %s HELP CHANS for more information", lgs_bot->name);
-			return NS_FAILURE;
-		}
-		lgs_newchanlog(cmdparams);
-		return NS_SUCCESS;
-	} else if (!ircstrcasecmp (cmdparams->av[0], "SET")) {
-		if (cmdparams->ac < 4) {
-			irc_prefmsg (lgs_bot, cmdparams->source, "Syntax error: insufficient parameters");
-			irc_prefmsg (lgs_bot, cmdparams->source, "/msg %s HELP CHANS for more information", lgs_bot->name);
-			return NS_FAILURE;
-		}
-		hn = hash_lookup(lgschans, cmdparams->av[2]);
-		if (hn) {
-			cl = hnode_get(hn);
-		} else {
-			irc_prefmsg (lgs_bot, cmdparams->source, "Can not find channel %s in Logging System", cmdparams->av[1]);
-			return NS_FAILURE;
-		}
-		if (!cl) {
-			irc_prefmsg (lgs_bot, cmdparams->source, "Can not find Channel %s in Logging System", cmdparams->av[1]);
-			return NS_FAILURE;
-		}
-		if (!ircstrcasecmp (cmdparams->av[1], "URL")) {
-			ircsnprintf(cl->statsurl, MAXPATH, "%s", cmdparams->av[3]);
-			irc_prefmsg (lgs_bot, cmdparams->source, "Changed URL for %s to: %s", cl->channame, cl->statsurl);
-			irc_chanalert (lgs_bot, "%s changed the URL for %s to: %s", cmdparams->source->name, cl->channame, cl->statsurl);
-			lgs_save_channels_data(cl);
-		} else {
-			irc_prefmsg (lgs_bot, cmdparams->source, "Unknown Set Option");
-		}
-		return NS_SUCCESS;
-	} else {
-		irc_prefmsg (lgs_bot, cmdparams->source, "Syntax error: Unknown Command %s", cmdparams->av[0]);
-		irc_prefmsg (lgs_bot, cmdparams->source, "/msg %s HELP CHANS for more information", lgs_bot->name);
-		return NS_FAILURE;
-	}
-	return NS_FAILURE;	
-}
-
-/* @brief Send some very simple stats to the user
- *
- * @param u The user requesting stats data
- * @param av the text sent
- * @param ac the number of words in av
- * @returns NS_SUCCESS or NS_FAILURE
- */
-static int lgs_stats(CmdParams* cmdparams)
-{
-	irc_prefmsg (lgs_bot, cmdparams->source, "LogServ Stats:");
-	irc_prefmsg (lgs_bot, cmdparams->source, "Monitoring %d channels", (int)hash_count(lgschans));
-	return NS_SUCCESS;
-}
-
-
-ChannelLog *lgs_newchanlog(CmdParams* cmdparams) 
+static int lgs_cmd_add (CmdParams* cmdparams)
 {
 	Channel *c;
 	ChannelLog *cl;
 	hnode_t *cn;
 
-	c = find_chan (cmdparams->av[1]);
+	c = find_chan (cmdparams->av[0]);
 	if (!c) {
-		irc_prefmsg (lgs_bot, cmdparams->source, "Error, Channel %s is not Online at the moment", cmdparams->av[1]);
-		return NULL;
+		irc_prefmsg (lgs_bot, cmdparams->source, "Error, Channel %s is not Online at the moment", cmdparams->av[0]);
+		return NS_FAILURE;
 	}
 	if ((cn = hash_lookup(lgschans, cmdparams->av[1])) != NULL) {
-		irc_prefmsg (lgs_bot, cmdparams->source, "Already Logging %s.", cmdparams->av[1]);
-		return hnode_get(cn);
+		irc_prefmsg (lgs_bot, cmdparams->source, "Already Logging %s.", cmdparams->av[0]);
+		return NS_FAILURE;
 	}
 	cl = ns_calloc (sizeof(ChannelLog));
-	strlcpy(cl->channame, cmdparams->av[1], MAXCHANLEN);
+	strlcpy(cl->channame, cmdparams->av[0], MAXCHANLEN);
 	cl->c = c;
 	c->moddata[lgs_module->modnum] = cl;
-	if (!ircstrcasecmp (cmdparams->av[2], "Public")) {
+	if (!ircstrcasecmp (cmdparams->av[1], "Public")) {
 		cl->flags |= LGSPUBSTATS;
-	} else if (!ircstrcasecmp (cmdparams->av[2], "Private")) {
+	} else if (!ircstrcasecmp (cmdparams->av[1], "Private")) {
 		cl->flags &= ~LGSPUBSTATS;
 	} else {
-		irc_prefmsg (lgs_bot, cmdparams->source, "Unknown Public Type %s. Setting to Public", cmdparams->av[2]);
+		irc_prefmsg (lgs_bot, cmdparams->source, "Unknown Public Type %s. Setting to Public", cmdparams->av[1]);
 		cl->flags |= LGSPUBSTATS;
 	}
-	if (cmdparams->ac == 4) {
+	if (cmdparams->ac == 3) {
 		/* we have a URL */
-		strlcpy(cl->statsurl, cmdparams->av[3], MAXPATH);
+		strlcpy(cl->statsurl, cmdparams->av[2], MAXPATH);
 		irc_prefmsg (lgs_bot, cmdparams->source, "Stats URL is set to %s", cl->statsurl);
 	} else {
 		irc_prefmsg (lgs_bot, cmdparams->source, "No Stats URL is Set");
 	}
-
-
 	cn = hnode_create(cl);
 	hash_insert(lgschans, cn, cl->channame);
 	lgs_save_channels_data(cl);
@@ -532,7 +422,94 @@ ChannelLog *lgs_newchanlog(CmdParams* cmdparams)
 	}
 	irc_prefmsg (lgs_bot, cmdparams->source, "Now Logging %s", cl->channame);
 	irc_chanalert (lgs_bot, "%s Activated Logging on %s", cmdparams->source->name, cl->channame);
-	return cl;
+	return NS_SUCCESS;
+}
+
+static int lgs_cmd_del (CmdParams* cmdparams)
+{
+	hnode_t *hn;
+	ChannelLog *cl;
+
+	hn = hash_lookup(lgschans, cmdparams->av[0]);
+	if (!hn) {
+		irc_prefmsg (lgs_bot, cmdparams->source, "Can not find channel %s in Logging System", cmdparams->av[0]);
+		return NS_FAILURE;
+	}
+	cl = hnode_get(hn);
+	if (!cl) {
+		irc_prefmsg (lgs_bot, cmdparams->source, "Can not find Channel %s in Logging System", cmdparams->av[0]);
+		return NS_FAILURE;
+	}
+	/* rotate out the file */
+	if (cl->flags & LGSACTIVE) {
+		lgs_switch_file(cl);
+	}
+	if (cl->c) {
+		cl->c->moddata[lgs_module->modnum] = NULL;
+	}
+	hash_delete(lgschans, hn);
+	hnode_destroy(hn);
+	irc_part (lgs_bot, cl->channame);
+	ns_free (cl);
+	DelRow("Channel", cmdparams->av[1]);
+	irc_prefmsg (lgs_bot, cmdparams->source, "Deleted Channel %s", cmdparams->av[0]);
+	irc_chanalert (lgs_bot, "%s deleted %s from Channel Logging", cmdparams->source->name, cmdparams->av[0]);
+	return NS_SUCCESS;
+}
+
+static int lgs_cmd_list (CmdParams* cmdparams)
+{
+	hscan_t hs;
+	hnode_t *hn;
+	ChannelLog *cl;
+
+	irc_prefmsg (lgs_bot, cmdparams->source, "Monitored Channel List:");
+	hash_scan_begin(&hs, lgschans);
+	while ((hn = hash_scan_next(&hs)) != NULL) {
+		cl = hnode_get(hn);
+		if ((cl->flags & LGSPUBSTATS) || (UserLevel(cmdparams->source) >= NS_ULEVEL_LOCOPER)) {
+			/* its a priv channel, only show to opers */
+			irc_prefmsg (lgs_bot, cmdparams->source, "%s (%c) URL: %s", cl->channame, (cl->flags & LGSACTIVE) ? '*' : '-', (cl->statsurl[0] != 0) ? cl->statsurl : "None");
+		}							
+	}
+	irc_prefmsg (lgs_bot, cmdparams->source, "End Of List.");				
+	return NS_SUCCESS;
+}
+
+static int lgs_cmd_url (CmdParams* cmdparams)
+{
+	hnode_t *hn;
+	ChannelLog *cl;
+
+	hn = hash_lookup(lgschans, cmdparams->av[0]);
+	if (!hn) {
+		irc_prefmsg (lgs_bot, cmdparams->source, "Can not find channel %s in Logging System", cmdparams->av[0]);
+		return NS_FAILURE;
+	}
+	cl = hnode_get(hn);
+	if (!cl) {
+		irc_prefmsg (lgs_bot, cmdparams->source, "Can not find Channel %s in Logging System", cmdparams->av[0]);
+		return NS_FAILURE;
+	}
+	ircsnprintf(cl->statsurl, MAXPATH, "%s", cmdparams->av[1]);
+	irc_prefmsg (lgs_bot, cmdparams->source, "Changed URL for %s to: %s", cl->channame, cl->statsurl);
+	irc_chanalert (lgs_bot, "%s changed the URL for %s to: %s", cmdparams->source->name, cl->channame, cl->statsurl);
+	lgs_save_channels_data(cl);
+	return NS_SUCCESS;
+}
+
+/* @brief Send some very simple stats to the user
+ *
+ * @param u The user requesting stats data
+ * @param av the text sent
+ * @param ac the number of words in av
+ * @returns NS_SUCCESS or NS_FAILURE
+ */
+static int lgs_stats(CmdParams* cmdparams)
+{
+	irc_prefmsg (lgs_bot, cmdparams->source, "LogServ Stats:");
+	irc_prefmsg (lgs_bot, cmdparams->source, "Monitoring %d channels", (int)hash_count(lgschans));
+	return NS_SUCCESS;
 }
 
 static void lgs_save_channels_data(ChannelLog *cl) {

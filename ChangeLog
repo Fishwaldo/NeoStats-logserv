@@ -1,6 +1,8 @@
 LogServ ChangeLog
 =============================================================================
 3.0 * Mark * 
+- CHANS command is pointless since it requires a sub command so tidy up 
+  command path by promoting the sub commands. (M)
 - Replace file functions with core portable replacements. (M)
 - Split processing code into seperate files. Easier maintainance and allows
   us to create a template file for use in user submissions of alternative

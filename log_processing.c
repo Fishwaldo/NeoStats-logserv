@@ -163,7 +163,7 @@ static void lgs_stat_file(ChannelLog *cl)
 		return;
 	}
 	dlog (DEBUG1, "Logfile Size of %s is %d", fname, filesize);
-	if (filesize >  LogServ.maxlogsize) {
+	if (filesize > LogServ.maxlogsize) {
 		dlog (DEBUG1, "Switching Logfile %s", fname);
 		/* ok, the file exceeds out limits, lets switch it */
 		lgs_switch_file(cl);
@@ -199,6 +199,7 @@ void lgs_switch_file(ChannelLog *cl) {
 	res = sys_file_rename (oldfname, newfname);
 	if (res != 0) {
 		nlog (LOG_CRITICAL, "Couldn't rename file %s: %s", oldfname, sys_file_get_last_error ());
+		return;
 	}	
 	nlog (LOG_NORMAL, "Switched Logfile for %s from %s to %s", cl->channame, oldfname, newfname);
 }

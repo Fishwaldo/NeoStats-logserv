@@ -23,34 +23,49 @@
 
 #include "neostats.h"
 
-const char lgs_help_chan_oneline[]="Manipulate Channel Logging List";
+const char lgs_help_add_oneline[]="Add channel to log";
+const char lgs_help_del_oneline[]="Stop logging channel";
+const char lgs_help_list_oneline[]="List current channel log list";
+const char lgs_help_url_oneline[]="Change channel URL";
 const char lgs_help_stats_oneline[]="Simple LogServ Stats";
 
 const char *ls_about[] = {
-	"\2LogServ\2 provides a Logging Service for Channels on IRC",
-	"That can be used to generate statistical information about the channel",
+	"\2LogServ\2 provides a channel logging service that",
+	"can be used to generate statistical information.",
 	NULL
 };
 
-const char *lgs_help_chan[] = {
+const char *lgs_help_add[] = {
 	"Syntax: \2CHANS \37ADD <Channame> <\"public\"/\"private\"> <url>\37\2",
-	"        \2CHANS \37DEL <Channame>\37\2",
-	"        \2CHANS \37LIST\37\2",
-	"        \2CHANS \37SET URL <url>\37\2",
 	"",
-	"Provides Logging Services for Channels on the network",
-	"\2ADD\2 Adds a channel to LogServ for Monitoring. You must specify:",
-	"      The Channel Name",
-	"      Public/Private to indicate if the logging for this channel should be",
-	"      made known to users",
-	"      a URL to display when joining the channel showing where users can view",
-	"      Statistics about the channel",
-	"\2DEL\2 Deletes a logged channel from LogServ",
-	"      Requires the channel name",
-	"\2LIST\2 Lists the channels that LogServ is currently logging",
-	"\2SET\2 Modifies certain features of LogServ on that channel",
-	"      Those options include:",
-	"      \2URL\2 - Modifies the URL for the stats on that channel",
+	"Adds a channel to LogServ for Monitoring. You must specify:",
+	"The Channel Name",
+	"Public/Private to indicate if the logging for this channel should be",
+	"made known to users",
+	"a URL to display when joining the channel showing where users can view",
+	"Statistics about the channel",
+	NULL
+};
+
+const char *lgs_help_del[] = {
+	"Syntax: \2CHANS \37DEL <Channame>\37\2",
+	"",
+	"Deletes a logged channel from LogServ",
+	"Requires the channel name",
+	NULL
+};
+
+const char *lgs_help_list[] = {
+	"Syntax: \2CHANS \37LIST\37\2",
+	"",
+	"Lists the channels that LogServ is currently logging",
+	NULL
+};
+
+const char *lgs_help_url[] = {
+	"Syntax: \2CHANS \37SET URL <url>\37\2",
+	"",
+	"Modifies the URL for the stats on that channel",
 	NULL
 };
 
