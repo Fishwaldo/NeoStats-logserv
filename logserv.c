@@ -439,7 +439,7 @@ int __ModInit(int modnum, int apiver)
 		strlcpy(LogServ.host, tmp, MAXHOST);
 		free(tmp);
 	}
-	if (GetConf((void *) &tmp, CFGSTR, "Rname") < 0) {
+	if (GetConf((void *) &tmp, CFGSTR, "RealName") < 0) {
 		ircsnprintf(LogServ.rname, MAXREALNAME, "Channel Logging Bot");
 	} else {
 		strlcpy(LogServ.rname, tmp, MAXREALNAME);
