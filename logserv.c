@@ -163,16 +163,19 @@ static int lgs_PartChan(char **av, int ac)
 
 	c = findchan(av[0]);
 	if ((cl = lgs_findactchanlog(c)) != NULL) {
+		/* process the part message now */
+		lgs_send_to_logproc(LGSMSG_PART, cl, av, ac);	
 		if (c->cur_users == 2) {
 			/* last user just parted, so we leave as well */
 			nlog(LOG_DEBUG1, LOG_MOD, "Parting Channel %s as there are no more members", c->name);
+			/*close/switch the logfile*/
+			lgs_switch_file(cl);
+
 			spart_cmd(s_LogServ, c->name);
 			c->moddata[LogServ.modnum] = NULL;
 			cl->c = NULL;
 			cl->flags &= ~LGSACTIVE;
 		}
-		/* process the part message now */
-		lgs_send_to_logproc(LGSMSG_PART, cl, av, ac);	
 		return NS_SUCCESS;	
 	}
 	return NS_SUCCESS;
@@ -310,6 +313,8 @@ static int lgs_KickChan(char **av, int ac) {
 		if (cl->c->cur_users == 2) {
 			/* last user just parted, so we leave as well */
 			nlog(LOG_DEBUG1, LOG_MOD, "Parting Channel %s as there are no more members", cl->channame);
+			lgs_switch_file(cl);
+
 			spart_cmd(s_LogServ, cl->channame);
 			cl->c->moddata[LogServ.modnum] = NULL;
 			cl->c = NULL;
@@ -436,6 +441,9 @@ void __ModFini()
 {
 	/* close the log files */
 	lgs_close_logs();
+	
+	/* delete the hash */
+	hash_destroy(lgschans);
 
 
 };
@@ -478,9 +486,21 @@ static int lgs_version(User * u, char **av, int ac) {
  * @returns NS_SUCCESS or NS_FAILURE
  */
 static int lgs_chans(User * u, char **av, int ac) {
+	hscan_t hs;
+	hnode_t *hn;
+	ChannelLog *cl;
+
 	if (!strcasecmp(av[2], "LIST")) {
-		prefmsg(u->nick, s_LogServ, "Channel List:");
-		/* XXX do channel list */
+		prefmsg(u->nick, s_LogServ, "Monitored Channel List:");
+		hash_scan_begin(&hs, lgschans);
+		while ((hn = hash_scan_next(&hs)) != NULL) {
+			cl = hnode_get(hn);
+			if ((cl->flags & LGSPUBSTATS) || (UserLevel(u) >= NS_ULEVEL_LOCOPER)) {
+				/* its a priv channel, only show to opers */
+				prefmsg(u->nick, s_LogServ, "%s (%c) URL: %s", cl->channame, (cl->flags & LGSACTIVE) ? '*' : '-', cl->statsurl ? cl->statsurl : "None");
+			}							
+		}
+		prefmsg(u->nick, s_LogServ, "End Of List.");				
 		return NS_SUCCESS;
 	} else if (!strcasecmp(av[2], "DEL")) {
 		if (ac < 4) {
@@ -488,7 +508,29 @@ static int lgs_chans(User * u, char **av, int ac) {
 			prefmsg(u->nick, s_LogServ, "/msg %s HELP CHANS for more information", s_LogServ);
 			return NS_FAILURE;
 		}
-		prefmsg(u->nick, s_LogServ, "Del Chan");
+		cl = lgs_findactchanlog(findchan(av[3]));
+		if (!cl) {
+			prefmsg(u->nick, s_LogServ, "Can not find Channel %s in Logging System", av[3]);
+			return NS_FAILURE;
+		}
+		/* rotate out the file */
+		
+		lgs_switch_file(cl);
+		cl->c->moddata[LogServ.modnum] = NULL;
+		hn = hash_lookup(lgschans, cl->channame);
+		if (hn) {
+			hash_delete(lgschans, hn);
+			hnode_destroy(hn);
+			spart_cmd(s_LogServ, cl->channame);
+			free(cl);
+			DelRow("Chans", av[3]);
+		} else {
+			nlog(LOG_CRITICAL, LOG_MOD, "Ekk. Can't find channel in logserv hash");
+			prefmsg(u->nick, s_LogServ, "Internal Error, Please Consult LogFile");
+			return NS_FAILURE;
+		}
+		prefmsg(u->nick, s_LogServ, "Deleted Channel %s", av[3]);
+		chanalert(s_LogServ, "%s deleted %s from Channel Logging", u->nick, av[3]);
 		return NS_SUCCESS;
 	} else if (!strcasecmp(av[2], "ADD")) {
 		if (ac < 6) {
@@ -504,7 +546,19 @@ static int lgs_chans(User * u, char **av, int ac) {
 			prefmsg(u->nick, s_LogServ, "/msg %s HELP CHANS for more information", s_LogServ);
 			return NS_FAILURE;
 		}
-		prefmsg(u->nick, s_LogServ, "Set Chan");
+		cl = lgs_findactchanlog(findchan(av[4]));
+		if (!cl) {
+			prefmsg(u->nick, s_LogServ, "Can't find Channel %s", av[4]);
+			return NS_FAILURE;
+		}
+		if (!strcasecmp(av[3], "URL")) {
+			ircsnprintf(cl->statsurl, MAXPATH, "%s", av[5]);
+			prefmsg(u->nick, s_LogServ, "Changed URL for %s to: %s", cl->channame, cl->statsurl);
+			chanalert(s_LogServ, "%s changed the URL for %s to: %s", u->nick, cl->channame, cl->statsurl);
+			lgs_save_channels_data(cl);
+		} else {
+			prefmsg(u->nick, s_LogServ, "Unknown Set Option");
+		}
 		return NS_SUCCESS;
 	} else {
 		prefmsg(u->nick, s_LogServ, "Syntax error: Unknown Command %s", av[2]);

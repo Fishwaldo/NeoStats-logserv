@@ -138,5 +138,6 @@ int xchat_modeproc(ChannelLog *, char **, int);
 
 void lgs_RotateLogs();
 void lgs_close_logs();
+void lgs_switch_file(ChannelLog *cl);
 
 #endif

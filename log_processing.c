@@ -49,7 +49,6 @@ char startlog[BUFSIZE];
 static void lgs_write_log(ChannelLog *cl, char *fmt, ...) __attribute__((format(printf,2,3)));
 static int lgs_open_log(ChannelLog *cl);
 static void lgs_stat_file(ChannelLog *cl);
-static void lgs_switch_file(ChannelLog *cl);
 
 static char *dirc_startlog(ChannelLog *cl);
 static char *mirc_startlog(ChannelLog *cl);
@@ -63,7 +62,14 @@ static char *xchat_startlog(ChannelLog *cl);
 
 #ifndef safe_channame
 
-/* Make the name of a logfile safe */
+/* @brief Make the name of a logfile safe for a filename
+ * 
+ * given a name, make sure its a safe name for a filename
+ * 
+ * @params name the name to check. Warning, the name is modified
+ *
+ * @returns a modified version of the name, that is safe to use as a filename
+ */
 
 static char *_irclog_safe(char *name) {
   char *ptr;
@@ -90,6 +96,16 @@ static char *_irclog_safe(char *name) {
 
 #define safe_channame(x) _irclog_safe(x) 
 #endif
+
+/* @brief write a formatted log to the log files, and check if we should switch th logfile
+ * 
+ * writes a message to a log file. If the logfile hasn't been opened yet, we 
+ * open it, and write out any headers required.
+ * 
+ * @params cl The ChannelLog structreu for the channel we are loggin
+ * @params fmt the printf style format of the log message
+ */
+
 
 static void lgs_write_log(ChannelLog *cl, char *fmt, ...) {
 	va_list ap;
@@ -140,6 +156,13 @@ static void lgs_write_log(ChannelLog *cl, char *fmt, ...) {
 	}
 }
 
+/* @brief Opens the log file, creating directories where necessary
+ *
+ * @param cl the channel log function
+ *
+ * @returns a boolen indicating success/failure
+ */ 
+
 static int lgs_open_log(ChannelLog *cl) {
 	struct stat st;
 	int res;
@@ -187,6 +210,10 @@ static int lgs_open_log(ChannelLog *cl) {
 	return NS_SUCCESS;
 }
 
+/* @brief check the logfile size, and rotate if necessary
+ * 
+ * @param cl the ChannelLog struct for the channel we are checking 
+ */ 
 static void lgs_stat_file(ChannelLog *cl) {
 	struct stat st;
 	int res;
@@ -215,7 +242,11 @@ static void lgs_stat_file(ChannelLog *cl) {
 	}
 }
 
-static void lgs_switch_file(ChannelLog *cl) {
+/* @brief actually switch the logfile, saving the old log in a different directory
+ *
+ * @param cl the ChannelLog struct 
+ */
+void lgs_switch_file(ChannelLog *cl) {
 	struct stat st;
 	char tmbuf[MAXPATH];
 	char newfname[MAXPATH];
@@ -261,6 +292,11 @@ static void lgs_switch_file(ChannelLog *cl) {
 	}	
 	nlog(LOG_NORMAL, LOG_MOD, "Switched Logfile for %s from %s to %s", cl->channame, oldfname, newfname);
 }
+/* @brief Close all logfiles and delete the struct assocated with them
+ *
+ * Called from ModFini when we are unloaded, to cleanup
+ */
+
 void lgs_close_logs() {
 	hscan_t hs;
 	hnode_t *hn;
@@ -288,6 +324,10 @@ void lgs_close_logs() {
 
 }
 
+/* @brief Rotate the log files if they have been opened longer than the pre-defined time
+ * 
+ * Runs through all active opened logfiles only
+ */
 void lgs_RotateLogs() {
 	hscan_t hs;
 	hnode_t *hn;
@@ -303,7 +343,6 @@ void lgs_RotateLogs() {
 		}
 	}
 }
-
 
 
 char *dirc_startlog(ChannelLog *chandata) {
