@@ -103,14 +103,14 @@ typedef struct logtype_proc {
 /* log_procssing.c decl */
 
 
-int dirc_joinproc(ChannelLog *, char **, int);
-int dirc_partproc(ChannelLog *, char **, int);
-int dirc_msgproc(ChannelLog *, char **, int);
-int dirc_quitproc(ChannelLog *, char **, int);
-int dirc_topicproc(ChannelLog *, char **, int);
-int dirc_kickproc(ChannelLog *, char **, int);
-int dirc_nickproc(ChannelLog *, char **, int);
-int dirc_modeproc(ChannelLog *, char **, int);
+int logserv_joinproc(ChannelLog *, char **, int);
+int logserv_partproc(ChannelLog *, char **, int);
+int logserv_msgproc(ChannelLog *, char **, int);
+int logserv_quitproc(ChannelLog *, char **, int);
+int logserv_topicproc(ChannelLog *, char **, int);
+int logserv_kickproc(ChannelLog *, char **, int);
+int logserv_nickproc(ChannelLog *, char **, int);
+int logserv_modeproc(ChannelLog *, char **, int);
 int egg_joinproc(ChannelLog *, char **, int);
 int egg_partproc(ChannelLog *, char **, int);
 int egg_msgproc(ChannelLog *, char **, int);

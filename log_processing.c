@@ -50,7 +50,7 @@ static void lgs_write_log(ChannelLog *cl, char *fmt, ...) __attribute__((format(
 static int lgs_open_log(ChannelLog *cl);
 static void lgs_stat_file(ChannelLog *cl);
 
-static char *dirc_startlog(ChannelLog *cl);
+static char *logserv_startlog(ChannelLog *cl);
 static char *mirc_startlog(ChannelLog *cl);
 static char *egg_startlog(ChannelLog *cl);
 static char *xchat_startlog(ChannelLog *cl);
@@ -124,7 +124,7 @@ static void lgs_write_log(ChannelLog *cl, char *fmt, ...) {
 		/* ok, we just opened the file, write the start out */
 		switch (LogServ.logtype) {
 			case 0:
-				fprintf(cl->logfile, "%s", dirc_startlog(cl));
+				fprintf(cl->logfile, "%s", logserv_startlog(cl));
 				break;
 			case 1:
 				fprintf(cl->logfile, "%s", egg_startlog(cl));
@@ -345,45 +345,45 @@ void lgs_RotateLogs() {
 }
 
 
-char *dirc_startlog(ChannelLog *chandata) {
+char *logserv_startlog(ChannelLog *chandata) {
 	return startlog;
 }
 
 
-int dirc_joinproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_joinproc(ChannelLog *chandata, char **av, int ac) {
 
 	return NS_SUCCESS;
 }
 
-int dirc_partproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_partproc(ChannelLog *chandata, char **av, int ac) {
 
 	return NS_SUCCESS;
 }
 
-int dirc_msgproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_msgproc(ChannelLog *chandata, char **av, int ac) {
 printf("doing msgproc\n");
 	return NS_SUCCESS;
 }
 
-int dirc_quitproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_quitproc(ChannelLog *chandata, char **av, int ac) {
 
 	return NS_SUCCESS;
 }
 
-int dirc_topicproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_topicproc(ChannelLog *chandata, char **av, int ac) {
 
 	return NS_SUCCESS;
 }
 
-int dirc_kickproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_kickproc(ChannelLog *chandata, char **av, int ac) {
 
 	return NS_SUCCESS;
 }
-int dirc_nickproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_nickproc(ChannelLog *chandata, char **av, int ac) {
 
 	return NS_SUCCESS;
 }
-int dirc_modeproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_modeproc(ChannelLog *chandata, char **av, int ac) {
 
 	return NS_SUCCESS;
 }
@@ -392,7 +392,7 @@ int dirc_modeproc(ChannelLog *chandata, char **av, int ac) {
 /* this usually goes at the end of a logfile. Hrm */
 
 char *egg_startlog(ChannelLog *cl) {
-
+	strftime(startlog, BUFSIZE, "[%H:%M] --- %a %b %d %Y\n", localtime(&me.now));
 
 	return startlog;
 }

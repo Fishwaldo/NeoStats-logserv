@@ -49,7 +49,7 @@ ChannelLog *lgs_newchanlog(User *u, char **av, int ac);
 ChannelLog *lgs_findactchanlog(Chans *c);
 
 logtype_proc logging_funcs[] = {
-	{dirc_joinproc, dirc_partproc, dirc_msgproc, dirc_quitproc, dirc_topicproc, dirc_kickproc, dirc_nickproc, dirc_modeproc},
+	{logserv_joinproc, logserv_partproc, logserv_msgproc, logserv_quitproc, logserv_topicproc, logserv_kickproc, logserv_nickproc, logserv_modeproc},
 	{egg_joinproc, egg_partproc, egg_msgproc, egg_quitproc, egg_topicproc, egg_kickproc, egg_nickproc, egg_modeproc},
 	{mirc_joinproc, mirc_partproc, mirc_msgproc, mirc_quitproc, mirc_topicproc, mirc_kickproc, mirc_nickproc, mirc_modeproc},
 	{xchat_joinproc, xchat_partproc, xchat_msgproc, xchat_quitproc, xchat_topicproc, xchat_kickproc, xchat_nickproc, xchat_modeproc},
@@ -83,7 +83,7 @@ bot_setting lgs_settings[]=
 	{"LOGTYPE",		
 	&LogServ.logtype,	
 	SET_TYPE_INT,	
-	0,	
+	1,	
 	3,	
 	NS_ULEVEL_ADMIN,
 	"LogType",
@@ -145,6 +145,7 @@ int __ChanMessage(char *origin, char **argv, int argc)
 		} else {
 			buf = joinbuf(argv, argc, 1);
 		}
+		strip_mirc_codes(buf);
 		AddStringToList(&data, buf, &datasize);
 		lgs_send_to_logproc(LGSMSG_MSG, cl, data, datasize);		
 		free(data);
@@ -415,7 +416,7 @@ int __ModInit(int modnum, int apiver)
 	
 	/* get the logtype */
 	if (GetConf((void *)&LogServ.logtype, CFGINT, "LogType") < 0) {
-		LogServ.logtype = 0;
+		LogServ.logtype = 1;
 	} 
 	/* get the logsize switch */
 	if (GetConf((void *)&LogServ.maxlogsize, CFGINT, "LogSwitchSize") < 0) {
