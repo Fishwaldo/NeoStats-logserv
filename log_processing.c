@@ -41,7 +41,7 @@ int dirc_partproc(ChannelLog *chandata, char **av, int ac) {
 }
 
 int dirc_msgproc(ChannelLog *chandata, char **av, int ac) {
-
+printf("doing msgproc\n");
 }
 
 int dirc_quitproc(ChannelLog *chandata, char **av, int ac) {

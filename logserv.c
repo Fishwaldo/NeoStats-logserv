@@ -44,7 +44,8 @@ static int lgs_version(User * u, char **av, int ac);
 static int lgs_chans(User * u, char **av, int ac);
 static int lgs_stats(User * u, char **av, int ac);
 static int lgs_send_to_logproc( logmsgtype msgtype, ChannelLog *lgschan, char **av, int ac);
-
+static void save_channels_data(ChannelLog *cl);
+ChannelLog *newchanlog(User *u, char **av, int ac);
 
 logtype_proc logging_funcs[] = {
 	{dirc_joinproc, dirc_partproc, dirc_msgproc, dirc_quitproc, dirc_topicproc, dirc_kickproc},
@@ -106,7 +107,20 @@ Functions __module_functions[] = {
  */
 int __ChanMessage(char *origin, char **argv, int argc)
 {
-	char *chan = argv[0];
+	char *chan = argv[0]; 
+	Chans *c;
+	ChannelLog *cl;
+	char **data;
+	int datasize;
+	char *buf = joinbuf(argv, argc, 1);
+	
+	c = findchan(chan);
+	if (c && c->moddata[LogServ.modnum]) {
+		cl = c->moddata[LogServ.modnum];
+		AddStringToList(&data, origin, &datasize);
+		AddStringToList(&data, buf, &datasize);
+		lgs_send_to_logproc(LGSMSG_MSG, cl, data, datasize);		
+	}
 	return 1;
 }
 
@@ -144,7 +158,7 @@ int __ModInit(int modnum, int apiver)
 	if (GetConf((void *)&LogServ.logtype, CFGINT, "LogType") < 0) {
 		LogServ.logtype = 0;
 	} 
-	
+	LogServ.modnum = modnum;
 	return 1;
 }
 
@@ -212,7 +226,7 @@ static int lgs_chans(User * u, char **av, int ac) {
 			prefmsg(u->nick, s_LogServ, "/msg %s HELP CHANS for more information", s_LogServ);
 			return NS_FAILURE;
 		}
-		prefmsg(u->nick, s_LogServ, "Add Chan");
+		newchanlog(u, av, ac);
 		return NS_SUCCESS;
 	} else if (!strcasecmp(av[2], "SET")) {
 		if (ac < 6) {
@@ -240,6 +254,7 @@ static int lgs_chans(User * u, char **av, int ac) {
 static int lgs_stats(User * u, char **av, int ac) {
 	prefmsg(u->nick, s_LogServ, "LogServ Stats:");
 	prefmsg(u->nick, s_LogServ, "Monitoring %d channels", (int)hash_count(lgschans));
+	return NS_SUCCESS;
 }
 
 
@@ -277,3 +292,64 @@ static int lgs_send_to_logproc( logmsgtype msgtype, ChannelLog *lgschan, char **
 	}	
 	return NS_FAILURE;
 }
+
+
+ChannelLog *newchanlog(User *u, char **av, int ac) {
+	Chans *c;
+	ChannelLog *cl;
+	hnode_t *cn;
+	
+	c = findchan(av[3]);
+	if (!c) {
+		prefmsg(u->nick, s_LogServ, "Error, Channel %s is not Online at the moment", av[3]);
+		return NULL;
+	}
+	if ((cn = hash_lookup(lgschans, av[3])) != NULL) {
+		prefmsg(u->nick, s_LogServ, "Already Logging %s.", av[3]);
+		return hnode_get(cn);
+	}
+	cl = malloc(sizeof(ChannelLog));
+	bzero(cl, sizeof(ChannelLog));
+	strlcpy(cl->channame, av[3], CHANLEN);
+	cl->c = c;
+	c->moddata[LogServ.modnum] = cl;
+	if (!strcasecmp(av[4], "Public")) {
+		cl->flags |= LGSPUBSTATS;
+	} else if (!strcasecmp(av[4], "Private")) {
+		cl->flags &= ~LGSPUBSTATS;
+	} else {
+		prefmsg(u->nick, s_LogServ, "Unknown Public Type %s. Setting to Public", av[4]);
+		cl->flags |= LGSPUBSTATS;
+	}
+	if (ac == 6) {
+		/* we have a URL */
+		strlcpy(cl->statsurl, av[5], MAXPATH);
+		prefmsg(u->nick, s_LogServ, "Stats URL is set to %s", cl->statsurl);
+	} else {
+		prefmsg(u->nick, s_LogServ, "No Stats URL is Set");
+	}
+
+
+	cn = hnode_create(cl);
+	hash_insert(lgschans, cn, cl->channame);
+	save_channels_data(cl);
+
+	if (join_bot_to_chan(s_LogServ, cl->channame, 0) == NS_SUCCESS) {
+		cl->flags |= LGSACTIVE;
+		nlog(LOG_NOTICE, LOG_MOD, "%s actived Logging on channel %s", u->nick, cl->channame);
+		prefmsg(cl->channame, s_LogServ, "%s Actived Channel Logging on %s", u->nick, cl->channame);
+		if (cl->statsurl[0] != '\0') {
+			prefmsg(cl->channame, s_LogServ, "Stats will be avaiable at %s when Logs are processed next", cl->statsurl);
+		}	
+	}
+	prefmsg(u->nick, s_LogServ, "Now Logging %s", cl->channame);
+	chanalert(s_LogServ, "%s Activated Logging on %s", u->nick, cl->channame);
+	return cl;
+}
+
+static void save_channels_data(ChannelLog *cl) {
+	
+	nlog(LOG_DEBUG1, LOG_MOD, "Saving Channel Data for %s", cl->channame);
+	SetData((void *)cl->flags, CFGINT, "Chans", cl->channame, "Flags");
+	SetData((void *)cl->statsurl, CFGSTR, "Chans", cl->channame, "URL");
+}	
