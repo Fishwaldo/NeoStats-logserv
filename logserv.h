@@ -71,7 +71,9 @@ typedef enum {
 	LGSMSG_MSG,
 	LGSMSG_QUIT,
 	LGSMSG_TOPIC,
-	LGSMSG_KICK
+	LGSMSG_KICK,
+	LGSMSG_NICK,
+	LGSMSG_CHANMODE
 } logmsgtype;
 	
 
@@ -87,6 +89,8 @@ typedef struct logtype_proc {
 	log_proc *quitproc;
 	log_proc *topicproc;
 	log_proc *kickproc;
+	log_proc *nickproc;
+	log_proc *modeproc;
 } logtype_proc;
 
 
@@ -97,24 +101,32 @@ int dirc_msgproc(ChannelLog *, char **, int);
 int dirc_quitproc(ChannelLog *, char **, int);
 int dirc_topicproc(ChannelLog *, char **, int);
 int dirc_kickproc(ChannelLog *, char **, int);
+int dirc_nickproc(ChannelLog *, char **, int);
+int dirc_modeproc(ChannelLog *, char **, int);
 int egg_joinproc(ChannelLog *, char **, int);
 int egg_partproc(ChannelLog *, char **, int);
 int egg_msgproc(ChannelLog *, char **, int);
 int egg_quitproc(ChannelLog *, char **, int);
 int egg_topicproc(ChannelLog *, char **, int);
 int egg_kickproc(ChannelLog *, char **, int);
+int egg_nickproc(ChannelLog *, char **, int);
+int egg_modeproc(ChannelLog *, char **, int);
 int mirc_joinproc(ChannelLog *, char **, int);
 int mirc_partproc(ChannelLog *, char **, int);
 int mirc_msgproc(ChannelLog *, char **, int);
 int mirc_quitproc(ChannelLog *, char **, int);
 int mirc_topicproc(ChannelLog *, char **, int);
 int mirc_kickproc(ChannelLog *, char **, int);
+int mirc_nickproc(ChannelLog *, char **, int);
+int mirc_modeproc(ChannelLog *, char **, int);
 int xchat_joinproc(ChannelLog *, char **, int);
 int xchat_partproc(ChannelLog *, char **, int);
 int xchat_msgproc(ChannelLog *, char **, int);
 int xchat_quitproc(ChannelLog *, char **, int);
 int xchat_topicproc(ChannelLog *, char **, int);
 int xchat_kickproc(ChannelLog *, char **, int);
+int xchat_nickproc(ChannelLog *, char **, int);
+int xchat_modeproc(ChannelLog *, char **, int);
 
 
 

@@ -44,14 +44,15 @@ static int lgs_version(User * u, char **av, int ac);
 static int lgs_chans(User * u, char **av, int ac);
 static int lgs_stats(User * u, char **av, int ac);
 static int lgs_send_to_logproc( logmsgtype msgtype, ChannelLog *lgschan, char **av, int ac);
-static void save_channels_data(ChannelLog *cl);
-ChannelLog *newchanlog(User *u, char **av, int ac);
+static void lgs_save_channels_data(ChannelLog *cl);
+ChannelLog *lgs_newchanlog(User *u, char **av, int ac);
+ChannelLog *lgs_findactchanlog(Chans *c);
 
 logtype_proc logging_funcs[] = {
-	{dirc_joinproc, dirc_partproc, dirc_msgproc, dirc_quitproc, dirc_topicproc, dirc_kickproc},
-	{egg_joinproc, egg_partproc, egg_msgproc, egg_quitproc, egg_topicproc, egg_kickproc},
-	{mirc_joinproc, mirc_partproc, mirc_msgproc, mirc_quitproc, mirc_topicproc, mirc_kickproc},
-	{xchat_joinproc, xchat_partproc, xchat_msgproc, xchat_quitproc, xchat_topicproc, xchat_kickproc},
+	{dirc_joinproc, dirc_partproc, dirc_msgproc, dirc_quitproc, dirc_topicproc, dirc_kickproc, dirc_nickproc, dirc_modeproc},
+	{egg_joinproc, egg_partproc, egg_msgproc, egg_quitproc, egg_topicproc, egg_kickproc, egg_nickproc, egg_modeproc},
+	{mirc_joinproc, mirc_partproc, mirc_msgproc, mirc_quitproc, mirc_topicproc, mirc_kickproc, mirc_nickproc, mirc_modeproc},
+	{xchat_joinproc, xchat_partproc, xchat_msgproc, xchat_quitproc, xchat_topicproc, xchat_kickproc, xchat_nickproc, xchat_modeproc},
 };
 
 
@@ -120,10 +121,11 @@ int __ChanMessage(char *origin, char **argv, int argc)
 		AddStringToList(&data, origin, &datasize);
 		AddStringToList(&data, buf, &datasize);
 		lgs_send_to_logproc(LGSMSG_MSG, cl, data, datasize);		
+		free(data);
 	}
 	return 1;
 }
-static int PartChan(char **av, int ac) 
+static int lgs_PartChan(char **av, int ac) 
 {
 	ChannelLog *cl;
 	Chans *c;
@@ -134,19 +136,36 @@ static int PartChan(char **av, int ac)
 	}
 
 	c = findchan(av[0]);
-	if (c->moddata[LogServ.modnum]) {
+	if ((cl = lgs_findactchanlog(c)) != NULL) {
 		if (c->cur_users == 2) {
 			/* last user just parted, so we leave as well */
-			cl = c->moddata[LogServ.modnum];
 			nlog(LOG_DEBUG1, LOG_MOD, "Parting Channel %s as there are no more members", c->name);
 			spart_cmd(s_LogServ, c->name);
 			c->moddata[LogServ.modnum] = NULL;
 			cl->c = NULL;
 		}
+		/* process the part message now */
+		lgs_send_to_logproc(LGSMSG_PART, cl, av, ac);	
+		return NS_SUCCESS;	
 	}
+	return NS_SUCCESS;
+}
+static int lgs_JoinChan(char **av, int ac) {
+	ChannelLog *cl;
+	
+	if (!strcasecmp(av[1], s_LogServ)) {
+		/* its me, so ignore */
+		return NS_FAILURE;
+	}
+	
+	if ((cl = lgs_findactchanlog(findchan(av[0]))) != NULL) {
+		lgs_send_to_logproc(LGSMSG_JOIN, cl, av, ac);
+		return NS_SUCCESS;
+	}	
+	return NS_SUCCESS;
 }
 
-static int NewChan(char **av, int ac) 
+static int lgs_NewChan(char **av, int ac) 
 {
 	ChannelLog *cl;
 	hnode_t *cn;
@@ -176,7 +195,7 @@ static int NewChan(char **av, int ac)
 /** Online event processing
  * What we do when we first come online
  */
-static int Online(char **av, int ac)
+static int lgs_Online(char **av, int ac)
 {
 	ChannelLog *cl;
 	hnode_t *cn;
@@ -224,15 +243,118 @@ static int Online(char **av, int ac)
 	return 1;
 };
 
+static int lgs_Signoff(char **av, int ac) {
+/* This function is kinda useless, because,
+ * partchan will be called for each channel the user is a member off
+ * before this function is called. - Damn
+ */
+#if 0
+	ChannelLog *cl;
+
+	if (!strcasecmp(av[0], s_LogServ)) {
+		/* its me, so ignore */
+		return NS_FAILURE;
+	}
+	
+	if ((cl = lgs_findactchanlog(findchan(av[0]))) != NULL) {
+		lgs_send_to_logproc(LGSMSG_QUIT, cl, av, ac);
+		return NS_SUCCESS;
+	}	
+#endif
+	return NS_SUCCESS;
+}	
+
+static int lgs_KickChan(char **av, int ac) {
+	ChannelLog *cl;
+
+	if (!strcasecmp(av[1], s_LogServ)) {
+		/* its me, so ignore */
+		return NS_FAILURE;
+	}
+	
+	if ((cl = lgs_findactchanlog(findchan(av[0]))) != NULL) {
+		lgs_send_to_logproc(LGSMSG_KICK, cl, av, ac);
+		return NS_SUCCESS;
+	}	
+	return NS_SUCCESS;
+}
+
+static int lgs_TopicChan(char **av, int ac) {
+	ChannelLog *cl;
+
+	if (!strcasecmp(av[1], s_LogServ)) {
+		/* its me, so ignore */
+		return NS_FAILURE;
+	}
+	
+	if ((cl = lgs_findactchanlog(findchan(av[0]))) != NULL) {
+		lgs_send_to_logproc(LGSMSG_TOPIC, cl, av, ac);
+		return NS_SUCCESS;
+	}	
+	return NS_SUCCESS;
+}
+
+static int lgs_NickChange(char **av, int ac) {
+	ChannelLog *cl;
+	User *u;
+	lnode_t *cm;
+
+	if (!strcasecmp(av[1], s_LogServ)) {
+		/* its me, so ignore */
+		return NS_FAILURE;
+	}
+	u = finduser(av[1]);
+	if (!u) {
+		return NS_FAILURE;
+	}
+	
+	/* ok, move through each of the channels */
+	cm = list_first (u->chans);
+	while (cm) {
+		if ((cl = lgs_findactchanlog(findchan (lnode_get (cm)))) != NULL) {
+			lgs_send_to_logproc(LGSMSG_NICK, cl, av, ac);
+                }
+                cm = list_next (u->chans, cm);
+	}
+	return NS_SUCCESS;
+}
+
+/* damn, 2.5.11 doesn't have a chan mode event. Duh! */
+#ifdef EVENT_CHANMODE
+static int lgs_ChanMode(char **av, int ac) {
+	ChannelLog *cl;
+
+	if (!strcasecmp(av[0], s_LogServ)) {
+		/* its me, so ignore */
+		return NS_FAILURE;
+	}
+	
+	if ((cl = lgs_findactchanlog(findchan(av[1]))) != NULL) {
+		lgs_send_to_logproc(LGSMSG_CHANMODE, cl, av, ac);
+		return NS_SUCCESS;
+	}	
+	return NS_SUCCESS;
+}
+#endif
+
+
 /** Module event list
  * What events we will act on
  * This is required if you want your module to respond to events on IRC
  * see modules.txt for a list of all events available
  */
 EventFnList __module_events[] = {
-	{EVENT_ONLINE, Online},
-	{EVENT_NEWCHAN, NewChan},
-	{EVENT_PARTCHAN, PartChan},
+	{EVENT_ONLINE, lgs_Online},
+	{EVENT_NEWCHAN, lgs_NewChan},
+	{EVENT_JOINCHAN, lgs_JoinChan},
+	{EVENT_PARTCHAN, lgs_PartChan},
+	{EVENT_SIGNOFF, lgs_Signoff},
+	{EVENT_KICK, lgs_KickChan},
+	{EVENT_TOPICCHANGE, lgs_TopicChan},
+	{EVENT_NICKCHANGE, lgs_NickChange},
+#ifdef EVENT_CHANMODE
+	{EVENT_CHANMODE, lgs_ChanMode},
+#endif
 	{NULL, NULL}
 };
 
@@ -317,7 +439,7 @@ static int lgs_chans(User * u, char **av, int ac) {
 			prefmsg(u->nick, s_LogServ, "/msg %s HELP CHANS for more information", s_LogServ);
 			return NS_FAILURE;
 		}
-		newchanlog(u, av, ac);
+		lgs_newchanlog(u, av, ac);
 		return NS_SUCCESS;
 	} else if (!strcasecmp(av[2], "SET")) {
 		if (ac < 6) {
@@ -376,6 +498,12 @@ static int lgs_send_to_logproc( logmsgtype msgtype, ChannelLog *lgschan, char **
 		case 5:
 			return logging_funcs[LogServ.logtype].kickproc(lgschan, av, ac);
 			break;
+		case 6:
+			return logging_funcs[LogServ.logtype].nickproc(lgschan, av, ac);
+			break;
+		case 7:
+			return logging_funcs[LogServ.logtype].modeproc(lgschan, av, ac);
+			break;
 		default:
 			nlog(LOG_WARNING, LOG_MOD, "Unknown msgtype %d", msgtype);
 			return NS_FAILURE;
@@ -385,7 +513,7 @@ static int lgs_send_to_logproc( logmsgtype msgtype, ChannelLog *lgschan, char **
 }
 
 
-ChannelLog *newchanlog(User *u, char **av, int ac) {
+ChannelLog *lgs_newchanlog(User *u, char **av, int ac) {
 	Chans *c;
 	ChannelLog *cl;
 	hnode_t *cn;
@@ -423,7 +551,7 @@ ChannelLog *newchanlog(User *u, char **av, int ac) {
 
 	cn = hnode_create(cl);
 	hash_insert(lgschans, cn, cl->channame);
-	save_channels_data(cl);
+	lgs_save_channels_data(cl);
 
 	if (join_bot_to_chan(s_LogServ, cl->channame, 0) == NS_SUCCESS) {
 		cl->flags |= LGSACTIVE;
@@ -438,9 +566,33 @@ ChannelLog *newchanlog(User *u, char **av, int ac) {
 	return cl;
 }
 
-static void save_channels_data(ChannelLog *cl) {
+static void lgs_save_channels_data(ChannelLog *cl) {
 	
 	nlog(LOG_DEBUG1, LOG_MOD, "Saving Channel Data for %s", cl->channame);
 	SetData((void *)cl->flags, CFGINT, "Chans", cl->channame, "Flags");
 	SetData((void *)cl->statsurl, CFGSTR, "Chans", cl->channame, "URL");
 }	
+
+/* @brief find a active Channel Log record 
+ * 
+ * @params c - Chans Struct of the channel we are looking for 
+ * 
+ * @returns A ChannelLog Struct on success, or NULL on failure
+ */
+
+ChannelLog *lgs_findactchanlog(Chans *c) {
+	ChannelLog *cl;
+	if (c && c->moddata[LogServ.modnum]) {
+		cl = c->moddata[LogServ.modnum];
+#ifdef DEBUG
+		/* paranoid checking this is */
+		if (!(cl->c == c)) {
+			nlog(LOG_WARNING, LOG_MOD, "Channel Log Channel doesn't match channel.");
+			return NULL;
+		}
+#endif
+		return cl;
+	} else {
+		return NULL;
+	}
+}
