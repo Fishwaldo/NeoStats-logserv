@@ -97,6 +97,8 @@ extern const char *lgs_help_stats[];
 extern const char *lgs_help_set_logtype[];
 extern const char *lgs_help_set_logsize[];
 extern const char *lgs_help_set_logtime[];
+extern const char *lgs_help_set_logdir[];
+extern const char *lgs_help_set_savedir[];
 
 extern char timebuf[TIMEBUFSIZE];
 extern char startlog[BUFSIZE];

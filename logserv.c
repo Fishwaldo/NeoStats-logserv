@@ -105,6 +105,26 @@ bot_setting lgs_settings[]=
 	"Seconds",
 	lgs_help_set_logtime ,
 	NULL, (void*)3600},
+	{"LOGDIR",		
+	&LogServ.logdir,	
+	SET_TYPE_STRING,	
+	0,	
+	MAXPATH,	
+	NS_ULEVEL_ADMIN,
+	"logdir",
+	NULL,
+	lgs_help_set_logdir,
+	NULL, (void*)"logs/chanlogs"},
+	{"SAVEDIR",		
+	&LogServ.logdir,	
+	SET_TYPE_STRING,	
+	0,	
+	MAXPATH,	
+	NS_ULEVEL_ADMIN,
+	"savedir",
+	NULL,
+	lgs_help_set_savedir,
+	NULL, (void*)"chanlogs"},
 	{NULL,			NULL,			0,		0, 	0,	0,			NULL,		NULL,		NULL },
 };
 
@@ -138,7 +158,6 @@ void LoadLogChannels (void)
 			if (GetData((void *)&cl->flags, CFGINT, "Channel", cl->channame, "Flags") > 0) {
 				cl->flags &= ~LGSACTIVE;
 				cl->flags &= ~LGSFDNEEDFLUSH;
-				cl->flags &= ~LGSFDOPENED;
 			}
 			if (GetData((void *)&tmp, CFGSTR, "Channel", cl->channame, "URL") < 0) {
 				cl->statsurl[0] = '\0';
@@ -284,10 +303,6 @@ int ModInit (Module *mod_ptr)
 {
 	ModuleConfig (lgs_settings);
 	lgschans = hash_create(-1, 0,0);
-	
-	/*XXX TODO */
-	ircsnprintf(LogServ.logdir, MAXPATH, "logs/chanlogs");
-	ircsnprintf(LogServ.savedir, MAXPATH, "ChanLogs");
 	return NS_SUCCESS;
 }
 

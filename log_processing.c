@@ -72,7 +72,7 @@ void lgs_write_log(ChannelLog *cl, char *fmt, ...) {
 	va_end (ap);
 	                                
 	/* if the FD isn't opened yet, lets open a log file */
-	if (!(cl->flags & LGSFDOPENED)) {
+	if (!(cl->logfile)) {
 		if (lgs_open_log(cl) != NS_SUCCESS) {
 			return;
 		}
@@ -137,8 +137,6 @@ static int lgs_open_log(ChannelLog *cl) {
 		return NS_FAILURE;
 	}
 	dlog (DEBUG1, "Opened %s for Appending", cl->filename);
-	/* set hte flag */
-	cl->flags |= LGSFDOPENED;
 	cl->fdopened = me.now;
 	return NS_SUCCESS;
 }
@@ -178,14 +176,13 @@ void lgs_switch_file(ChannelLog *cl) {
 	char oldfname[MAXPATH];
 	int res;
 
-	if (!(cl->flags & LGSFDOPENED)) {
+	if (!(cl->logfile)) {
 		/* no need to switch, its not opened */
 		return;
 	}
 	/* close the logfile */
 	sys_file_close (cl->logfile);
 	cl->fdopened = 0;
-	cl->flags &= ~ LGSFDOPENED;
 	/* check if the target directory exists */
 	if (sys_check_create_dir (LogServ.savedir) != NS_SUCCESS)
 	{
@@ -217,7 +214,7 @@ void lgs_close_logs() {
 	while (( hn = hash_scan_next(&hs)) != NULL) {
 		cl = hnode_get(hn);
 		/* if the log is opened then close it */
-		if (cl->flags & LGSFDOPENED) {
+		if (cl->logfile) {
 			sys_file_close (cl->logfile);
 		}
 		/* delete them from the hash */
@@ -252,7 +249,7 @@ int lgs_RotateLogs(void)
 	while (( hn = hash_scan_next(&hs)) != NULL) {
 		cl = hnode_get(hn);
 		/* if the log has been opened more than X, then rotate */
-		if ((cl->flags & LGSFDOPENED) && ((me.now - cl->fdopened) > LogServ.maxopentime)) {
+		if ((cl->logfile) && ((me.now - cl->fdopened) > LogServ.maxopentime)) {
 			lgs_switch_file(cl);
 		}
 	}

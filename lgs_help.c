@@ -99,3 +99,12 @@ const char *lgs_help_set_logtime[] = {
 	NULL
 };
 
+const char *lgs_help_set_logdir[] = {
+	"\2LOGDIR\2 <path> - path for log files",
+	NULL
+};
+
+const char *lgs_help_set_savedir[] = {
+	"\2SAVEDIR\2 <path> - path for save log files",
+	NULL
+};

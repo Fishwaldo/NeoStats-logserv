@@ -1,6 +1,11 @@
 LogServ ChangeLog
 =============================================================================
 3.0 * Mark * 
+- Add SET options for logdir and savedir. (M)
+- Remove indicator flag for open files. We can use the file descriptor for 
+  this job. (M).
+- Add support for EVENT_EMPTYCHAN so logserv will auto quit channels when all
+  users have left. (M)
 - Add support for channel notices and core side CTCP ACTION parsing. (M)
 - CHANS command is pointless since it requires a sub command so tidy up 
   command path by promoting the sub commands. (M)
