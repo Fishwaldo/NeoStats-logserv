@@ -123,6 +123,55 @@ int __ChanMessage(char *origin, char **argv, int argc)
 	}
 	return 1;
 }
+static int PartChan(char **av, int ac) 
+{
+	ChannelLog *cl;
+	Chans *c;
+	
+	/* this function is called recursively, so ignore parts by LogServ */
+	if (!strcasecmp(av[1], s_LogServ)) {
+		return NS_FAILURE;
+	}
+
+	c = findchan(av[0]);
+	if (c->moddata[LogServ.modnum]) {
+		if (c->cur_users == 2) {
+			/* last user just parted, so we leave as well */
+			cl = c->moddata[LogServ.modnum];
+			nlog(LOG_DEBUG1, LOG_MOD, "Parting Channel %s as there are no more members", c->name);
+			spart_cmd(s_LogServ, c->name);
+			c->moddata[LogServ.modnum] = NULL;
+			cl->c = NULL;
+		}
+	}
+}
+
+static int NewChan(char **av, int ac) 
+{
+	ChannelLog *cl;
+	hnode_t *cn;
+	Chans *c;
+
+	c = findchan(av[0]);
+	cn = hash_lookup(lgschans, av[0]);
+	if (!cn) 
+		return NS_FAILURE;
+		
+	cl = hnode_get(cn);
+	if (c && cl) {
+		if (join_bot_to_chan(s_LogServ, cl->channame, 0) == NS_SUCCESS) {
+			cl->flags |= LGSACTIVE;
+			nlog(LOG_NOTICE, LOG_MOD, "Actived Logging on channel %s", cl->channame);
+			if (cl->statsurl[0] != '\0') {
+				prefmsg(cl->channame, s_LogServ, "Stats will be avaiable at %s when Logs are processed next", cl->statsurl);
+			}	
+		}
+		c->moddata[LogServ.modnum] = cl;
+		cl->c = c;
+	}
+	return NS_SUCCESS;
+}	
+
 
 /** Online event processing
  * What we do when we first come online
@@ -134,6 +183,7 @@ static int Online(char **av, int ac)
 	char **row;
 	int count;
 	Chans *c;
+	char *tmp;
 	/* Introduce a bot onto the network */
 	lgs_bot = init_mod_bot(s_LogServ, "LogBot", me.name, "Channel Logging Bot", services_bot_modes,
 		BOT_FLAG_ONLY_OPERS, lgs_commands, lgs_settings, __module_info.module_name);		
@@ -150,8 +200,10 @@ static int Online(char **av, int ac)
 				cl->flags &= ~LGSFDNEEDFLUSH;
 				cl->flags &= ~LGSFDOPENED;
 			}
-			if (GetData((void *)&cl->statsurl, CFGSTR, "Chans", cl->channame, "URL") == 0) {
+			if (GetData((void *)&tmp, CFGSTR, "Chans", cl->channame, "URL") == 0) {
 				cl->statsurl[0] = '\0';
+			} else {
+				strlcpy(cl->statsurl, tmp, MAXPATH);
 			}
 			c = findchan(cl->channame);
 			if (c) {
@@ -179,6 +231,8 @@ static int Online(char **av, int ac)
  */
 EventFnList __module_events[] = {
 	{EVENT_ONLINE, Online},
+	{EVENT_NEWCHAN, NewChan},
+	{EVENT_PARTCHAN, PartChan},
 	{NULL, NULL}
 };
 
