@@ -23,10 +23,6 @@
 
 #include "neostats.h"
 #include "logserv.h"
-#include <sys/stat.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #include "logdefault.h"
 #include "logmirc.h"
 #include "logxchat.h"
