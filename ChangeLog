@@ -3,6 +3,7 @@ LogServ ChangeLog
 1.2 * Mark * 17/2/2003
 - We now try to read nick, user, host and realname so these can be configured more 
   easily (M)
+- SET interface for nick/user/host/realname added (M)
 
 1.1 * Fish * 17/1/2003
 - Fixed up help text.

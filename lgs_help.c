@@ -94,3 +94,28 @@ const char *lgs_help_set_logtime[] = {
 	"\2LOGAGE\2 <seconds> - Specify the age in seconds that we rotate the log file, regardless of log file size",
 	NULL
 };
+
+const char *lgs_help_set_nick[] = {
+	"NICK <newnick> Change bot nickname",
+	"(requires restart to take effect).",
+	NULL
+};
+
+const char *lgs_help_set_user[] = {
+	"USER <username> Change bot username",
+	"(requires restart to take effect).",
+	NULL
+};
+
+const char *lgs_help_set_host[] = {
+	"HOST <host> Change bot host",
+	"(requires restart to take effect).",
+	NULL
+};
+
+const char *lgs_help_set_realname[] = {
+	"REALNAME <realname> Change bot realname",
+	"(requires restart to take effect).",
+	NULL
+};
+

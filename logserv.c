@@ -76,6 +76,10 @@ bot_cmd lgs_commands[]=
 
 bot_setting lgs_settings[]=
 {
+	{"NICK",	&s_LogServ,		SET_TYPE_STRING,	0, MAXNICK, 	NS_ULEVEL_ADMIN, "Nick",	NULL,	lgs_help_set_nick },
+	{"USER",	&LogServ.user,	SET_TYPE_STRING,	0, MAXUSER, 	NS_ULEVEL_ADMIN, "User",	NULL,	lgs_help_set_user },
+	{"HOST",	&LogServ.host,	SET_TYPE_STRING,	0, MAXHOST, 	NS_ULEVEL_ADMIN, "Host",	NULL,	lgs_help_set_host },
+	{"REALNAME",&LogServ.rname,	SET_TYPE_STRING,	0, MAXREALNAME, NS_ULEVEL_ADMIN, "RealName",NULL,	lgs_help_set_realname },
 	{"LOGTYPE",		
 	&LogServ.logtype,	
 	SET_TYPE_INT,	
