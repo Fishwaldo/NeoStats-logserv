@@ -64,7 +64,7 @@ logtype_proc logging_funcs[] = {
 ModuleInfo __module_info = {
 	"LogServ",
 	"Channel Logging Bot",
-	"$Rev$\0"
+	"$Rev$",
 	__DATE__,
 	__TIME__
 };
