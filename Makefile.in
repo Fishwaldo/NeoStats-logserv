@@ -8,22 +8,22 @@ INSTALL_DATA = @INSTALL_DATA@
 DIRECTORY=@DIRINST@/dl/
 INCLUDES=-I@DIRINST@/include/ -I.
 
-SOURCES= logserv.c log_processing.c
-OBJECTS= logserv.o log_processing.o
+SRCS= logserv.c log_processing.c
+OBJS= ${SRCS:.c=.o}
 TARGET= logserv.so
 DOCS=LogServ.README LogServ.README.html
 SCRIPTS=OnisDoLogs.sh onisconfig
 DATA=
-DISTFILES=$(SOURCES) $(DOCS) $(SCRIPTS) *.in configure install-sh ChangeLog *.h lgs_help.c LICENSE
-distdir= @PACKAGE@-@VERSION@
+DISTFILES=$(SRCS) $(DOCS) $(SCRIPTS) *.in configure install-sh ChangeLog *.h lgs_help.c LICENSE
+DISTDIR= @PACKAGE@-@VERSION@
 
 all:	 module
 
 .c.o:	
 	 $(CC) -c $(CFLAGS) $(INCLUDES) $<
 
-module:	 $(OBJECTS)
-	 $(LD) -shared -o $(TARGET) $(LDFLAGS) $(OBJECTS)
+module:	 $(OBJS)
+	 $(LD) -shared -o $(TARGET) $(LDFLAGS) $(OBJS)
 
 clean:
 	 /bin/rm -rf $(TARGET) *.o Makefile *.log modconfig.h
@@ -36,21 +36,21 @@ install: module
 
 dist:	
 	@echo -n "Creating Directories"
-	@-rm -rf $(distdir)
-	@mkdir $(distdir)
+	@-rm -rf $(DISTDIR)
+	@mkdir $(DISTDIR)
 	@echo "Done"
 	@echo -n "Copying Core Distribution Files"
 	@for file in $(DISTFILES); do \
 		echo -n "."; \
-		cp -pr $$file $(distdir)/$$file; \
+		cp -pr $$file $(DISTDIR)/$$file; \
 	done
 	@echo "Done"
-	@tar -czf $(distdir).tar.gz $(distdir)/*
-	@echo "Tar file $(distdir).tar.gz created, Freshmeat Time"
+	@tar -czf $(DISTDIR).tar.gz $(DISTDIR)/*
+	@echo "Tar file $(DISTDIR).tar.gz created, Freshmeat Time"
 
 
 
-$(OBJECTS): Makefile
+$(OBJS): Makefile
 
 logserv.o:	logserv.c lgs_help.c logserv.h
 log_procssing.o: logserv.h
