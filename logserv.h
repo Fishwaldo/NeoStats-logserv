@@ -26,8 +26,7 @@
 #ifndef LOGSERV_H
 #define LOGSERV_H
 
-#include "dl.h"
-#include "stats.h"
+#include "neostats.h"
 
 #ifndef NS_ULEVEL_LOCOPER
 #define NS_ULEVEL_LOCOPER 40

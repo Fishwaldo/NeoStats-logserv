@@ -26,12 +26,7 @@
  */
 
 #include <stdio.h>
-#include "dl.h"       /* Required for module */
-#include "stats.h"    /* Required for bot support */
-#include "log.h"      /* Log systems support */
-#include "conf.h"     /* GetConf support */
-#include "logserv.h"
-
+#include "neostats.h"
 #include "lgs_help.c"
 
 /* forward decl */

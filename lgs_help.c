@@ -25,7 +25,7 @@
 ** $Id: ss_help.c 1086 2004-12-12 20:15:54Z Mark $
 */
 
-#include "stats.h"
+#include "neostats.h"
 
 const char lgs_help_about_oneline[]="About LogServ";
 const char lgs_help_version_oneline[]="Shows you the current LogServ Version";

@@ -29,10 +29,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "dl.h"       /* Required for module */
-#include "stats.h"    /* Required for bot support */
-#include "log.h"      /* Log systems support */
-#include "conf.h"     /* GetConf support */
 #include "logserv.h"  /* LogServ Definitions */
 
 /* only check logfile size every X calls */
