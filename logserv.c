@@ -289,7 +289,7 @@ ModuleEvent module_events[] =
  * This is required if you need to do initialisation of your module when
  * first loaded
  */
-int ModInit (Module *mod_ptr)
+int ModInit( void )
 {
 	ModuleConfig (lgs_settings);
 	lgschans = hash_create(-1, 0,0);
@@ -317,18 +317,19 @@ int ModSynch (void)
 	/* start a timer to scan the logs for rotation */
 	AddTimer (TIMER_TYPE_INTERVAL, lgs_RotateLogs, "lgs_RotateLogs", 300);
 	return NS_SUCCESS;
-};
+}
 
 /** Init module
  * This is required if you need to do cleanup of your module when it ends
  */
-void ModFini()
+int ModFini( void )
 {
 	/* close the log files */
 	lgs_close_logs();
 	/* delete the hash */
 	hash_destroy(lgschans);
-};
+	return NS_SUCCESS;
+}
 
 /* ok, now here are logservs functions */
 
