@@ -1,0 +1,34 @@
+#Neostats Module Makefile!
+CC=@CC@
+CFLAGS=@CFLAGS@
+LDFLAGS= @LIBS@
+INSTALL = @INSTALL@                                                                                                                 
+INSTALL_PROGRAM = @INSTALL_PROGRAM@                                                                                                 
+INSTALL_DATA = @INSTALL_DATA@
+DIRECTORY=@DIRINST@/dl/
+INCLUDES=-I@DIRINST@/include/ -I.
+
+SOURCES= logserv.c
+OBJECTS= logserv.o
+TARGET= logserv.so
+DOCS=README.LogServ
+DATA=
+
+
+all:	 module
+
+.c.o:	
+	 $(CC) -c $(CFLAGS) $(INCLUDES) $<
+
+module:	 $(OBJECTS)
+	 $(LD) -shared -o $(TARGET) $(LDFLAGS) $(OBJECTS)
+
+clean:
+	 /bin/rm -rf $(TARGET) *.o Makefile *.log modconfig.h
+
+install: module
+	 $(INSTALL) -m 644 $(TARGET) $(DIRECTORY)
+	 $(INSTALL) -m 644 $(DOCS) $(DIRECTORY)../doc/
+
+$(OBJECTS): Makefile
+

@@ -1,1 +1,14 @@
 * text=auto !eol
+/AUTHORS -text
+/COPYING -text
+/ChangeLog -text
+/LICENSE -text
+/Makefile.in -text
+/NEWS -text
+/README.LogServ -text
+/config.status -text
+/configure -text
+/configure.in -text
+/install-sh -text
+/logserv.c -text
+/modconfig.h.in -text
