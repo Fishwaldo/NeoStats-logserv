@@ -1,5 +1,5 @@
 /* NeoStats - IRC Statistical Services 
-** Copyright (c) 1999-2004 Adam Rutter, Justin Hammond, Mark Hetherington
+** Copyright (c) 1999-2005 Adam Rutter, Justin Hammond, Mark Hetherington
 ** http://www.neostats.net/
 **
 **  This program is free software; you can redistribute it and/or modify
@@ -41,7 +41,7 @@ static void lgs_save_channel_data (ChannelLog *cl);
 
 /** Copyright info */
 const char *ls_copyright[] = {
-	"Copyright (c) 1999-2004, NeoStats",
+	"Copyright (c) 1999-2005, NeoStats",
 	"http://www.neostats.net/",
 	NULL
 };
