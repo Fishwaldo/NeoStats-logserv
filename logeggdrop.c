@@ -21,6 +21,7 @@
 ** $Id$
 */
 
+#include "neostats.h"
 #include "logserv.h"  /* LogServ Definitions */
 
 /* [00:00] --- Fri Jan  2 2004 */

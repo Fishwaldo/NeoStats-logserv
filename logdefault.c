@@ -21,6 +21,7 @@
 ** $Id$
 */
 
+#include "neostats.h"
 #include "logserv.h"  /* LogServ Definitions */
 
 char *logserv_startlog(ChannelLog *chandata) {

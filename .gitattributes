@@ -10,6 +10,7 @@
 /NEWS -text
 /OnisDoLogs.sh -text
 /README.LogServ -text
+/RELNOTES -text
 /configure -text
 /configure.in -text
 /install-sh -text

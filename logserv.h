@@ -24,8 +24,6 @@
 #ifndef LOGSERV_H
 #define LOGSERV_H
 
-#include "neostats.h"
-
 /* Channel Logging Struct. */
 typedef struct CL_ {
 	char channame[MAXCHANLEN];

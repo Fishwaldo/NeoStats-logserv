@@ -21,7 +21,7 @@
 ** $Id$
 */
 
-#include <stdio.h>
+#include "neostats.h"
 #ifdef WIN32
 #include "win32modconfig.h"
 #else

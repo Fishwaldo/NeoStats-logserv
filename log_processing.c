@@ -21,6 +21,7 @@
 ** $Id$
 */
 
+#include "neostats.h"
 #include "logserv.h"
 #include <sys/stat.h>
 #ifdef HAVE_UNISTD_H

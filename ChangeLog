@@ -1,6 +1,6 @@
 LogServ ChangeLog
 =============================================================================
-3.0 * Mark * 
+3.0.a1 - Mark (M)
 - Add SET options for logdir and savedir. (M)
 - Remove indicator flag for open files. We can use the file descriptor for 
   this job. (M).
