@@ -59,6 +59,9 @@ typedef struct CL_ {
 
 /* settings for LogServ */
 struct LogServ {
+	char user[MAXUSER]; 
+	char host[MAXHOST]; 
+	char rname[MAXREALNAME]; 
 	int logtype;
 	int modnum;
 	char logdir[MAXPATH];

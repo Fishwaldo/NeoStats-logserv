@@ -232,7 +232,7 @@ static int lgs_Online(char **av, int ac)
 	Chans *c;
 	char *tmp;
 	/* Introduce a bot onto the network */
-	lgs_bot = init_mod_bot(s_LogServ, "LogBot", me.name, "Channel Logging Bot", services_bot_modes,
+	lgs_bot = init_mod_bot(s_LogServ, LogServ.user, LogServ.host, LogServ.rname, services_bot_modes,
 		BOT_FLAG_ONLY_OPERS, lgs_commands, lgs_settings, __module_info.module_name);		
 
 	/* load Channels and join them */
@@ -407,9 +407,34 @@ EventFnList __module_events[] = {
  */
 int __ModInit(int modnum, int apiver)
 {
+	char *tmp;
 	strlcpy(s_LogServ, "LogServ", MAXNICK);
 	lgschans = hash_create(-1, 0,0);
 	
+	if (GetConf((void *) &tmp, CFGSTR, "Nick") < 0) {
+		strlcpy(s_LogServ, "LogServ", MAXNICK);
+	} else {
+		strlcpy(s_LogServ, tmp, MAXNICK);
+		free(tmp);
+	}
+	if (GetConf((void *) &tmp, CFGSTR, "User") < 0) {
+		strlcpy(LogServ.user, "LogBot", MAXUSER);
+	} else {
+		strlcpy(LogServ.user, tmp, MAXUSER);
+		free(tmp);
+	}
+	if (GetConf((void *) &tmp, CFGSTR, "Host") < 0) {
+		strlcpy(LogServ.host, me.name, MAXHOST);
+	} else {
+		strlcpy(LogServ.host, tmp, MAXHOST);
+		free(tmp);
+	}
+	if (GetConf((void *) &tmp, CFGSTR, "Rname") < 0) {
+		ircsnprintf(LogServ.rname, MAXREALNAME, "Channel Logging Bot");
+	} else {
+		strlcpy(LogServ.rname, tmp, MAXREALNAME);
+		free(tmp);
+	}
 	/* get the logtype */
 	if (GetConf((void *)&LogServ.logtype, CFGINT, "LogType") < 0) {
 		LogServ.logtype = 1;
