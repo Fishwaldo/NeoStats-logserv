@@ -95,27 +95,3 @@ const char *lgs_help_set_logtime[] = {
 	NULL
 };
 
-const char *lgs_help_set_nick[] = {
-	"\2NICK\2 <newnick> Change bot nickname",
-	"(requires restart to take effect).",
-	NULL
-};
-
-const char *lgs_help_set_user[] = {
-	"\2USER\2 <username> Change bot username",
-	"(requires restart to take effect).",
-	NULL
-};
-
-const char *lgs_help_set_host[] = {
-	"\2HOST\2 <host> Change bot host",
-	"(requires restart to take effect).",
-	NULL
-};
-
-const char *lgs_help_set_realname[] = {
-	"\2REALNAME\2 <realname> Change bot realname",
-	"(requires restart to take effect).",
-	NULL
-};
-
