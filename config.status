@@ -447,7 +447,7 @@ s,@PACKAGE_VERSION@,,;t t
 s,@PACKAGE_STRING@,,;t t
 s,@PACKAGE_BUGREPORT@,,;t t
 s,@exec_prefix@,${prefix},;t t
-s,@prefix@,/home/fish/NeoStats/,;t t
+s,@prefix@,/home/ircd/NeoStats/,;t t
 s,@program_transform_name@,s,x,x,,;t t
 s,@bindir@,${exec_prefix}/bin,;t t
 s,@sbindir@,${exec_prefix}/sbin,;t t
@@ -472,14 +472,14 @@ s,@LIBS@,,;t t
 s,@CC@,gcc,;t t
 s,@CFLAGS@, -O2,;t t
 s,@LDFLAGS@,,;t t
-s,@CPPFLAGS@, -I/home/fish/NeoStats//include/,;t t
+s,@CPPFLAGS@, -I/home/ircd/NeoStats//include/,;t t
 s,@ac_ct_CC@,gcc,;t t
 s,@EXEEXT@,,;t t
 s,@OBJEXT@,o,;t t
 s,@INSTALL_PROGRAM@,${INSTALL},;t t
 s,@INSTALL_SCRIPT@,${INSTALL},;t t
 s,@INSTALL_DATA@,${INSTALL} -m 644,;t t
-s,@DIRINST@,/home/fish/NeoStats/,;t t
+s,@DIRINST@,/home/ircd/NeoStats/,;t t
 s,@LIBOBJS@,,;t t
 s,@LTLIBOBJS@,,;t t
 CEOF

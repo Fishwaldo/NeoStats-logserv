@@ -1,14 +1,24 @@
 #!/bin/sh
-
-# Channel og Directory. Where Logfiles are stored. Only need to change this
+LANG=C
+# Channel log Directory. Where Logfiles are stored. Only need to change this
 #if you installed neostats into a different prefix other than NeoStats
 chanlogs="$HOME/NeoStats/ChanLogs/"
 
 # Onis Installation Path
-onisinstall="$HOME/onis-0.4.6/" 
+onisinstall="$HOME/onis-0.4.9/" 
+
+# Output Path for Stats. Has to be writtable by the user executing this script
+onisoutput="/var/www/html/stats/"
 
 # optional Onis Commandline options
 onisoptions=""
+
+#=============================================================================
+# End of Configuration. Dont edit anything below this line
+#=============================================================================
+
+LANG=C
+
 
 doonis() {
 	#test if output directory exists 
@@ -17,7 +27,7 @@ doonis() {
 	fi
 	cd $chanlogs/$1
 	files=`ls $chanlogs/$1/*.log`
-	command="$onisinstall/onis --config $chanlogs/onisconfig --output $chanlogs/$1/html/index.html --channel \"$1\" --persistency_file $chanlogs/$1/persistancy.data --overwrite true $onisoptions $files"
+	command="$onisinstall/onis --config $chanlogs/onisconfig --output $onisoutput/$1.html --channel \"$1\" --persistency_file $chanlogs/$1/persistancy.data --overwrite true $onisoptions $files"
 	echo `$command`
 	cd $chanlogs
 }
