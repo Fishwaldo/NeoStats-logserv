@@ -2293,8 +2293,8 @@ if test "$ns_version_ok" = "yes"; then
 	echo "$as_me:$LINENO: result: Compatible Version" >&5
 echo "${ECHO_T}Compatible Version" >&6;
 else
-	{ { echo "$as_me:$LINENO: error: This Module requires NeoStats 2.5.2 or Higher" >&5
-echo "$as_me: error: This Module requires NeoStats 2.5.2 or Higher" >&2;}
+	{ { echo "$as_me:$LINENO: error: This Module requires NeoStats 2.5.13 or Higher" >&5
+echo "$as_me: error: This Module requires NeoStats 2.5.13 or Higher" >&2;}
    { (exit 1); exit 1; }; }
 fi
 

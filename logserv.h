@@ -29,6 +29,11 @@
 #include "dl.h"
 #include "stats.h"
 
+#ifndef NS_ULEVEL_LOCOPER
+#define NS_ULEVEL_LOCOPER 40
+#endif
+
+
 /** 
  * A string to hold the name of our bot
  */

@@ -405,7 +405,7 @@ char *egg_time() {
 
 
 /* [22:02] Fish (~Fish@Server-Admin.irc-chat.net) joined #neostats. */
-#define EJOINPROC "%s %s (%s@%s) joined %s\n"
+#define EJOINPROC "%s %s (%s@%s) joined %s.\n"
 
 int egg_joinproc(ChannelLog *chandata, char **av, int ac) {
 	User *u;
@@ -415,14 +415,14 @@ int egg_joinproc(ChannelLog *chandata, char **av, int ac) {
 	return NS_SUCCESS;
 }
 
-/* [22:02] Fish (~Fish@Server-Admin.irc-chat.net) left #neostats. */
-#define EPARTPROC "%s %s (%s@%s) left %s\n"
+/* [22:02] Fish (~Fish@Server-Admin.irc-chat.net) left #neostats (ha). */
+#define EPARTPROC "%s %s (%s@%s) left %s (%s).\n"
 
 int egg_partproc(ChannelLog *chandata, char **av, int ac) {
 	User *u;
 	u = finduser(av[1]);
 	if (u) 
-		lgs_write_log(chandata, EPARTPROC, egg_time(), u->nick, u->username, u->vhost, av[0]);
+		lgs_write_log(chandata, EPARTPROC, egg_time(), u->nick, u->username, u->vhost, av[0], ac = 3 ? av[2] : "");
 	
 	return NS_SUCCESS;
 }
