@@ -150,7 +150,7 @@ void LoadLogChannel (void *data)
 	cl = ns_calloc (sizeof(ChannelLog));
 	memcpy (cl, data, sizeof(ChannelLog));
 	dlog (DEBUG1, "Loading Channel %s", cl->channame);
-	c = find_channel (cl->channame);
+	c = FindChannel (cl->channame);
 	if (c) {
 		lgs_join_logged_channel (c, cl);
 	}
@@ -251,7 +251,7 @@ static int lgs_event_nick(CmdParams* cmdparams)
 	/* ok, move through each of the channels */
 	cm = list_first (cmdparams->source->user->chans);
 	while (cm) {
-		lgs_send_to_logproc (LGSMSG_NICK, ((Channel *)find_channel(lnode_get (cm))), cmdparams);
+		lgs_send_to_logproc (LGSMSG_NICK, ((Channel *)FindChannel(lnode_get (cm))), cmdparams);
         cm = list_next (cmdparams->source->user->chans, cm);
 	}
 	return NS_SUCCESS;
@@ -314,7 +314,7 @@ int ModSynch (void)
 	/* load Channels and join them */
 	LoadLogChannels ();
 	/* start a timer to scan the logs for rotation */
-	add_timer (TIMER_TYPE_INTERVAL, lgs_RotateLogs, "lgs_RotateLogs", 300);
+	AddTimer (TIMER_TYPE_INTERVAL, lgs_RotateLogs, "lgs_RotateLogs", 300);
 	return NS_SUCCESS;
 };
 
@@ -359,14 +359,14 @@ static int lgs_cmd_add (CmdParams* cmdparams)
 	}
 	hnode_create_insert (lgschans, cl, cl->channame);
 	lgs_save_channel_data (cl);
-	c = find_channel (cmdparams->av[0]);
+	c = FindChannel (cmdparams->av[0]);
 	if (c) {
 		lgs_join_logged_channel (c, cl); 
 		irc_chanprivmsg (lgs_bot, cl->channame, "%s activated logging on %s", cmdparams->source->name, cl->channame);
 	}
 	nlog (LOG_NOTICE, "%s activated logging on %s", cmdparams->source->name, cl->channame);
 	irc_prefmsg (lgs_bot, cmdparams->source, "Activated logging on %s", cl->channame);
-	command_report(lgs_bot, "%s activated logging on %s", cmdparams->source->name, cl->channame);
+	CommandReport(lgs_bot, "%s activated logging on %s", cmdparams->source->name, cl->channame);
 	return NS_SUCCESS;
 }
 
@@ -398,7 +398,7 @@ static int lgs_cmd_del (CmdParams* cmdparams)
 	ns_free (cl);
 	DBADelete( "Channel", cmdparams->av[1] );
 	irc_prefmsg (lgs_bot, cmdparams->source, "Deleted channel %s", cmdparams->av[0]);
-	command_report(lgs_bot, "%s deleted %s from logging", cmdparams->source->name, cmdparams->av[0]);
+	CommandReport(lgs_bot, "%s deleted %s from logging", cmdparams->source->name, cmdparams->av[0]);
 	return NS_SUCCESS;
 }
 
@@ -430,14 +430,14 @@ static int lgs_cmd_url (CmdParams* cmdparams)
 		irc_prefmsg (lgs_bot, cmdparams->source, "Can not find channel %s in Logging System", cmdparams->av[0]);
 		return NS_FAILURE;
 	}
-	if (validate_url (cmdparams->av[1]) != NS_SUCCESS)
+	if ( ValidateURL( cmdparams->av[1] ) != NS_SUCCESS )
 	{
 		irc_prefmsg (lgs_bot, cmdparams->source, "%s is an invalid URL", cmdparams->av[1]);
 		return NS_FAILURE;
 	}
 	ircsnprintf(cl->statsurl, MAXPATH, "%s", cmdparams->av[1]);
 	irc_prefmsg (lgs_bot, cmdparams->source, "Changed URL for %s to: %s", cl->channame, cl->statsurl);
-	command_report(lgs_bot, "%s changed the URL for %s to: %s", cmdparams->source->name, cl->channame, cl->statsurl);
+	CommandReport(lgs_bot, "%s changed the URL for %s to: %s", cmdparams->source->name, cl->channame, cl->statsurl);
 	lgs_save_channel_data (cl);
 	return NS_SUCCESS;
 }
