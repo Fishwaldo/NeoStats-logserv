@@ -142,19 +142,20 @@ static int lgs_join_logged_channel (Channel* c, ChannelLog *cl)
 	return NS_SUCCESS;
 }
 
-void LoadLogChannel (void *data)
+int LoadLogChannel (void *data)
 {
 	ChannelLog *cl;
 	Channel *c;
 
 	cl = ns_calloc (sizeof(ChannelLog));
-	memcpy (cl, data, sizeof(ChannelLog));
+	os_memcpy (cl, data, sizeof(ChannelLog));
 	dlog (DEBUG1, "Loading Channel %s", cl->channame);
 	c = FindChannel (cl->channame);
 	if (c) {
 		lgs_join_logged_channel (c, cl);
 	}
 	hnode_create_insert (lgschans, cl, cl->channame);
+	return NS_FALSE;
 }
 
 void LoadLogChannels (void)
@@ -459,11 +460,3 @@ static void lgs_save_channel_data (ChannelLog *cl) {
 	dlog (DEBUG1, "Saving Channel Data for %s", cl->channame);
 	DBAStore ("Channel", cl->channame, cl, sizeof (ChannelLog));
 }	
-
-#ifdef WIN32 /* temp */
-
-int main (int argc, char **argv)
-{
-	return 0;
-}
-#endif

@@ -96,7 +96,7 @@ void lgs_write_log(ChannelLog *cl, char *fmt, ...) {
 	}
 	/* ok, file is opened. write the string to it */
 #ifdef DEBUG
-	printf("%s\n", log_buf);
+	dlog (DEBUG1, "%s\n", log_buf);
 #endif
 	os_fprintf (cl->logfile, "%s", log_buf);
 	cl->dostat++;
