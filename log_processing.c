@@ -21,13 +21,11 @@
 ** $Id$
 */
 
-#include <stdio.h>
-#include <sys/types.h>
+#include "logserv.h"
 #include <sys/stat.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "logserv.h"
 #include "logdefault.h"
 #include "logmirc.h"
 #include "logxchat.h"
@@ -225,14 +223,13 @@ void lgs_close_logs() {
 		/* delete them from the hash */
 		c = cl->c;
 		if (c) {
-			c->moddata[lgs_module->modnum] = NULL;
+			set_channel_moddata (c, NULL);
 			cl->c = NULL;
 		}
 		hash_delete(lgschans, hn);
 		hnode_destroy(hn);
 		ns_free (cl);
 	}
-
 }
 
 /* @brief Rotate the log files if they have been opened longer than the pre-defined time
@@ -269,7 +266,17 @@ int lgs_RotateLogs(void)
  * @param ac message size 
  * @returns NS_SUCCESS or NS_FAILURE
  */
-int lgs_send_to_logproc(LGSMSG_TYPE msgtype, ChannelLog *lgschan, CmdParams* cmdparams) 
+int lgs_send_to_logproc(LGSMSG_TYPE msgtype, Channel *c, CmdParams* cmdparams) 
 {
-	return logging_funcs[LogServ.logtype][msgtype](lgschan, cmdparams);
+	ChannelLog *cl;
+
+	if (c)
+	{
+		cl = (ChannelLog *)get_channel_moddata (c);
+		if (cl)
+		{
+			return logging_funcs[LogServ.logtype][msgtype](cl, cmdparams);
+		}
+	}
+	return NS_FAILURE;
 }

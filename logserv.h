@@ -77,7 +77,7 @@ typedef enum {
 typedef int (*log_proc) (ChannelLog *chandata, CmdParams* cmdparams);
 
 /* log_procssing.c decl */
-int lgs_send_to_logproc (LGSMSG_TYPE msgtype, ChannelLog *lgschan, CmdParams* cmdparams);
+int lgs_send_to_logproc (LGSMSG_TYPE msgtype, Channel *c, CmdParams* cmdparams);
 int lgs_RotateLogs(void);
 void lgs_close_logs();
 void lgs_switch_file(ChannelLog *cl);
@@ -100,7 +100,5 @@ extern const char *lgs_help_set_logtime[];
 
 extern char timebuf[TIMEBUFSIZE];
 extern char startlog[BUFSIZE];
-
-extern Module *lgs_module;
 
 #endif
