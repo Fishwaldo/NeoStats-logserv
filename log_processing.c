@@ -328,6 +328,11 @@ void lgs_RotateLogs() {
 	hnode_t *hn;
 	ChannelLog *cl;
 	
+	/* if Logage is 0, just bail out */
+	if (LogServ.maxopentime <= 0) {
+		return;
+	}
+
 	/* scan through the log files */
 	hash_scan_begin(&hs, lgschans);
 	while (( hn = hash_scan_next(&hs)) != NULL) {
