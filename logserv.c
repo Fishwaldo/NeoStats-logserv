@@ -149,6 +149,7 @@ static int lgs_PartChan(char **av, int ac)
 			spart_cmd(s_LogServ, c->name);
 			c->moddata[LogServ.modnum] = NULL;
 			cl->c = NULL;
+			cl->flags &= ~LGSACTIVE;
 		}
 		/* process the part message now */
 		lgs_send_to_logproc(LGSMSG_PART, cl, av, ac);	
@@ -185,6 +186,7 @@ static int lgs_NewChan(char **av, int ac)
 	cl = hnode_get(cn);
 	if (c && cl) {
 		if (join_bot_to_chan(s_LogServ, cl->channame, 0) == NS_SUCCESS) {
+			SET_SEGV_INMODULE(__module_info.module_name);
 			cl->flags |= LGSACTIVE;
 			nlog(LOG_NOTICE, LOG_MOD, "Actived Logging on channel %s", cl->channame);
 			if (cl->statsurl[0] != '\0') {
@@ -233,6 +235,7 @@ static int lgs_Online(char **av, int ac)
 			c = findchan(cl->channame);
 			if (c) {
 				if (join_bot_to_chan(s_LogServ, cl->channame, 0) == NS_SUCCESS) {
+					SET_SEGV_INMODULE(__module_info.module_name);
 					cl->flags |= LGSACTIVE;
 					nlog(LOG_NOTICE, LOG_MOD, "Actived Logging on channel %s", cl->channame);
 					if (cl->statsurl[0] != '\0') {
@@ -280,6 +283,14 @@ static int lgs_KickChan(char **av, int ac) {
 	
 	if ((cl = lgs_findactchanlog(findchan(av[0]))) != NULL) {
 		lgs_send_to_logproc(LGSMSG_KICK, cl, av, ac);
+		if (cl->c->cur_users == 2) {
+			/* last user just parted, so we leave as well */
+			nlog(LOG_DEBUG1, LOG_MOD, "Parting Channel %s as there are no more members", cl->channame);
+			spart_cmd(s_LogServ, cl->channame);
+			cl->c->moddata[LogServ.modnum] = NULL;
+			cl->c = NULL;
+			cl->flags &= ~LGSACTIVE;
+		}
 		return NS_SUCCESS;
 	}	
 	return NS_SUCCESS;

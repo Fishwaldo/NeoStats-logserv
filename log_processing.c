@@ -104,17 +104,22 @@ char *egg_startlog(ChannelLog *cl) {
 
 	return startlog;
 }
+#define EGGTIME "[%H:%M]"
 
 char *egg_time() {
-
+	strftime(timebuf, TIMEBUFSIZE, EGGTIME, localtime(&me.now));
 	return timebuf;
 }
+
 
 /* [22:02] Fish (~Fish@Server-Admin.irc-chat.net) joined #neostats. */
 #define EJOINPROC "%s %s (%s@%s) joined %s\n"
 
 int egg_joinproc(ChannelLog *chandata, char **av, int ac) {
-
+	User *u;
+	u = finduser(av[1]);
+	if (u)
+		lgs_write_log(chandata, EJOINPROC, egg_time(), u->nick, u->username, u->vhost, av[0]);
 	return NS_SUCCESS;
 }
 
@@ -122,7 +127,11 @@ int egg_joinproc(ChannelLog *chandata, char **av, int ac) {
 #define EPARTPROC "%s %s (%s@%s) left %s\n"
 
 int egg_partproc(ChannelLog *chandata, char **av, int ac) {
-
+	User *u;
+	u = finduser(av[1]);
+	if (u) 
+		lgs_write_log(chandata, EPARTPROC, egg_time(), u->nick, u->username, u->vhost, av[0]);
+	
 	return NS_SUCCESS;
 }
 
@@ -133,7 +142,10 @@ int egg_partproc(ChannelLog *chandata, char **av, int ac) {
 #define EACTPROC "%s Action: %s %s\n"
 
 int egg_msgproc(ChannelLog *chandata, char **av, int ac) {
-
+	if (ac == 3) 
+		lgs_write_log(chandata, EACTPROC, egg_time(), av[0], av[2]);
+	else 
+		lgs_write_log(chandata, EMSGPROC, egg_time(), av[0], av[1]);
 	return NS_SUCCESS;
 }
 
@@ -141,15 +153,25 @@ int egg_msgproc(ChannelLog *chandata, char **av, int ac) {
 #define EQUITPROC "%s %s (%s@%s) left irc: %s\n"
 
 int egg_quitproc(ChannelLog *chandata, char **av, int ac) {
-
+	User *u;
+	u = finduser(av[0]);
+	if (u) 
+		lgs_write_log(chandata, EQUITPROC, egg_time(), u->nick, u->username, u->vhost, ac == 2 ? av[1] : "");
+		
 	return NS_SUCCESS;
 }
 
 /* [22:02] Topic changed on #neostats by Fish!~Fish@Server-Admin.irc-chat.net: <LuShes> I'mmmm back!!!! [NeoStats Support] http://www.neostats.net */
 #define ETOPICPROC "%s Topic changed on %s by %s!%s@%s: %s\n"
+#define ENOUSERTOPICPROC "%s Topic changed on %s by %s: %s\n"
 
 int egg_topicproc(ChannelLog *chandata, char **av, int ac) {
-
+	User *u;
+	u = finduser(av[1]);
+	if (u)
+		lgs_write_log(chandata, ETOPICPROC, egg_time(), av[0], u->nick, u->username, u->vhost, ac == 3 ? av[2] : "");
+	else 
+		lgs_write_log(chandata, ENOUSERTOPICPROC, egg_time(), av[0], av[1], ac == 3 ? av[2] : "");
 	return NS_SUCCESS;
 }
 
@@ -157,14 +179,24 @@ int egg_topicproc(ChannelLog *chandata, char **av, int ac) {
 #define EKICKPROC "%s %s kicked from %s by %s: %s\n"
 
 int egg_kickproc(ChannelLog *chandata, char **av, int ac) {
-
+	lgs_write_log(chandata, EKICKPROC, egg_time(), av[1], av[0], av[2], ac == 4 ? av[3] : ""); 
 	return NS_SUCCESS;
 }
 
 /* [22:02] #NeoStats: mode change '+oa Fish Fish' by SuperSexSquirrel!super@supersexsquirrel.org */
 #define EMODEPROC "%s %s: mode change '%s' by %s!%s@%s\n"
+#define ENOUSERMODEPROC "%s %s: mode change '%s' by %s\n"
 int egg_modeproc(ChannelLog *chandata, char **av, int ac) {
-
+	User *u;
+	char *modebuf;
+	
+	modebuf = joinbuf(av, ac, 2);
+	u = finduser(av[0]);
+	if (u) {
+		lgs_write_log(chandata, EMODEPROC, egg_time(), av[1], modebuf, u->nick, u->username, u->vhost);
+	} else {
+		lgs_write_log(chandata, ENOUSERMODEPROC, egg_time(), av[1], modebuf, av[0]);
+	}	
 	return NS_SUCCESS;
 }
 
@@ -172,7 +204,7 @@ int egg_modeproc(ChannelLog *chandata, char **av, int ac) {
 #define ENICKPROC "%s Nick change: %s -> %s\n"
 
 int egg_nickproc(ChannelLog *chandata, char **av, int ac) {
-
+	lgs_write_log(chandata, ENICKPROC, egg_time(), av[0], av[1]);
 	return NS_SUCCESS;
 }
 
@@ -202,7 +234,7 @@ char *mirc_time() {
 #define MJOINPROC "%s * %s has joined %s\n"
 
 int mirc_joinproc(ChannelLog *chandata, char **av, int ac) {
-
+	lgs_write_log(chandata, MJOINPROC, mirc_time(), av[1], av[0]);
 	return NS_SUCCESS;
 }
 
@@ -210,7 +242,7 @@ int mirc_joinproc(ChannelLog *chandata, char **av, int ac) {
 #define MPARTPROC "%s * %s has left %s\n"
 
 int mirc_partproc(ChannelLog *chandata, char **av, int ac) {
-
+	lgs_write_log(chandata, MPARTPROC, mirc_time(), av[1], av[0]);
 	return NS_SUCCESS;
 }
 
@@ -220,7 +252,11 @@ int mirc_partproc(ChannelLog *chandata, char **av, int ac) {
 #define MACTPROC "%s * %s %s\n"
 
 int mirc_msgproc(ChannelLog *chandata, char **av, int ac) {
-
+	if (ac == 3) {
+		lgs_write_log(chandata, MACTPROC, mirc_time(), av[0], av[2]);
+	} else {
+		lgs_write_log(chandata, MMSGPROC, mirc_time(), av[0], av[1]);
+	}
 	return NS_SUCCESS;
 }
 
@@ -228,7 +264,7 @@ int mirc_msgproc(ChannelLog *chandata, char **av, int ac) {
 #define MQUITPROC "%s * %s has quit IRC (%s)\n"
 
 int mirc_quitproc(ChannelLog *chandata, char **av, int ac) {
-
+	lgs_write_log(chandata, MQUITPROC, mirc_time(), av[0], ac == 2 ? av[1] : "");
 	return NS_SUCCESS;
 }
 
@@ -236,7 +272,7 @@ int mirc_quitproc(ChannelLog *chandata, char **av, int ac) {
 #define MTOPICPROC "%s * %s changes topic to '%s'\n"
 
 int mirc_topicproc(ChannelLog *chandata, char **av, int ac) {
-
+	lgs_write_log(chandata, MTOPICPROC, mirc_time(), av[1], ac == 3 ? av[2] : "");
 	return NS_SUCCESS;
 }
 
@@ -244,7 +280,7 @@ int mirc_topicproc(ChannelLog *chandata, char **av, int ac) {
 #define MKICKPROC "%s * %s was kicked by %s (%s)\n"
 
 int mirc_kickproc(ChannelLog *chandata, char **av, int ac) {
-
+	lgs_write_log(chandata, MKICKPROC, mirc_time(), av[1], av[2], ac == 4 ? av[3] : "");
 	return NS_SUCCESS;
 }
 
@@ -252,7 +288,7 @@ int mirc_kickproc(ChannelLog *chandata, char **av, int ac) {
 #define MNICKPROC "%s * %s is now known as %s\n"
 
 int mirc_nickproc(ChannelLog *chandata, char **av, int ac) {
-
+	lgs_write_log(chandata, MNICKPROC, mirc_time(), av[0], av[1]);
 	return NS_SUCCESS;
 }
 
@@ -260,7 +296,11 @@ int mirc_nickproc(ChannelLog *chandata, char **av, int ac) {
 #define MMODEPROC "%s * %s sets mode: %s\n"
 
 int mirc_modeproc(ChannelLog *chandata, char **av, int ac) {
-
+	char *modebuf;
+	
+	modebuf = joinbuf(av, ac, 2);
+	lgs_write_log(chandata, MMODEPROC, mirc_time(), av[0], modebuf);
+	free(modebuf);
 	return NS_SUCCESS;
 }
 
