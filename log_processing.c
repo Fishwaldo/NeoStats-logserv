@@ -44,49 +44,15 @@
 char timebuf[TIMEBUFSIZE];
 char startlog[BUFSIZE];
 
-logtype_proc logging_funcs[] = {
-	{logserv_joinproc, logserv_partproc, logserv_msgproc, logserv_quitproc, logserv_topicproc, logserv_kickproc, logserv_nickproc, logserv_modeproc},
-	{egg_joinproc, egg_partproc, egg_msgproc, egg_quitproc, egg_topicproc, egg_kickproc, egg_nickproc, egg_modeproc},
-	{mirc_joinproc, mirc_partproc, mirc_msgproc, mirc_quitproc, mirc_topicproc, mirc_kickproc, mirc_nickproc, mirc_modeproc},
-	{xchat_joinproc, xchat_partproc, xchat_msgproc, xchat_quitproc, xchat_topicproc, xchat_kickproc, xchat_nickproc, xchat_modeproc},
+log_proc logging_funcs[][LGSMSG_NUMTYPES] = {
+	{logserv_joinproc, logserv_partproc, logserv_msgproc, logserv_noticeproc, logserv_quitproc, logserv_topicproc, logserv_kickproc, logserv_nickproc, logserv_modeproc},
+	{egg_joinproc, egg_partproc, egg_msgproc, egg_noticeproc, egg_quitproc, egg_topicproc, egg_kickproc, egg_nickproc, egg_modeproc},
+	{mirc_joinproc, mirc_partproc, mirc_msgproc, mirc_noticeproc, mirc_quitproc, mirc_topicproc, mirc_kickproc, mirc_nickproc, mirc_modeproc},
+	{xchat_joinproc, xchat_partproc, xchat_msgproc, xchat_noticeproc, xchat_quitproc, xchat_topicproc, xchat_kickproc, xchat_nickproc, xchat_modeproc},
 };
 
 static int lgs_open_log(ChannelLog *cl);
 static void lgs_stat_file(ChannelLog *cl);
-
-
-/* 
- *
- */
-
-static int check_create_logdir (char* dirname)
-{
-	struct stat st;
-	int res;
-
-	/* first, make sure the logdir dir exists */
-	res = stat(dirname, &st);
-	if (res != 0) {
-		/* hrm, error */
-		if (errno == ENOENT) {
-			/* ok, it doesn't exist, create it */
-			res = sys_mkdir (dirname, 0700);
-			if (res != 0) {
-				/* error */
-				nlog (LOG_CRITICAL, "Couldn't create LogDir Directory: %s", strerror(errno));
-				return NS_FAILURE;
-			}
-			nlog (LOG_NOTICE, "Created Channel Logging Dir %s", dirname);
-		} else {
-			nlog (LOG_CRITICAL, "Stat Returned A error: %s", strerror(errno));
-			return NS_FAILURE;
-		}
-	} else if (!S_ISDIR(st.st_mode))	{
-		nlog (LOG_CRITICAL, "%s is not a Directory", dirname);
-		return NS_FAILURE;
-	}
-	return NS_SUCCESS;
-}
 
 /* @brief write a formatted log to the log files, and check if we should switch th logfile
  * 
@@ -158,7 +124,7 @@ static int lgs_open_log(ChannelLog *cl) {
 	char fname[MAXPATH];
 
 	/* first, make sure the logdir dir exists */
-	if (check_create_logdir (LogServ.logdir) != NS_SUCCESS)
+	if (sys_check_create_dir (LogServ.logdir) != NS_SUCCESS)
 	{
 		return NS_FAILURE;
 	}
@@ -167,9 +133,9 @@ static int lgs_open_log(ChannelLog *cl) {
 	ircsnprintf(fname, MAXPATH, "%s/%s.log", LogServ.logdir, make_safe_filename (cl->filename));
 
 	/* open the file */
-	cl->logfile = sys_file_open (fname, "a");
+	cl->logfile = sys_file_open (fname, FILE_MODE_APPEND);
 	if (!cl->logfile) {
-		nlog (LOG_CRITICAL, "Could not open %s for Appending: %s", cl->filename, strerror(errno));
+		nlog (LOG_CRITICAL, "Could not open %s for Appending: %s", cl->filename, sys_file_get_last_error ());
 		return NS_FAILURE;
 	}
 	dlog (DEBUG1, "Opened %s for Appending", cl->filename);
@@ -183,28 +149,21 @@ static int lgs_open_log(ChannelLog *cl) {
  * 
  * @param cl the ChannelLog struct for the channel we are checking 
  */ 
-static void lgs_stat_file(ChannelLog *cl) {
-	struct stat st;
-	int res;
+static void lgs_stat_file(ChannelLog *cl) 
+{
+	int filesize = 0;
 	char fname[MAXPATH];
 	
 	/* reset this counter */
 	cl->dostat = 0;
 	/* construct the filename to stat */
 	ircsnprintf(fname, MAXPATH, "%s/%s.log", LogServ.logdir, cl->filename);
-	res = stat(fname, &st);
-	if (res != 0) {
-		if (errno == ENOENT) {
-			/* wtf, this is bad */
-			nlog (LOG_CRITICAL, "LogFile went away: %s", fname);
-			return;
-		} else {
-			nlog (LOG_CRITICAL, "Logfile Error: %s", strerror(errno));
-			return;
-		}
+	filesize = sys_file_get_size (fname);
+	if (filesize <= 0) {
+		return;
 	}
-	dlog (DEBUG1, "Logfile Size of %s is %d", fname, (int)st.st_size);
-	if (st.st_size > LogServ.maxlogsize) {
+	dlog (DEBUG1, "Logfile Size of %s is %d", fname, filesize);
+	if (filesize >  LogServ.maxlogsize) {
 		dlog (DEBUG1, "Switching Logfile %s", fname);
 		/* ok, the file exceeds out limits, lets switch it */
 		lgs_switch_file(cl);
@@ -230,16 +189,16 @@ void lgs_switch_file(ChannelLog *cl) {
 	cl->fdopened = 0;
 	cl->flags &= ~ LGSFDOPENED;
 	/* check if the target directory exists */
-	if (check_create_logdir (LogServ.savedir) != NS_SUCCESS)
+	if (sys_check_create_dir (LogServ.savedir) != NS_SUCCESS)
 	{
 		return;
 	}
-	strftime(tmbuf, MAXPATH, "%d%m%Y%H%M%S", localtime(&me.now));
+	sys_strftime (tmbuf, MAXPATH, "%d%m%Y%H%M%S", sys_localtime (&me.now));
 	ircsnprintf(newfname, MAXPATH, "%s/%s-%s.log", LogServ.savedir, cl->filename, tmbuf);
 	ircsnprintf(oldfname, MAXPATH, "%s/%s.log", LogServ.logdir, cl->filename);
-	res = rename(oldfname, newfname);
+	res = sys_file_rename (oldfname, newfname);
 	if (res != 0) {
-		nlog (LOG_CRITICAL, "Couldn't Rename file %s: %s", oldfname, strerror(errno));
+		nlog (LOG_CRITICAL, "Couldn't rename file %s: %s", oldfname, sys_file_get_last_error ());
 	}	
 	nlog (LOG_NORMAL, "Switched Logfile for %s from %s to %s", cl->channame, oldfname, newfname);
 }
@@ -270,7 +229,7 @@ void lgs_close_logs() {
 		}
 		hash_delete(lgschans, hn);
 		hnode_destroy(hn);
-		free(cl);
+		ns_free (cl);
 	}
 
 }
@@ -309,41 +268,7 @@ int lgs_RotateLogs(void)
  * @param ac message size 
  * @returns NS_SUCCESS or NS_FAILURE
  */
-int lgs_send_to_logproc( logmsgtype msgtype, ChannelLog *lgschan, CmdParams* cmdparams) {
-	switch (msgtype) {
-		case 0:
-			return logging_funcs[LogServ.logtype].joinproc(lgschan, cmdparams);
-			break;
-		case 1:
-			return logging_funcs[LogServ.logtype].partproc(lgschan, cmdparams);
-			break;
-		case 2:
-			return logging_funcs[LogServ.logtype].msgproc(lgschan, cmdparams);
-			break;
-		case 3:
-			return logging_funcs[LogServ.logtype].quitproc(lgschan, cmdparams);
-			break;
-		case 4: 
-			return logging_funcs[LogServ.logtype].topicproc(lgschan, cmdparams);
-			break;
-		case 5:
-			return logging_funcs[LogServ.logtype].kickproc(lgschan, cmdparams);
-			break;
-		case 6:
-			return logging_funcs[LogServ.logtype].nickproc(lgschan, cmdparams);
-			break;
-		case 7:
-			return logging_funcs[LogServ.logtype].modeproc(lgschan, cmdparams);
-			break;
-		default:
-			nlog (LOG_WARNING, "Unknown msgtype %d", msgtype);
-			return NS_FAILURE;
-			break;
-	}	
-	return NS_FAILURE;
+int lgs_send_to_logproc(LGSMSG_TYPE msgtype, ChannelLog *lgschan, CmdParams* cmdparams) 
+{
+	return logging_funcs[LogServ.logtype][msgtype](lgschan, cmdparams);
 }
-
-#ifdef WIN32
-/* temporary work around for linker error */
-void main(void) {}
-#endif

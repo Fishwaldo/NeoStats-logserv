@@ -128,7 +128,7 @@ static int lgs_event_cnotice (CmdParams* cmdparams)
 			AddStringToList(&data, argv[1], &datasize);
 			buf = joinbuf(argv, argc, 2);
 		} else {*/
-		lgs_send_to_logproc(LGSMSG_MSG, cl, cmdparams);		
+		lgs_send_to_logproc(LGSMSG_NOTICE, cl, cmdparams);		
 	}
 	return 1;
 }
@@ -221,8 +221,7 @@ int ModSynch (void)
 	if (GetTableData("Channel", &row) > 0) {
 		for (count = 0; row[count] != NULL; count++) {
 			dlog (DEBUG1, "Loading Channel %s", row[count]);
-			cl = malloc(sizeof(ChannelLog));
-			bzero(cl, sizeof(ChannelLog));
+			cl = ns_calloc (sizeof(ChannelLog));
 			strlcpy(cl->channame, row[count], MAXCHANLEN);
 			if (GetData((void *)&cl->flags, CFGINT, "Channel", cl->channame, "Flags") > 0) {
 				cl->flags &= ~LGSACTIVE;
@@ -382,7 +381,7 @@ static int lgs_chans(CmdParams* cmdparams)
 	hnode_t *hn;
 	ChannelLog *cl;
 
-	if (!strcasecmp(cmdparams->av[0], "LIST")) {
+	if (!ircstrcasecmp (cmdparams->av[0], "LIST")) {
 		irc_prefmsg (lgs_bot, cmdparams->source, "Monitored Channel List:");
 		hash_scan_begin(&hs, lgschans);
 		while ((hn = hash_scan_next(&hs)) != NULL) {
@@ -394,19 +393,18 @@ static int lgs_chans(CmdParams* cmdparams)
 		}
 		irc_prefmsg (lgs_bot, cmdparams->source, "End Of List.");				
 		return NS_SUCCESS;
-	} else if (!strcasecmp(cmdparams->av[0], "DEL")) {
+	} else if (!ircstrcasecmp (cmdparams->av[0], "DEL")) {
 		if (cmdparams->ac < 2) {
 			irc_prefmsg (lgs_bot, cmdparams->source, "Syntax error: insufficient parameters");
 			irc_prefmsg (lgs_bot, cmdparams->source, "/msg %s HELP CHANS for more information", lgs_bot->name);
 			return NS_FAILURE;
 		}
 		hn = hash_lookup(lgschans, cmdparams->av[1]);
-		if (hn) {
-			cl = hnode_get(hn);
-		} else {
+		if (!hn) {
 			irc_prefmsg (lgs_bot, cmdparams->source, "Can not find channel %s in Logging System", cmdparams->av[1]);
 			return NS_FAILURE;
 		}
+		cl = hnode_get(hn);
 		if (!cl) {
 			irc_prefmsg (lgs_bot, cmdparams->source, "Can not find Channel %s in Logging System", cmdparams->av[1]);
 			return NS_FAILURE;
@@ -422,12 +420,12 @@ static int lgs_chans(CmdParams* cmdparams)
 		hash_delete(lgschans, hn);
 		hnode_destroy(hn);
 		irc_part (lgs_bot, cl->channame);
-		free(cl);
+		ns_free (cl);
 		DelRow("Channel", cmdparams->av[1]);
 		irc_prefmsg (lgs_bot, cmdparams->source, "Deleted Channel %s", cmdparams->av[1]);
 		irc_chanalert (lgs_bot, "%s deleted %s from Channel Logging", cmdparams->source->name, cmdparams->av[1]);
 		return NS_SUCCESS;
-	} else if (!strcasecmp(cmdparams->av[0], "ADD")) {
+	} else if (!ircstrcasecmp (cmdparams->av[0], "ADD")) {
 		if (cmdparams->ac < 4) {
 			irc_prefmsg (lgs_bot, cmdparams->source, "Syntax error: insufficient parameters");
 			irc_prefmsg (lgs_bot, cmdparams->source, "/msg %s HELP CHANS for more information", lgs_bot->name);
@@ -435,7 +433,7 @@ static int lgs_chans(CmdParams* cmdparams)
 		}
 		lgs_newchanlog(cmdparams);
 		return NS_SUCCESS;
-	} else if (!strcasecmp(cmdparams->av[0], "SET")) {
+	} else if (!ircstrcasecmp (cmdparams->av[0], "SET")) {
 		if (cmdparams->ac < 4) {
 			irc_prefmsg (lgs_bot, cmdparams->source, "Syntax error: insufficient parameters");
 			irc_prefmsg (lgs_bot, cmdparams->source, "/msg %s HELP CHANS for more information", lgs_bot->name);
@@ -452,7 +450,7 @@ static int lgs_chans(CmdParams* cmdparams)
 			irc_prefmsg (lgs_bot, cmdparams->source, "Can not find Channel %s in Logging System", cmdparams->av[1]);
 			return NS_FAILURE;
 		}
-		if (!strcasecmp(cmdparams->av[1], "URL")) {
+		if (!ircstrcasecmp (cmdparams->av[1], "URL")) {
 			ircsnprintf(cl->statsurl, MAXPATH, "%s", cmdparams->av[3]);
 			irc_prefmsg (lgs_bot, cmdparams->source, "Changed URL for %s to: %s", cl->channame, cl->statsurl);
 			irc_chanalert (lgs_bot, "%s changed the URL for %s to: %s", cmdparams->source->name, cl->channame, cl->statsurl);
@@ -499,14 +497,13 @@ ChannelLog *lgs_newchanlog(CmdParams* cmdparams)
 		irc_prefmsg (lgs_bot, cmdparams->source, "Already Logging %s.", cmdparams->av[1]);
 		return hnode_get(cn);
 	}
-	cl = malloc(sizeof(ChannelLog));
-	bzero(cl, sizeof(ChannelLog));
+	cl = ns_calloc (sizeof(ChannelLog));
 	strlcpy(cl->channame, cmdparams->av[1], MAXCHANLEN);
 	cl->c = c;
 	c->moddata[lgs_module->modnum] = cl;
-	if (!strcasecmp(cmdparams->av[2], "Public")) {
+	if (!ircstrcasecmp (cmdparams->av[2], "Public")) {
 		cl->flags |= LGSPUBSTATS;
-	} else if (!strcasecmp(cmdparams->av[2], "Private")) {
+	} else if (!ircstrcasecmp (cmdparams->av[2], "Private")) {
 		cl->flags &= ~LGSPUBSTATS;
 	} else {
 		irc_prefmsg (lgs_bot, cmdparams->source, "Unknown Public Type %s. Setting to Public", cmdparams->av[2]);
@@ -568,3 +565,4 @@ ChannelLog *lgs_findactchanlog(Channel *c) {
 		return NULL;
 	}
 }
+

@@ -28,6 +28,7 @@ char *mirc_startlog(ChannelLog *cl);
 int mirc_joinproc(ChannelLog *chandata, CmdParams* cmdparams);
 int mirc_partproc(ChannelLog *chandata, CmdParams* cmdparams);
 int mirc_msgproc(ChannelLog *chandata, CmdParams* cmdparams);
+int mirc_noticeproc(ChannelLog *chandata, CmdParams* cmdparams);
 int mirc_quitproc(ChannelLog *chandata, CmdParams* cmdparams);
 int mirc_topicproc(ChannelLog *chandata, CmdParams* cmdparams);
 int mirc_kickproc(ChannelLog *chandata, CmdParams* cmdparams);

@@ -28,6 +28,7 @@ char *egg_startlog(ChannelLog *cl);
 int egg_joinproc(ChannelLog *chandata, CmdParams* cmdparams);
 int egg_partproc(ChannelLog *chandata, CmdParams* cmdparams);
 int egg_msgproc(ChannelLog *chandata, CmdParams* cmdparams);
+int egg_noticeproc(ChannelLog *chandata, CmdParams* cmdparams);
 int egg_quitproc(ChannelLog *chandata, CmdParams* cmdparams);
 int egg_topicproc(ChannelLog *chandata, CmdParams* cmdparams);
 int egg_kickproc(ChannelLog *chandata, CmdParams* cmdparams);

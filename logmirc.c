@@ -36,9 +36,9 @@ char *mirc_startlog(ChannelLog *cl) {
 	char timebuf2[TIMEBUFSIZE];
 	char timebuf3[TIMEBUFSIZE];
 	
-	strftime(timebuf, TIMEBUFSIZE, "%a %b %d %H:%M:%S %Y", localtime(&me.now));
-	strftime(timebuf2, TIMEBUFSIZE, "[%H:%M]", localtime(&me.now));
-	strftime(timebuf3, TIMEBUFSIZE, "%a %b %d %H:%M:%S", localtime(&cl->c->topictime));
+	sys_strftime (timebuf, TIMEBUFSIZE, "%a %b %d %H:%M:%S %Y", sys_localtime (&me.now));
+	sys_strftime (timebuf2, TIMEBUFSIZE, "[%H:%M]", sys_localtime (&me.now));
+	sys_strftime (timebuf3, TIMEBUFSIZE, "%a %b %d %H:%M:%S", sys_localtime (&cl->c->topictime));
 	ircsnprintf(startlog, BUFSIZE, MSTARTLOG, timebuf, cl->channame, timebuf2, cl->channame, timebuf2, cl->c->topic[0] != '0' ? cl->c->topic : "", timebuf2, cl->c->topicowner[0] != '0' ? cl->c->topicowner: "", timebuf3);
 
 	return startlog;
@@ -46,7 +46,7 @@ char *mirc_startlog(ChannelLog *cl) {
 
 #define MIRCTIME "[%H:%M]"
 char *mirc_time() {
-	strftime(timebuf, TIMEBUFSIZE, MIRCTIME, localtime(&me.now));
+	sys_strftime (timebuf, TIMEBUFSIZE, MIRCTIME, sys_localtime (&me.now));
 	return timebuf;
 }
 
@@ -75,6 +75,15 @@ int mirc_partproc(ChannelLog *chandata, CmdParams* cmdparams)
 #define MACTPROC "%s * %s %s\n"
 
 int mirc_msgproc(ChannelLog *chandata, CmdParams* cmdparams) {
+	if (cmdparams->ac == 3) {
+		lgs_write_log(chandata, MACTPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
+	} else {
+		lgs_write_log(chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
+	}
+	return NS_SUCCESS;
+}
+
+int mirc_noticeproc(ChannelLog *chandata, CmdParams* cmdparams) {
 	if (cmdparams->ac == 3) {
 		lgs_write_log(chandata, MACTPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
 	} else {
@@ -124,7 +133,7 @@ int mirc_modeproc(ChannelLog *chandata, CmdParams* cmdparams) {
 	
 	modebuf = joinbuf(cmdparams->av, cmdparams->ac, 0);
 	lgs_write_log(chandata, MMODEPROC, mirc_time(), cmdparams->source->name, modebuf);
-	free(modebuf);
+	ns_free (modebuf);
 	return NS_SUCCESS;
 }
 

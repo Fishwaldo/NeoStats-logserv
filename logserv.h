@@ -62,32 +62,21 @@ typedef enum {
 	LGSMSG_JOIN=0,
 	LGSMSG_PART,
 	LGSMSG_MSG,
+	LGSMSG_NOTICE,
 	LGSMSG_QUIT,
 	LGSMSG_TOPIC,
 	LGSMSG_KICK,
 	LGSMSG_NICK,
-	LGSMSG_CHANMODE
-} logmsgtype;
+	LGSMSG_CHANMODE,
+	LGSMSG_NUMTYPES
+} LGSMSG_TYPE;
 	
 
 /* logging function prototype */
-typedef int (log_proc) (ChannelLog *chandata, CmdParams* cmdparams);
-
-/* LogType Proc table */
-
-typedef struct logtype_proc {
-	log_proc *joinproc;
-	log_proc *partproc;
-	log_proc *msgproc;
-	log_proc *quitproc;
-	log_proc *topicproc;
-	log_proc *kickproc;
-	log_proc *nickproc;
-	log_proc *modeproc;
-} logtype_proc;
+typedef int (*log_proc) (ChannelLog *chandata, CmdParams* cmdparams);
 
 /* log_procssing.c decl */
-int lgs_send_to_logproc (logmsgtype msgtype, ChannelLog *lgschan, CmdParams* cmdparams);
+int lgs_send_to_logproc (LGSMSG_TYPE msgtype, ChannelLog *lgschan, CmdParams* cmdparams);
 int lgs_RotateLogs(void);
 void lgs_close_logs();
 void lgs_switch_file(ChannelLog *cl);

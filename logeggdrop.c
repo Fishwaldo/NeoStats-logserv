@@ -27,14 +27,14 @@
 /* this usually goes at the end of a logfile. Hrm */
 
 char *egg_startlog(ChannelLog *cl) {
-	strftime(startlog, BUFSIZE, "[%H:%M] --- %a %b %d %Y\n", localtime(&me.now));
+	sys_strftime (startlog, BUFSIZE, "[%H:%M] --- %a %b %d %Y\n", sys_localtime (&me.now));
 
 	return startlog;
 }
 #define EGGTIME "[%H:%M]"
 
 char *egg_time() {
-	strftime(timebuf, TIMEBUFSIZE, EGGTIME, localtime(&me.now));
+	sys_strftime (timebuf, TIMEBUFSIZE, EGGTIME, sys_localtime (&me.now));
 	return timebuf;
 }
 
@@ -64,6 +64,14 @@ int egg_partproc(ChannelLog *chandata, CmdParams* cmdparams)
 #define EACTPROC "%s Action: %s %s\n"
 
 int egg_msgproc(ChannelLog *chandata, CmdParams* cmdparams) {
+	if (cmdparams->ac == 3) 
+		lgs_write_log(chandata, EACTPROC, egg_time(), cmdparams->source->name, cmdparams->param);
+	else 
+		lgs_write_log(chandata, EMSGPROC, egg_time(), cmdparams->source->name, cmdparams->param);
+	return NS_SUCCESS;
+}
+
+int egg_noticeproc(ChannelLog *chandata, CmdParams* cmdparams) {
 	if (cmdparams->ac == 3) 
 		lgs_write_log(chandata, EACTPROC, egg_time(), cmdparams->source->name, cmdparams->param);
 	else 

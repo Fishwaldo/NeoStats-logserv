@@ -28,7 +28,7 @@
 #define XCHATTIME "%b %d %H:%M:%S"
 
 char *xchat_time() {
-	strftime(timebuf, TIMEBUFSIZE, XCHATTIME, localtime(&me.now));
+	sys_strftime (timebuf, TIMEBUFSIZE, XCHATTIME, sys_localtime (&me.now));
 	return timebuf;
 }
 /* **** BEGIN LOGGING AT Fri Jan  2 17:25:15 2004
@@ -38,7 +38,7 @@ char *xchat_time() {
  
 char *xchat_startlog(ChannelLog *cl) {
 	char tmbuf[TIMEBUFSIZE];
-	strftime(tmbuf, TIMEBUFSIZE, "%a %b %d %H:%M:%S %Y", localtime(&me.now));
+	sys_strftime (tmbuf, TIMEBUFSIZE, "%a %b %d %H:%M:%S %Y", sys_localtime (&me.now));
 	ircsnprintf(startlog, BUFSIZE, XSTARTLOG, tmbuf);
 	return startlog;
 }
@@ -70,6 +70,15 @@ int xchat_partproc(ChannelLog *chandata, CmdParams* cmdparams)
 #define XACTFMT "%s *\t%s %s\n"
 
 int xchat_msgproc(ChannelLog *chandata, CmdParams* cmdparams) {
+	if (cmdparams->ac == 3) {
+		lgs_write_log(chandata, XACTFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
+	} else {
+		lgs_write_log(chandata, XMSGFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
+	}
+	return NS_SUCCESS;
+}
+
+int xchat_noticeproc(ChannelLog *chandata, CmdParams* cmdparams) {
 	if (cmdparams->ac == 3) {
 		lgs_write_log(chandata, XACTFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
 	} else {
@@ -117,7 +126,7 @@ int xchat_modeproc(ChannelLog *chandata, CmdParams* cmdparams) {
 	
 	modebuf = joinbuf(cmdparams->av, cmdparams->ac, 0);
 	lgs_write_log(chandata, XMODEPROC, xchat_time(), cmdparams->source->name, chandata->channame, modebuf);
-	free(modebuf);
+	ns_free (modebuf);
 	return NS_SUCCESS;
 }
 
