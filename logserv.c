@@ -412,6 +412,12 @@ EventFnList __module_events[] = {
 int __ModInit(int modnum, int apiver)
 {
 	char *tmp;
+#ifdef NS_ERR_VERSION /* Forward port version checks */
+	/* Check that our compiled version if compatible with the calling version of NeoStats */
+	if(	ircstrncasecmp (me.version, NEOSTATS_VERSION, VERSIONSIZE) !=0) {
+		return NS_ERR_VERSION;
+	}
+#endif 
 	strlcpy(s_LogServ, "LogServ", MAXNICK);
 	lgschans = hash_create(-1, 0,0);
 	
