@@ -72,6 +72,7 @@ const char *lgs_help_version[] = {
 };
 
 const char *lgs_help_set_logtype[] = {
+	"\2LOGTYPE\2 <type>",
 	"Modifies the logfile format that LogServ should Use.",
 	"The options are:",
 	"\21\2 - EggDrop Format",
@@ -84,12 +85,12 @@ const char *lgs_help_set_logtype[] = {
 };
 
 const char *lgs_help_set_logsize[] = {
-	"Specify the size in bytes at which a logfile is automatically",
+	"\2LOGSIZE\2 <bytes> - Specify the size in bytes at which a logfile is automatically",
 	"rotated",
 	NULL
 };
 
 const char *lgs_help_set_logtime[] = {
-	"Specify the age in seconds that we rotate the log file, irregardless of log file size",
+	"\2LOGAGE\2 <seconds> - Specify the age in seconds that we rotate the log file, irregardless of log file size",
 	NULL
 };
