@@ -677,7 +677,7 @@ int xchat_topicproc(ChannelLog *chandata, char **av, int ac) {
 #define XKICKPROC "%s <--\t%s has kicked %s from %s (%s)\n"
 
 int xchat_kickproc(ChannelLog *chandata, char **av, int ac) {
-	lgs_write_log(chandata, XKICKPROC, xchat_time(), av[1], av[2], av[0], ac == 4 ? av[3] : "");
+	lgs_write_log(chandata, XKICKPROC, xchat_time(), av[2], av[1], av[0], ac == 4 ? av[3] : "");
 	return NS_SUCCESS;
 }
 
