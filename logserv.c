@@ -34,10 +34,6 @@
 
 #include "lgs_help.c"
 
-;
-
-
-
 /* forward decl */
 static int lgs_about(User * u, char **av, int ac);
 static int lgs_version(User * u, char **av, int ac);
