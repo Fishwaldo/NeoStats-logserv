@@ -82,7 +82,7 @@ bot_setting lgs_settings[]=
 	3,	
 	NS_ULEVEL_ADMIN,
 	"LogType",
-	"Log Type",
+	NULL,
 	lgs_help_set_logtype,
 	NULL, (void*)1},
 	{"LOGSIZE",		
@@ -219,7 +219,7 @@ static int lgs_event_emptychan (CmdParams* cmdparams)
 	if (cl) {
 		/*close/switch the logfile*/
 		lgs_switch_file(cl);
-		set_channel_moddata (cl->c, NULL);
+		clear_channel_moddata (cl->c);
 		cl->c = NULL;
 		cl->flags &= ~LGSACTIVE;
 	}
@@ -237,7 +237,7 @@ static int lgs_event_newchan (CmdParams* cmdparams)
 	ChannelLog *cl;
 
 	cl = (ChannelLog *)hnode_find (lgschans, cmdparams->channel);
-	if (cmdparams->channel && cl) {
+	if (cl) {
 		lgs_join_logged_channel (cmdparams->channel, cl);
 	}
 	return NS_SUCCESS;
@@ -291,7 +291,7 @@ ModuleEvent module_events[] =
 	{EVENT_KICK,		lgs_event_kick,		EVENT_FLAG_EXCLUDE_MODME},
 	{EVENT_TOPIC,		lgs_event_topic,	EVENT_FLAG_EXCLUDE_MODME},
 	{EVENT_NICK,		lgs_event_nick,		EVENT_FLAG_EXCLUDE_MODME},
-	{EVENT_CHANMODE,	lgs_event_cmode,	EVENT_FLAG_EXCLUDE_MODME},
+	{EVENT_CMODE,		lgs_event_cmode,	EVENT_FLAG_EXCLUDE_MODME},
 	{EVENT_NULL, NULL}
 };
 
@@ -318,7 +318,7 @@ int ModInit (Module *mod_ptr)
 int ModSynch (void)
 {
 	/* Introduce a bot onto the network */
-	lgs_bot = init_bot(&ls_botinfo);		
+	lgs_bot = AddBot (&ls_botinfo);		
 	if (!lgs_bot) {
 		return NS_FAILURE;
 	}
@@ -401,7 +401,7 @@ static int lgs_cmd_del (CmdParams* cmdparams)
 		lgs_switch_file(cl);
 	}
 	if (cl->c) {
-		set_channel_moddata (cl->c, NULL);
+		clear_channel_moddata (cl->c);
 	}
 	hash_delete(lgschans, hn);
 	hnode_destroy(hn);
@@ -439,6 +439,11 @@ static int lgs_cmd_url (CmdParams* cmdparams)
 	cl = (ChannelLog *) hnode_find (lgschans, cmdparams->av[0]);
 	if (!cl) {
 		irc_prefmsg (lgs_bot, cmdparams->source, "Can not find channel %s in Logging System", cmdparams->av[0]);
+		return NS_FAILURE;
+	}
+	if (validate_url (cmdparams->av[1]) != NS_SUCCESS)
+	{
+		irc_prefmsg (lgs_bot, cmdparams->source, "%s is an invalid URL", cmdparams->av[1]);
 		return NS_FAILURE;
 	}
 	ircsnprintf(cl->statsurl, MAXPATH, "%s", cmdparams->av[1]);

@@ -36,9 +36,9 @@ char *mirc_startlog(ChannelLog *cl) {
 	char timebuf2[TIMEBUFSIZE];
 	char timebuf3[TIMEBUFSIZE];
 	
-	sys_strftime (timebuf, TIMEBUFSIZE, "%a %b %d %H:%M:%S %Y", sys_localtime (&me.now));
-	sys_strftime (timebuf2, TIMEBUFSIZE, "[%H:%M]", sys_localtime (&me.now));
-	sys_strftime (timebuf3, TIMEBUFSIZE, "%a %b %d %H:%M:%S", sys_localtime (&cl->c->topictime));
+	os_strftime (timebuf, TIMEBUFSIZE, "%a %b %d %H:%M:%S %Y", os_localtime (&me.now));
+	os_strftime (timebuf2, TIMEBUFSIZE, "[%H:%M]", os_localtime (&me.now));
+	os_strftime (timebuf3, TIMEBUFSIZE, "%a %b %d %H:%M:%S", os_localtime (&cl->c->topictime));
 	ircsnprintf(startlog, BUFSIZE, MSTARTLOG, timebuf, cl->channame, timebuf2, cl->channame, timebuf2, cl->c->topic[0] != '0' ? cl->c->topic : "", timebuf2, cl->c->topicowner[0] != '0' ? cl->c->topicowner: "", timebuf3);
 
 	return startlog;
@@ -46,7 +46,7 @@ char *mirc_startlog(ChannelLog *cl) {
 
 #define MIRCTIME "[%H:%M]"
 char *mirc_time() {
-	sys_strftime (timebuf, TIMEBUFSIZE, MIRCTIME, sys_localtime (&me.now));
+	os_strftime (timebuf, TIMEBUFSIZE, MIRCTIME, os_localtime (&me.now));
 	return timebuf;
 }
 

@@ -42,7 +42,6 @@ typedef struct CL_ {
 /* settings for LogServ */
 struct LogServ {
 	int logtype;
-	int modnum;
 	char logdir[MAXPATH];
 	char savedir[MAXPATH];
 	long maxlogsize;

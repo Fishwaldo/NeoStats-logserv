@@ -79,16 +79,16 @@ void lgs_write_log(ChannelLog *cl, char *fmt, ...) {
 		/* ok, we just opened the file, write the start out */
 		switch (LogServ.logtype) {
 			case 0:
-				sys_file_printf (cl->logfile, "%s", logserv_startlog(cl));
+				os_fprintf (cl->logfile, "%s", logserv_startlog(cl));
 				break;
 			case 1:
-				sys_file_printf (cl->logfile, "%s", egg_startlog(cl));
+				os_fprintf (cl->logfile, "%s", egg_startlog(cl));
 				break;
 			case 2:
-				sys_file_printf (cl->logfile, "%s", mirc_startlog(cl));
+				os_fprintf (cl->logfile, "%s", mirc_startlog(cl));
 				break;
 			case 3:
-				sys_file_printf (cl->logfile, "%s", xchat_startlog(cl));
+				os_fprintf (cl->logfile, "%s", xchat_startlog(cl));
 				break;
 			default:
 				nlog (LOG_WARNING, "Unknown LogType");
@@ -98,15 +98,15 @@ void lgs_write_log(ChannelLog *cl, char *fmt, ...) {
 #ifdef DEBUG
 	printf("%s\n", log_buf);
 #endif
-	sys_file_printf (cl->logfile, "%s", log_buf);
+	os_fprintf (cl->logfile, "%s", log_buf);
 	cl->dostat++;
 #ifdef DEBUG
 	/* only flush the logfile in debug mode */
-	sys_file_flush (cl->logfile);
+	os_fflush (cl->logfile);
 #endif
 	/* ok, now stat the file to check size */
 	if (cl->dostat >= DOSIZE) { 
-		sys_file_flush (cl->logfile);
+		os_fflush (cl->logfile);
 		lgs_stat_file(cl);
 	}
 }
@@ -122,7 +122,7 @@ static int lgs_open_log(ChannelLog *cl) {
 	char fname[MAXPATH];
 
 	/* first, make sure the logdir dir exists */
-	if (sys_check_create_dir (LogServ.logdir) != NS_SUCCESS)
+	if (os_check_create_dir (LogServ.logdir) != NS_SUCCESS)
 	{
 		return NS_FAILURE;
 	}
@@ -131,9 +131,9 @@ static int lgs_open_log(ChannelLog *cl) {
 	ircsnprintf(fname, MAXPATH, "%s/%s.log", LogServ.logdir, make_safe_filename (cl->filename));
 
 	/* open the file */
-	cl->logfile = sys_file_open (fname, FILE_MODE_APPEND);
+	cl->logfile = os_fopen (fname, "a");
 	if (!cl->logfile) {
-		nlog (LOG_CRITICAL, "Could not open %s for Appending: %s", cl->filename, sys_file_get_last_error ());
+		nlog (LOG_CRITICAL, "Could not open %s for Appending: %s", cl->filename, os_strerror ());
 		return NS_FAILURE;
 	}
 	dlog (DEBUG1, "Opened %s for Appending", cl->filename);
@@ -154,7 +154,7 @@ static void lgs_stat_file(ChannelLog *cl)
 	cl->dostat = 0;
 	/* construct the filename to stat */
 	ircsnprintf(fname, MAXPATH, "%s/%s.log", LogServ.logdir, cl->filename);
-	filesize = sys_file_get_size (fname);
+	filesize = os_file_get_size (fname);
 	if (filesize <= 0) {
 		return;
 	}
@@ -181,19 +181,19 @@ void lgs_switch_file(ChannelLog *cl) {
 		return;
 	}
 	/* close the logfile */
-	sys_file_close (cl->logfile);
+	os_fclose (cl->logfile);
 	cl->fdopened = 0;
 	/* check if the target directory exists */
-	if (sys_check_create_dir (LogServ.savedir) != NS_SUCCESS)
+	if (os_check_create_dir (LogServ.savedir) != NS_SUCCESS)
 	{
 		return;
 	}
-	sys_strftime (tmbuf, MAXPATH, "%d%m%Y%H%M%S", sys_localtime (&me.now));
+	os_strftime (tmbuf, MAXPATH, "%d%m%Y%H%M%S", os_localtime (&me.now));
 	ircsnprintf(newfname, MAXPATH, "%s/%s-%s.log", LogServ.savedir, cl->filename, tmbuf);
 	ircsnprintf(oldfname, MAXPATH, "%s/%s.log", LogServ.logdir, cl->filename);
-	res = sys_file_rename (oldfname, newfname);
+	res = os_rename (oldfname, newfname);
 	if (res != 0) {
-		nlog (LOG_CRITICAL, "Couldn't rename file %s: %s", oldfname, sys_file_get_last_error ());
+		nlog (LOG_CRITICAL, "Couldn't rename file %s: %s", oldfname, os_strerror ());
 		return;
 	}	
 	nlog (LOG_NORMAL, "Switched Logfile for %s from %s to %s", cl->channame, oldfname, newfname);
@@ -215,12 +215,12 @@ void lgs_close_logs() {
 		cl = hnode_get(hn);
 		/* if the log is opened then close it */
 		if (cl->logfile) {
-			sys_file_close (cl->logfile);
+			os_fclose (cl->logfile);
 		}
 		/* delete them from the hash */
 		c = cl->c;
 		if (c) {
-			set_channel_moddata (c, NULL);
+			clear_channel_moddata (c);
 			cl->c = NULL;
 		}
 		hash_delete(lgschans, hn);

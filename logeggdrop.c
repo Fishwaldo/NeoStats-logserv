@@ -27,14 +27,14 @@
 /* this usually goes at the end of a logfile. Hrm */
 
 char *egg_startlog(ChannelLog *cl) {
-	sys_strftime (startlog, BUFSIZE, "[%H:%M] --- %a %b %d %Y\n", sys_localtime (&me.now));
+	os_strftime (startlog, BUFSIZE, "[%H:%M] --- %a %b %d %Y\n", os_localtime (&me.now));
 
 	return startlog;
 }
 #define EGGTIME "[%H:%M]"
 
 char *egg_time() {
-	sys_strftime (timebuf, TIMEBUFSIZE, EGGTIME, sys_localtime (&me.now));
+	os_strftime (timebuf, TIMEBUFSIZE, EGGTIME, os_localtime (&me.now));
 	return timebuf;
 }
 

@@ -28,7 +28,7 @@
 #define XCHATTIME "%b %d %H:%M:%S"
 
 char *xchat_time() {
-	sys_strftime (timebuf, TIMEBUFSIZE, XCHATTIME, sys_localtime (&me.now));
+	os_strftime (timebuf, TIMEBUFSIZE, XCHATTIME, os_localtime (&me.now));
 	return timebuf;
 }
 /* **** BEGIN LOGGING AT Fri Jan  2 17:25:15 2004
@@ -38,7 +38,7 @@ char *xchat_time() {
  
 char *xchat_startlog(ChannelLog *cl) {
 	char tmbuf[TIMEBUFSIZE];
-	sys_strftime (tmbuf, TIMEBUFSIZE, "%a %b %d %H:%M:%S %Y", sys_localtime (&me.now));
+	os_strftime (tmbuf, TIMEBUFSIZE, "%a %b %d %H:%M:%S %Y", os_localtime (&me.now));
 	ircsnprintf(startlog, BUFSIZE, XSTARTLOG, tmbuf);
 	return startlog;
 }
