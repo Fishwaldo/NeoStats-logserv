@@ -8,8 +8,8 @@ INSTALL_DATA = @INSTALL_DATA@
 DIRECTORY=@DIRINST@/dl/
 INCLUDES=-I@DIRINST@/include/ -I.
 
-SOURCES= logserv.c
-OBJECTS= logserv.o
+SOURCES= logserv.c log_processing.c
+OBJECTS= logserv.o log_processing.o
 TARGET= logserv.so
 DOCS=README.LogServ
 DATA=

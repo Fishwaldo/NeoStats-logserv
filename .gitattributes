@@ -11,5 +11,7 @@
 /configure.in -text
 /install-sh -text
 /lgs_help.c -text
+/log_processing.c -text
 /logserv.c -text
+/logserv.h -text
 /modconfig.h.in -text

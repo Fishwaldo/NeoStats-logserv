@@ -64,5 +64,10 @@ const char *lgs_help_stats[] = {
 
 const char *lgs_help_version[] = {
 	"hrm",
-	NULL,
+	NULL
+};
+
+const char *lgs_help_set_logtype[] = {
+	"The Log format to use",
+	NULL
 };
