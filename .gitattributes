@@ -3,6 +3,8 @@
 /COPYING -text
 /ChangeLog -text
 /LICENSE -text
+/LogServ.README.html -text
+/LogServ.xml -text
 /Makefile.in -text
 /NEWS -text
 /OnisDoLogs.sh -text

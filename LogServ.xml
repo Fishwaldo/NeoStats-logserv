@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+<article>
+  <title>LogServ Manual</title>
+
+  <para>Welcome to the LogServ Manual. This document will aid you in setting
+  up and running LogServServ on your IRC network.</para>
+
+  <para>LogServ is a basic Channel Logging Module for the NeoStats Services
+  that can log channel activity to a log file for processing by 3rd party
+  programs such as Onis or MircStats. These programs can then produce HTML
+  pages with interesting statistics on the channel activities. </para>
+
+  <para>LogServ is flexible in the logging of channels, and can produce log
+  files in the same format as Xchat, Mirc, EggDrop, or our own custom logging
+  format, meaning you should be able to use just about any IRC Log Parsing
+  program to produce statistics for you.</para>
+
+  <para>Additionally, LogServ can rotate log files based on log file size or
+  age, and place them in a different directory for processing at any time.</para>
+
+  <para>We recomend that you use the Onis Log file parser, as its what we have
+  done our testing with, and additionally, has several neat features that are
+  applicable to logging lots of channels. These are:<itemizedlist><listitem><para>Persistance.
+  You don&#39;t need to keep old log files around if you wish your statistics
+  to have a long history, thus saving you valuable file system space</para></listitem><listitem><para>Easily
+  Customizable with stylesheets</para></listitem><listitem><para>Easily
+  scriptable for processing many channels at once</para></listitem></itemizedlist></para>
+
+  <para>We have provided a sample shell script and Onis configuration file to
+  automatically parse your log files in one go, producing the required output.
+  </para>
+
+  <para>LogServ is Copyright, 2003 by Justin Hammond.</para>
+
+  <sect1>
+    <title>Prerequisites and Installation.</title>
+
+    <para>LogServ is designed to run on Top of NeoStats. The Following
+    requirements at the time of writing are required for NeoStats:<itemizedlist><listitem><para>A
+    Linux or BSD based Server or Shell.</para></listitem><listitem><para>A
+    supported IRCd. Currently, Hybrid7, Unreal, Ultimate2.x or Ultimate3.x or
+    NeoIRCd</para></listitem><listitem><para>Some basic Unix administration
+    Skill</para></listitem><listitem><para>Of Course, a IRC network to connect
+    it all together.</para></listitem><listitem><para>Spare disk space and a
+    webserver to display the output</para></listitem><listitem><para>A log
+    file parser such as Onis</para></listitem></itemizedlist></para>
+
+    <para>Please refer to the NeoStats website for more information on the
+    requirements</para>
+
+    <sect2>
+      <title>Compiling and Installation</title>
+
+      <para>As long as you have successfully setup NeoStats, and installed it
+      correctly, Compiling LogServ is very simple and straight forward. First
+      you must extract the files from the download package. This is as simple
+      as:</para>
+
+      <screen>bash$<command> tar -xzf LogServ-&#60;ver&#62;.tar.gz</command></screen>
+
+      <para>This should then create a directory called
+      LogServ-&#60;version&#62; where &#60;version&#62; is the Version of
+      LogServ. Then Proceed to Change into the LogServ directory, and run
+      Configure as follows:<screen>bash$<command>./configure [--enable-debug | --with-neostats=&#60;dir&#62;]</command></screen></para>
+
+      <para>--enable-debug is only useful for diagnostics purposes when used
+      in conjunction with debugging tools. There should be no need to use this
+      option on a day to day basis</para>
+
+      <para>--with-neostats=&#60;dir&#62; should be used if your neostats
+      directory is not in a standard location (~/NeoStats/). Replace
+      &#60;dir&#62; with the full path to your NeoStats installation directory
+      (NOT SOURCE DIRECTORY)</para>
+
+      <para>Configuring LogServ will look something like the following screen:</para>
+
+      <screen>[Fish@fish-dt]$ ./configure
+checking for gcc... gcc
+checking for C compiler default output... a.out
+checking whether the C compiler works... yes
+checking whether we are cross compiling... no
+checking for suffix of executables...
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether gcc accepts -g... yes
+checking for gcc option to accept ANSI C... none needed
+checking for a BSD-compatible install... /usr/bin/install -c
+checking for pcre_compile in -lpcre... yes
+checking Location of NeoStats...... /home/fish/NeoStats/
+checking for /home/fish/NeoStats//include/dl.h... yes
+checking Version of NeoStats...... Compatible Version
+checking Whether to Enable Debuging...... no
+configure: creating ./config.status
+config.status: creating Makefile
+
+(*----------------------------------------------------------*)
+(| To compile your module, please type &#39;make&#39;               |)
+(| If make completes without errors, then you               |)
+(| Must &#39;make install&#39;, but please be sure that NeoStats    |)
+(| Is not currently running with a module of the same name  |)
+(| Running, otherwise Make install will not work            |)
+(| !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |)
+(| If you are running a BSD, make install may produce a     |)
+(| Error, if that is the case, then please manually copy    |)
+(| opsb.so to the NeoStats/dl directory                     |)
+(| !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! |)
+(*----------------------------------------------------------*)
+(| For Support please visit:                                |)
+(|    IRC:                   /server irc.irc-chat.org       |)
+(|                                   #neostats channel      |)
+(|    WWW:   http://www.neostats.net/boards/                |)
+(*----------------------------------------------------------*)
+(|This Module was written by:                               |)
+(|      fish (fish@dynam.ac)                                |)
+(*----------------------------------------------------------*)
+</screen>
+
+      <para>If the configuration did not produce a error, you may then move
+      onto Compiling LogServ. Compiling is simply just issuing the
+      &#34;make&#34; command (or &#34;gmake&#34; if you are running BSD):</para>
+
+      <screen>[Fish@fish-dt]$ make
+gcc -c -O2 -Wall -g -ggdb -I/home/fish/NeoStats//include/ -I. logserv.c
+gcc -c -O2 -Wall -g -ggdb -I/home/fish/NeoStats//include/ -I. log_processing.c
+ld -shared -o logserv.so  logserv.o log_processing.o
+</screen>
+
+      <para>again, check for Error messages. As long as there are not error
+      messages, &#34;make install&#34; will install LogServ, this README file,
+      and any auxiliary files needed into your NeoStats directory:</para>
+
+      <screen>[Fish@fish-dt]$ make install
+/usr/bin/install -c -m 644 LogServ.so  /home/fish/NeoStats//dl/
+/usr/bin/install -c -m 644 README.LogServ /home/fish/NeoStats//dl/../doc/
+</screen>
+
+      <para>If you receive *ANY* errors at all during the this process, please
+      post them on our Support boards, at http//www.neostats.net/boards/</para>
+
+      <para>Once Installation is complete, you can either configure NeoStats
+      to load LogServ when it starts, or load LogServ via IRC.</para>
+
+      <para>To Configure NeoStats to automatically load LogServ when it boots,
+      add the following line to your &#34;neostats.cfg&#34; file in the
+      NeoStats directory:</para>
+
+      <para><command>LOAD_MODULE logserv</command></para>
+
+      <para>To load LogServ via IRC, you must make sure you have the
+      appropriate permissions and issue the following command:</para>
+
+      <para><command>/msg neostats load logserv</command></para>
+
+      <para>Thats it. LogServ is now loaded and ready for use </para>
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>Basic Configuration</title>
+
+    <para>LogServ is completely configured online via IRC. When you first
+    start up LogServ, it attempts some &#34;Sane&#34; defaults for you get
+    started with, but you should always review these settings as soon as you
+    install. There are a few important settings you may want to review right
+    away. They are:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>LogType is the format we should be logging as (Xchat, Mirc,
+        EggDrop, or LogServ)</para>
+      </listitem>
+
+      <listitem>
+        <para>Logfile size to rotate at (1Mb by default)</para>
+      </listitem>
+
+      <listitem>
+        <para>Logfile age to rotate at (1Hr by default)</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>These are outlined below:</para>
+
+    <sect2>
+      <title>LogType</title>
+
+      <para>Logtype is the format you wish to perform your logging in. By
+      default, LogServ logs using its own internal logfile format, but as of
+      writting, no external logfile parser supports that format, so you are
+      advised to change it. There are four possible choices:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>0 - LogServ Format. Our own Logging file format</para>
+        </listitem>
+
+        <listitem>
+          <para>1 - EggDrop Format. The Same logging format as the popular
+          EggDrop Bot</para>
+        </listitem>
+
+        <listitem>
+          <para>2 - Mirc Format. This is the same format as the mirc 6.0
+          series</para>
+        </listitem>
+
+        <listitem>
+          <para>3 - Xchat Format. This is the same format as Xchat 2.0.5 IRC
+          client</para>
+
+          <warning>
+            <para>Changing the LogType is imediate, and all new entries into a
+            logfile will start with the new format imediatly. You should stop
+            NeoStats, and remove the files in NeoStats/logs/chanlogs/
+            directory after changing this setting, so when you next process
+            your log files, it will not be confused by the changing formats.
+            </para>
+          </warning>
+        </listitem>
+      </itemizedlist>
+
+      <para><emphasis role="bold">Changing the LogFile Format</emphasis></para>
+
+      <para>Before starting to log any channels, you should select which
+      format you wish to log in. We recomend Xchat format. To change the
+      LogType, issue the following command:</para>
+
+      <screen>/msg LogServ set logtype &#60;type&#62;</screen>
+
+      <para>Where:</para>
+
+      <para>&#60;type&#62; = The Logging format time, indicated by a number
+      from 0 to 3, representing the differnt formats available as outlined
+      above. </para>
+
+      <para>The output is as follows:</para>
+
+      <screen>&#62;logserv&#60; set logtype 3
+-LogServ- LOGTYPE set to 3</screen>
+
+      <para><emphasis role="bold">Viewing the current Logtype setting</emphasis></para>
+
+      <para>To view the current logtype selected, simple type:</para>
+
+      <screen>/msg LogServ set list</screen>
+
+      <para>And all the current settings (the rest will be explained later in
+      this document) are displayed. The output is as follows:</para>
+
+      <screen>&#62;LogServ&#60; set list
+-LogServ- Current LogServ settings:
+-LogServ- LOGTYPE: 3 Log Type
+-LogServ- LOGSIZE: 2000 Bytes
+-LogServ- LOGAGE: 3600 Seconds</screen>
+    </sect2>
+
+    <sect2>
+      <title>LOGSIZE SETTING</title>
+
+      <para>LogServ stores logs in two places on your Shell. Live logs, or
+      logs that are currently being written are stored in the
+      ~/NeoStats/logs/chanlogs/ directory, and these the logs that are
+      currently being updated. When the log reaches a certian size, or age, it
+      is closed, and moved to a the ~/NeoStats/ChanLogs/ directory where you
+      can process the log files. The LogFile size settings specifies how big a
+      &#34;live log&#34; is allowed to reach before it is moved to the final
+      directory. By default, LogServ will rotate all files larger than 1Mb,
+      and this should be satisfactory for most users. </para>
+
+      <para><emphasis role="bold">Changing the LogSize to switch at.
+      </emphasis></para>
+
+      <para>To change the size at which a logfile will switch at, use the
+      following format:</para>
+
+      <screen>/msg SecureServ set logsize &#60;bytes&#62;</screen>
+
+      <para>Where:</para>
+
+      <para>&#60;bytes&#62; = if the file is larger than this size, it is
+      &#34;swapped&#34;</para>
+
+      <para>The output is as follows:</para>
+
+      <screen>&#62;logserv&#60; set logsize 20000
+&#60;LogServ&#62; LOGSIZE set to 20000 by Fish
+-LogServ- LOGSIZE set to 20000</screen>
+
+      <para><emphasis role="bold">Viewing the current setting</emphasis></para>
+
+      <para>Please refer to the previous section.</para>
+    </sect2>
+
+    <sect2>
+      <title>LOGAGE SETTING</title>
+
+      <para>In addition to the logsize setting above, LogServ will rotate a
+      logfile after it has been opened for a period of time. This is so
+      channels that might not have much activity still get a chance to be
+      updated often.</para>
+
+      <para>The logage setting can be changed via:</para>
+
+      <screen>/msg LogServ set logage &#60;seconds&#62;</screen>
+
+      <para>Where:</para>
+
+      <para>&#60;seconds&#62; = The number of seconds the log file must be
+      opened for before rotating. Minium value is 5 minutes, but its
+      recomended not to go under 1 Hour (3600 seconds)</para>
+
+      <para>The output is as follows:</para>
+
+      <screen>&#62;LogServ&#60; set logage 7200
+&#60;LogServ&#62; LOGAGE set to 7200 by Fish
+-LogServ- LOGAGE set to 7200</screen>
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>Configuring LogServ to Log Individual Channels</title>
+
+    <para>Obviously, we dont want to log every single IRC channel on the
+    network, so you have to tell LogServ what channels you wish to Log. This
+    is fairly basic. You have 4 options:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Add A channel</para>
+      </listitem>
+
+      <listitem>
+        <para>Delete A channel</para>
+      </listitem>
+
+      <listitem>
+        <para>Change a Channels settings</para>
+      </listitem>
+
+      <listitem>
+        <para>View the Channel list. </para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Each Setting is described in the following section.</para>
+
+    <sect2>
+      <title>Adding a Channel</title>
+
+      <para>Adding a Channel to be logged is instantanous, and the channel
+      will begin logging straight after this command has complete. LogServ
+      will join the channel, but not give itself any channel modes, so the
+      channel owner can decide if it should be OP&#39;d or not. </para>
+
+      <para>The Syntax is:</para>
+
+      <screen>/msg LogServ chans add &#60;name&#62; &#60;public&#62; &#60;url&#62;</screen>
+
+      <para>Where:</para>
+
+      <para>&#60;name&#62; = The name of the channel you wish to Log. Must
+      exist on the IRC network.</para>
+
+      <para>&#60;public&#62; = Indicates weather to show the channel to
+      non-privledged users in the channel logging list or not. Either the
+      words &#34;public&#34; or &#34;private&#34;. If a invalid entry is
+      specified, defaults to Public. Currently doesn&#39;t do anything.
+      </para>
+
+      <para>&#60;url&#62; = For informational purposes only. Displays the Web
+      Address that users can visit to view the channel statistics. </para>
+
+      <para>The output is as follows:</para>
+
+      <screen>&#62;logserv&#60; chans add #ircop public http://www.neostats.net
+&#60;LogServ&#62; Fish used CHANS
+-LogServ- Stats URL is set to http://www.neostats.net
+-LogServ- Now Logging #ircop
+&#60;LogServ&#62; Fish Activated Logging on #ircop</screen>
+
+      <para>And the channel members of #ircop shall see:</para>
+
+      <screen>--&#62; LogServ (LogBot@stats.dynam.ac) has joined #ircop
+-LogServ/#ircop- Fish Actived Channel Logging on #ircop
+-LogServ/#ircop- Stats will be avaiable at http://www.neostats.net when Logs are processed next</screen>
+    </sect2>
+
+    <sect2>
+      <title>Deleting a Channel</title>
+
+      <para>Deleting a channel from LogServ means it will no longer log any
+      activity in that channel. If the channel is currently active, LogServ
+      shall part the channel, Close the &#34;live log&#34; and move it to its
+      processing directory. </para>
+
+      <para>The Syntax is:</para>
+
+      <screen>/msg LogServ chans del &#60;name&#62;</screen>
+
+      <para>Where:</para>
+
+      <para>&#60;name&#62; = The name of a channel we are currently logging.
+      </para>
+
+      <para>The output is as follows:</para>
+
+      <screen>&#62;LogServ&#60; chans del #ircop
+&#60;LogServ&#62; Fish used CHANS
+-LogServ- Deleted Channel #ircop
+&#60;LogServ&#62; Fish deleted #ircop from Channel Logging</screen>
+    </sect2>
+
+    <sect2>
+      <title>Changing Channel Settings</title>
+
+      <para>You can change the URL location displayed when viewing the channel
+      list using the chans set command. </para>
+
+      <para>The Syntax is:</para>
+
+      <screen>/msg logserv chans set  URL &#60;name&#62; &#60;newurl&#62;</screen>
+
+      <para>Where:</para>
+
+      <para>&#60;name&#62; = The channel name you wish to alter</para>
+
+      <para>&#60;newurl&#62; = The new URL you wish to set. </para>
+
+      <para>The output is as follows:</para>
+
+      <screen>&#60;LogServ&#62; Fish used CHANS
+-LogServ- Changed URL for #blah to: http://nowhere.com
+&#60;LogServ&#62; Fish changed the URL for #blah to: http://nowhere.com</screen>
+    </sect2>
+
+    <sect2>
+      <title>Viewing the Channel List</title>
+
+      <para>The channel list can be viewed by issuing the following command:</para>
+
+      <screen>/msg logserv chans list</screen>
+
+      <para>The output is as follows:</para>
+
+      <screen>-LogServ- Monitored Channel List:
+-LogServ- #blah (-) URL: http://nowhere.com
+-LogServ- #bl (-) URL: None
+-LogServ- #ircop (*) URL: http://www.neostats.net
+-LogServ- End Of List.</screen>
+
+      <para>The (-) or (*) indicate if the channel is currently active.
+      </para>
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>Misc Commands</title>
+
+    <para>There are several other commands available. These are documented
+    below:</para>
+
+    <sect2>
+      <title>STATS</title>
+
+      <para>The stats command shows some basic stats about the Logging
+      Activities. With future versions its expected the amount of information
+      will increase with this command. </para>
+
+      <para>The Syntax is:</para>
+
+      <screen>/msg LogServ stats</screen>
+
+      <para>And the output is</para>
+
+      <screen>&#60;LogServ&#62; Fish used STATS
+-LogServ- LogServ Stats:
+-LogServ- Monitoring 3 channels</screen>
+    </sect2>
+
+    <sect2>
+      <title>VERSION</title>
+
+      <para>This displays LogServ&#39;s Version number</para>
+
+      <para>The Syntax is:</para>
+
+      <screen>/msg LogServ version</screen>
+
+      <para>And the Output is:</para>
+
+      <screen>&#60;LogServ&#62; Fish used VERSION
+-LogServ- LogServ Version Information
+-LogServ- LogServ Version: $Rev: 19 $ Compiled Jan 13 2004 at 20:08:11</screen>
+    </sect2>
+
+    <sect2>
+      <title>ABOUT</title>
+
+      <para>This displays a brief message to users describing the function of
+      LogServ:</para>
+
+      <para>The Syntax is:</para>
+
+      <screen>/msg LogServ About</screen>
+
+      <para>And the output is:</para>
+
+      <screen>&#60;LogServ&#62; Fish used ABOUT
+-LogServ- LogServ logs channel activities to produce HTML pages describing some interesting Statistics
+-LogServ- about that channel. If you wish to have your channel logged, 
+-LogServ- please contact the Network Adminstration</screen>
+    </sect2>
+  </sect1>
+
+  <sect1>
+    <title>LogFile Parsers</title>
+
+    <para>As mentioned in the introduction, LogServ only generates Log files,
+    you still need to get some program to create the HTML pages from the
+    logfiles. </para>
+
+    <para>We currently recomend Onis for parsing the logfiles. You can obtain
+    a copy of Onis from http://verplant.org/onis/</para>
+
+    <para>We have provided a Sample Onis Configuration based on Onis 0.4.9,
+    and a shell script that can be executed by Crontab to process all your
+    Logfiles. This sample configuration and Shell script are installed into
+    the ~/NeoStats/ChanLogs/ directory by default.</para>
+
+    <para>This shell script will automatically go through each of the channels
+    logs running Onis to update the HTML pages. At the top of the script are
+    some variables that should be setup to configure where you wish to place
+    the resultant HTML files, and where Onis is installed. You should read the
+    begining of the file OnisDoLogs.sh to figure out what needs to be
+    configured.</para>
+
+    <para>This shell script assumes that you have a webserver on the same
+    shell as NeoStats. If not, its upto the reader to implement some sort of
+    FTP/SCP script to transfer either the logfiles, or the output from Onis to
+    his webserver. </para>
+
+    <para>Additionally, if you are using a different LogFile parser, other
+    than Onis, you will have to develop your own script or method for updating
+    the HTML pages. If you do develop a script for another Logfile Processor,
+    please send us a copy, so we may include it in future versions. </para>
+
+    <para>The logs for each channel are placed into their own directory within
+    the ChanLogs directory, so if you are logging #neostats, The logfiles
+    would be placed in ChanLogs/#neostats. </para>
+
+    <warning>
+      <para># is a special charactor on most shells and needs to be escaped.
+      So if you wish to change directory to #neostats, you would actually type
+      cd \#neostats. Keep this in mind when developing any scripts. </para>
+    </warning>
+
+    <para>Each Logfile is timestamped with the time it was rotated out of the
+    logs/chanlogs/ directory, with the format &#60;name&#62;-YYMMDDHHMMSS.log</para>
+  </sect1>
+</article>

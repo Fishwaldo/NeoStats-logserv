@@ -252,6 +252,10 @@ void lgs_switch_file(ChannelLog *cl) {
 	char savedir[MAXPATH];
 	int res;
 
+	if (!(cl->flags & LGSFDOPENED)) {
+		/* no need to switch, its not opened */
+		return;
+	}
 	/* close the logfile */
 	fclose(cl->logfile);
 	cl->fdopened = 0;
@@ -275,9 +279,7 @@ void lgs_switch_file(ChannelLog *cl) {
 			nlog(LOG_CRITICAL, LOG_MOD, "Stat Returned A error: %s", strerror(errno));
 			return;
 		}
-	}
-	/* is it a directory ? */
-	if (!S_ISDIR(st.st_mode))	{
+	} else if (!S_ISDIR(st.st_mode))	{
 		nlog(LOG_CRITICAL, LOG_MOD, "%s is not a Directory", savedir);
 		return;
 	}

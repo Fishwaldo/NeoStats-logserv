@@ -250,7 +250,7 @@ static int lgs_Online(char **av, int ac)
 				cl->flags &= ~LGSFDNEEDFLUSH;
 				cl->flags &= ~LGSFDOPENED;
 			}
-			if (GetData((void *)&tmp, CFGSTR, "Chans", cl->channame, "URL") == 0) {
+			if (GetData((void *)&tmp, CFGSTR, "Chans", cl->channame, "URL") < 0) {
 				cl->statsurl[0] = '\0';
 			} else {
 				strlcpy(cl->statsurl, tmp, MAXPATH);
@@ -497,7 +497,7 @@ static int lgs_chans(User * u, char **av, int ac) {
 			cl = hnode_get(hn);
 			if ((cl->flags & LGSPUBSTATS) || (UserLevel(u) >= NS_ULEVEL_LOCOPER)) {
 				/* its a priv channel, only show to opers */
-				prefmsg(u->nick, s_LogServ, "%s (%c) URL: %s", cl->channame, (cl->flags & LGSACTIVE) ? '*' : '-', cl->statsurl ? cl->statsurl : "None");
+				prefmsg(u->nick, s_LogServ, "%s (%c) URL: %s", cl->channame, (cl->flags & LGSACTIVE) ? '*' : '-', (cl->statsurl[0] != 0) ? cl->statsurl : "None");
 			}							
 		}
 		prefmsg(u->nick, s_LogServ, "End Of List.");				
@@ -508,27 +508,31 @@ static int lgs_chans(User * u, char **av, int ac) {
 			prefmsg(u->nick, s_LogServ, "/msg %s HELP CHANS for more information", s_LogServ);
 			return NS_FAILURE;
 		}
-		cl = lgs_findactchanlog(findchan(av[3]));
+		hn = hash_lookup(lgschans, av[3]);
+		if (hn) {
+			cl = hnode_get(hn);
+		} else {
+			prefmsg(u->nick, s_LogServ, "Can not find channel %s in Logging System", av[3]);
+			return NS_FAILURE;
+		}
 		if (!cl) {
 			prefmsg(u->nick, s_LogServ, "Can not find Channel %s in Logging System", av[3]);
 			return NS_FAILURE;
 		}
 		/* rotate out the file */
 		
-		lgs_switch_file(cl);
-		cl->c->moddata[LogServ.modnum] = NULL;
-		hn = hash_lookup(lgschans, cl->channame);
-		if (hn) {
-			hash_delete(lgschans, hn);
-			hnode_destroy(hn);
-			spart_cmd(s_LogServ, cl->channame);
-			free(cl);
-			DelRow("Chans", av[3]);
-		} else {
-			nlog(LOG_CRITICAL, LOG_MOD, "Ekk. Can't find channel in logserv hash");
-			prefmsg(u->nick, s_LogServ, "Internal Error, Please Consult LogFile");
-			return NS_FAILURE;
+		if (cl->flags & LGSACTIVE) {
+			lgs_switch_file(cl);
 		}
+		if (cl->c) {
+			cl->c->moddata[LogServ.modnum] = NULL;
+		}
+		hash_delete(lgschans, hn);
+		hnode_destroy(hn);
+		spart_cmd(s_LogServ, cl->channame);
+		SET_SEGV_INMODULE(__module_info.module_name);
+		free(cl);
+		DelRow("Chans", av[3]);
 		prefmsg(u->nick, s_LogServ, "Deleted Channel %s", av[3]);
 		chanalert(s_LogServ, "%s deleted %s from Channel Logging", u->nick, av[3]);
 		return NS_SUCCESS;
@@ -546,9 +550,15 @@ static int lgs_chans(User * u, char **av, int ac) {
 			prefmsg(u->nick, s_LogServ, "/msg %s HELP CHANS for more information", s_LogServ);
 			return NS_FAILURE;
 		}
-		cl = lgs_findactchanlog(findchan(av[4]));
+		hn = hash_lookup(lgschans, av[4]);
+		if (hn) {
+			cl = hnode_get(hn);
+		} else {
+			prefmsg(u->nick, s_LogServ, "Can not find channel %s in Logging System", av[3]);
+			return NS_FAILURE;
+		}
 		if (!cl) {
-			prefmsg(u->nick, s_LogServ, "Can't find Channel %s", av[4]);
+			prefmsg(u->nick, s_LogServ, "Can not find Channel %s in Logging System", av[3]);
 			return NS_FAILURE;
 		}
 		if (!strcasecmp(av[3], "URL")) {
