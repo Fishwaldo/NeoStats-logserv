@@ -114,7 +114,9 @@ int __ChanMessage(char *origin, char **argv, int argc)
 	char **data;
 	int datasize = 0;
 	char *buf;
-	
+
+	SET_SEGV_INMODULE(__module_info.module_name);
+		
 	c = findchan(chan);
 	if (c && c->moddata[LogServ.modnum]) {
 		cl = c->moddata[LogServ.modnum];
@@ -388,6 +390,12 @@ int __ModInit(int modnum, int apiver)
 	if (GetConf((void *)&LogServ.logtype, CFGINT, "LogType") < 0) {
 		LogServ.logtype = 0;
 	} 
+
+	/*XXX TODO */
+	ircsnprintf(LogServ.logdir, MAXPATH, "logs/chanlogs");
+	ircsnprintf(LogServ.savedir, MAXPATH, "ChanLogs");
+	LogServ.maxlogsize = 2000;
+		
 	LogServ.modnum = modnum;
 	return 1;
 }

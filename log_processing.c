@@ -26,36 +26,240 @@
  */
 
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include "dl.h"       /* Required for module */
 #include "stats.h"    /* Required for bot support */
 #include "log.h"      /* Log systems support */
 #include "conf.h"     /* GetConf support */
 #include "logserv.h"  /* LogServ Definitions */
 
+/* only check logfile size every X calls */
+#ifdef DEBUG
+#define DOSIZE 1
+#else 
+#define DOSIZE 50
+#endif
+
+
 char timebuf[TIMEBUFSIZE];
 char startlog[BUFSIZE];
 
 static void lgs_write_log(ChannelLog *cl, char *fmt, ...) __attribute__((format(printf,2,3)));
+static int lgs_open_log(ChannelLog *cl);
+static void lgs_stat_file(ChannelLog *cl);
+static void lgs_switch_file(ChannelLog *cl);
 
+static char *dirc_startlog(ChannelLog *cl);
+static char *mirc_startlog(ChannelLog *cl);
+static char *egg_startlog(ChannelLog *cl);
+static char *xchat_startlog(ChannelLog *cl);
 
+/* This was taken from DircProxy 
+ * but is actually a pretty handy function. 
+ * maybe it should go in the core? 
+ */
+
+#ifndef safe_channame
+
+/* Make the name of a logfile safe */
+
+static char *_irclog_safe(char *name) {
+  char *ptr;
+
+  /* Channel names are allowed to contain . and / according to the IRC
+     protocol.  These are nasty as it means someone could theoretically
+     create a channel called #/../../etc/passwd and the program would try
+     to unlink "/tmp/#/../../etc/passwd" = "/etc/passwd".  If running as root
+     this could be bad.  So to compensate we replace '/' with ':' as thats not
+     valid in channel names. */
+  ptr = name;
+  while (*ptr) {
+    switch (*ptr) {
+      case '/':
+        *ptr = ':';
+        break;
+    }
+
+    ptr++;
+  }
+
+  return name;
+}
+
+#define safe_channame(x) _irclog_safe(x) 
+#endif
 
 static void lgs_write_log(ChannelLog *cl, char *fmt, ...) {
 	va_list ap;
 	char log_buf[BUFSIZE];
 	
+	/* format the string to write */
         va_start (ap, fmt);
         ircvsnprintf (log_buf, BUFSIZE, fmt, ap);
         va_end (ap);
-	                                                
-	printf("%s", log_buf);
-
+	                                
+	/* if the FD isn't opened yet, lets open a log file */
+	if (!(cl->flags & LGSFDOPENED)) {
+		if (!lgs_open_log(cl)) {
+			return;
+		}
+		/* ok, we just opened the file, write the start out */
+		switch (LogServ.logtype) {
+			case 0:
+				fprintf(cl->logfile, "%s", dirc_startlog(cl));
+				break;
+			case 1:
+				fprintf(cl->logfile, "%s", egg_startlog(cl));
+				break;
+			case 2:
+				fprintf(cl->logfile, "%s", mirc_startlog(cl));
+				break;
+			case 3:
+				fprintf(cl->logfile, "%s", xchat_startlog(cl));
+				break;
+			default:
+				nlog(LOG_WARNING, LOG_MOD, "Unknown LogType");
+		}
+	}
+	/* ok, file is opened. write the string to it */
+	fprintf(cl->logfile, "%s", log_buf);
+	cl->dostat++;
+#ifdef DEBUG
+	/* only flush the logfile in debug mode */
+	fflush(cl->logfile);
+#endif
+	/* ok, now stat the file to check size */
+	if (cl->dostat >= DOSIZE) { 
+		fflush(cl->logfile);
+		lgs_stat_file(cl);
+	}
 }
 
+static int lgs_open_log(ChannelLog *cl) {
+	struct stat st;
+	int res;
+	char fname[MAXPATH];
+
+	/* first, make sure the logdir dir exists */
+	res = stat(LogServ.logdir, &st);
+	if (res != 0) {
+		/* hrm, error */
+		if (errno == ENOENT) {
+			/* ok, it doesn't exist, create it */
+			res = mkdir(LogServ.logdir, 0700);
+			if (res != 0) {
+				/* error */
+				nlog(LOG_CRITICAL, LOG_MOD, "Couldn't create LogDir Directory: %s", strerror(errno));
+				return NS_FAILURE;
+			}
+			nlog(LOG_NOTICE, LOG_MOD, "Created Channel Logging Dir %s", LogServ.logdir);
+			return NS_SUCCESS;
+		} else {
+			nlog(LOG_CRITICAL, LOG_MOD, "Stat Returned A error: %s", strerror(errno));
+			return NS_FAILURE;
+		}
+	}
+	/* is it a directory ? */
+	if (!S_ISDIR(st.st_mode))	{
+		nlog(LOG_CRITICAL, LOG_MOD, "%s is not a Directory", LogServ.logdir);
+		return NS_FAILURE;
+	}
+	
+	/* copy name to the filename holder (in case of invalid paths) */
+	strlcpy(cl->filename, cl->channame, MAXPATH);
+	ircsnprintf(fname, MAXPATH, "%s/%s.log", LogServ.logdir, safe_channame(cl->filename));
+
+	/* open the file */
+	cl->logfile = fopen(fname, "a");
+	if (!cl->logfile) {
+		nlog(LOG_CRITICAL, LOG_MOD, "Could not open %s for Appending: %s", cl->filename, strerror(errno));
+		return NS_FAILURE;
+	}
+	nlog(LOG_DEBUG1, LOG_MOD, "Opened %s for Appending", cl->filename);
+	/* set hte flag */
+	cl->flags |= LGSFDOPENED;
+	return NS_SUCCESS;
+}
+
+static void lgs_stat_file(ChannelLog *cl) {
+	struct stat st;
+	int res;
+	char fname[MAXPATH];
+	
+	/* reset this counter */
+	cl->dostat = 0;
+	/* construct the filename to stat */
+	ircsnprintf(fname, MAXPATH, "%s/%s.log", LogServ.logdir, cl->filename);
+	res = stat(fname, &st);
+	if (res != 0) {
+		if (errno == ENOENT) {
+			/* wtf, this is bad */
+			nlog(LOG_CRITICAL, LOG_MOD, "LogFile went away: %s", fname);
+			return;
+		} else {
+			nlog(LOG_CRITICAL, LOG_MOD, "Logfile Error: %s", strerror(errno));
+			return;
+		}
+	}
+	nlog(LOG_DEBUG1, LOG_MOD, "Logfile Size of %s is %d", fname, st.st_size);
+	if (st.st_size > LogServ.maxlogsize) {
+		nlog(LOG_DEBUG1, LOG_MOD, "Switching Logfile %s", fname);
+		/* ok, the file exceeds out limits, lets switch it */
+		lgs_switch_file(cl);
+	}
+}
+
+static void lgs_switch_file(ChannelLog *cl) {
+	struct stat st;
+	char tmbuf[MAXPATH];
+	char newfname[MAXPATH];
+	char oldfname[MAXPATH];
+	int res;
+
+	/* close the logfile */
+	fclose(cl->logfile);
+	cl->flags &= ~ LGSFDOPENED;
+	
+	/* check if the target directory exists */
+	res = stat(LogServ.savedir, &st);
+	if (res != 0) {
+		/* hrm, error */
+		if (errno == ENOENT) {
+			/* ok, it doesn't exist, create it */
+			res = mkdir(LogServ.savedir, 0700);
+			if (res != 0) {
+				/* error */
+				nlog(LOG_CRITICAL, LOG_MOD, "Couldn't create LogDir Directory: %s", strerror(errno));
+				return;
+			}
+			nlog(LOG_NOTICE, LOG_MOD, "Created Channel Logging Dir %s", LogServ.savedir);
+		} else {
+			nlog(LOG_CRITICAL, LOG_MOD, "Stat Returned A error: %s", strerror(errno));
+			return;
+		}
+	}
+	/* is it a directory ? */
+	if (!S_ISDIR(st.st_mode))	{
+		nlog(LOG_CRITICAL, LOG_MOD, "%s is not a Directory", LogServ.savedir);
+		return;
+	}
+	strftime(tmbuf, MAXPATH, "%d%m%Y%H%M%S", localtime(&me.now));
+	ircsnprintf(newfname, MAXPATH, "%s/%s-%s.log", LogServ.savedir, cl->filename, tmbuf);
+	ircsnprintf(oldfname, MAXPATH, "%s/%s.log", LogServ.logdir, cl->filename);
+	res = rename(oldfname, newfname);
+	if (res != 0) {
+		nlog(LOG_CRITICAL, LOG_MOD, "Couldn't Rename file %s: %s", oldfname, strerror(errno));
+	}	
+}
 static void lgs_close_logs() {
 
 }
 
-
+char *dirc_startlog(ChannelLog *chandata) {
+	return startlog;
+}
 
 
 int dirc_joinproc(ChannelLog *chandata, char **av, int ac) {
@@ -350,11 +554,11 @@ int xchat_partproc(ChannelLog *chandata, char **av, int ac) {
 
 /* Jan 02 17:25:43 <SecureServ>    Akilling jojo!~jojo@pD9E60152.dip.t-dialin.net for Virus IRCORK */
 
-#define XMSGFMT "%s <%s>\t %s\n"
+#define XMSGFMT "%s <%s>\t%s\n"
 
 /* Action: 
  * Jan 02 17:28:52 *       Fish-Away sighs */
-#define XACTFMT "%s *\t %s %s\n"
+#define XACTFMT "%s *\t%s %s\n"
 
 int xchat_msgproc(ChannelLog *chandata, char **av, int ac) {
 	if (ac == 3) {
@@ -365,7 +569,7 @@ int xchat_msgproc(ChannelLog *chandata, char **av, int ac) {
 	return NS_SUCCESS;
 }
 /* Jan 02 17:47:26 <--     Dirk-Digler has quit (Killed (Fish (get lost))) */
-#define XQUITFMT "%s <--\t %s has quit (%s)\n"
+#define XQUITFMT "%s <--\t%s has quit (%s)\n"
 
 int xchat_quitproc(ChannelLog *chandata, char **av, int ac) {
 	lgs_write_log(chandata, XQUITFMT, xchat_time(), av[0], ac == 2 ? av[1] : "");
@@ -373,7 +577,7 @@ int xchat_quitproc(ChannelLog *chandata, char **av, int ac) {
 }
 
 /* Jan 02 17:48:12 ---     Digi|Away has changed the topic to: FREE PORN - DETAILS INSIDE */
-#define XTOPICPROC "%s ---\t %s has changed the topic to: %s\n"
+#define XTOPICPROC "%s ---\t%s has changed the topic to: %s\n"
 
 int xchat_topicproc(ChannelLog *chandata, char **av, int ac) {
 	lgs_write_log(chandata, XTOPICPROC, xchat_time(), av[1], ac == 3 ? av[2] : "");

@@ -44,9 +44,11 @@ typedef struct CL_ {
 	char channame[CHANLEN];
 	Chans *c;
 	FILE *logfile;
+	char filename[MAXPATH];
 	unsigned long flags;
 	char statsurl[MAXPATH];
 	time_t fdopened;
+	int dostat;
 } ChannelLog;
 
 
@@ -54,6 +56,9 @@ typedef struct CL_ {
 struct LogServ {
 	int logtype;
 	int modnum;
+	char logdir[MAXPATH];
+	char savedir[MAXPATH];
+	long maxlogsize;
 } LogServ;
 
 /* Definitions for flags */
