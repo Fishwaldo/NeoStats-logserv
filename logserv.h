@@ -1,8 +1,6 @@
 /* NeoStats - IRC Statistical Services 
-** Copyright (c) 1999-2004 Adam Rutter, Justin Hammond
+** Copyright (c) 1999-2004 Adam Rutter, Justin Hammond, Mark Hetherington
 ** http://www.neostats.net/
-**
-**  Portions Copyright (c) 2000-2001 ^Enigma^
 **
 **  This program is free software; you can redistribute it and/or modify
 **  it under the terms of the GNU General Public License as published by
@@ -88,57 +86,24 @@ typedef struct logtype_proc {
 	log_proc *modeproc;
 } logtype_proc;
 
-
 /* log_procssing.c decl */
-
-
-int logserv_joinproc(ChannelLog *chandata, CmdParams* cmdparams);
-int logserv_partproc(ChannelLog *chandata, CmdParams* cmdparams);
-int logserv_msgproc(ChannelLog *chandata, CmdParams* cmdparams);
-int logserv_quitproc(ChannelLog *chandata, CmdParams* cmdparams);
-int logserv_topicproc(ChannelLog *chandata, CmdParams* cmdparams);
-int logserv_kickproc(ChannelLog *chandata, CmdParams* cmdparams);
-int logserv_nickproc(ChannelLog *chandata, CmdParams* cmdparams);
-int logserv_modeproc(ChannelLog *chandata, CmdParams* cmdparams);
-int egg_joinproc(ChannelLog *chandata, CmdParams* cmdparams);
-int egg_partproc(ChannelLog *chandata, CmdParams* cmdparams);
-int egg_msgproc(ChannelLog *chandata, CmdParams* cmdparams);
-int egg_quitproc(ChannelLog *chandata, CmdParams* cmdparams);
-int egg_topicproc(ChannelLog *chandata, CmdParams* cmdparams);
-int egg_kickproc(ChannelLog *chandata, CmdParams* cmdparams);
-int egg_nickproc(ChannelLog *chandata, CmdParams* cmdparams);
-int egg_modeproc(ChannelLog *chandata, CmdParams* cmdparams);
-int mirc_joinproc(ChannelLog *chandata, CmdParams* cmdparams);
-int mirc_partproc(ChannelLog *chandata, CmdParams* cmdparams);
-int mirc_msgproc(ChannelLog *chandata, CmdParams* cmdparams);
-int mirc_quitproc(ChannelLog *chandata, CmdParams* cmdparams);
-int mirc_topicproc(ChannelLog *chandata, CmdParams* cmdparams);
-int mirc_kickproc(ChannelLog *chandata, CmdParams* cmdparams);
-int mirc_nickproc(ChannelLog *chandata, CmdParams* cmdparams);
-int mirc_modeproc(ChannelLog *chandata, CmdParams* cmdparams);
-int xchat_joinproc(ChannelLog *chandata, CmdParams* cmdparams);
-int xchat_partproc(ChannelLog *chandata, CmdParams* cmdparams);
-int xchat_msgproc(ChannelLog *chandata, CmdParams* cmdparams);
-int xchat_quitproc(ChannelLog *chandata, CmdParams* cmdparams);
-int xchat_topicproc(ChannelLog *chandata, CmdParams* cmdparams);
-int xchat_kickproc(ChannelLog *chandata, CmdParams* cmdparams);
-int xchat_nickproc(ChannelLog *chandata, CmdParams* cmdparams);
-int xchat_modeproc(ChannelLog *chandata, CmdParams* cmdparams);
-
+int lgs_send_to_logproc (logmsgtype msgtype, ChannelLog *lgschan, CmdParams* cmdparams);
 int lgs_RotateLogs(void);
 void lgs_close_logs();
 void lgs_switch_file(ChannelLog *cl);
+void lgs_write_log(ChannelLog *cl, char *fmt, ...) __attribute__((format(printf,2,3)));
 
-extern const char lgs_help_version_oneline[];
 extern const char lgs_help_chan_oneline[];
 extern const char lgs_help_stats_oneline[];
 extern const char *ls_about[];
 extern const char *lgs_help_chan[];
 extern const char *lgs_help_stats[];
-extern const char *lgs_help_version[];
 extern const char *lgs_help_set_logtype[];
 extern const char *lgs_help_set_logsize[];
 extern const char *lgs_help_set_logtime[];
+
+extern char timebuf[TIMEBUFSIZE];
+extern char startlog[BUFSIZE];
 
 extern Module *lgs_module;
 

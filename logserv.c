@@ -1,5 +1,5 @@
 /* NeoStats - IRC Statistical Services 
-** Copyright (c) 1999-2004 Justin Hammond
+** Copyright (c) 1999-2004 Adam Rutter, Justin Hammond, Mark Hetherington
 ** http://www.neostats.net/
 **
 **  This program is free software; you can redistribute it and/or modify
@@ -35,18 +35,9 @@ Module *lgs_module;
 /* forward decl */
 static int lgs_chans (CmdParams* cmdparams);
 static int lgs_stats (CmdParams* cmdparams);
-static int lgs_send_to_logproc (logmsgtype msgtype, ChannelLog *lgschan, CmdParams* cmdparams);
 static void lgs_save_channels_data(ChannelLog *cl);
 ChannelLog *lgs_newchanlog(CmdParams* cmdparams);
 ChannelLog *lgs_findactchanlog(Channel *c);
-
-logtype_proc logging_funcs[] = {
-	{logserv_joinproc, logserv_partproc, logserv_msgproc, logserv_quitproc, logserv_topicproc, logserv_kickproc, logserv_nickproc, logserv_modeproc},
-	{egg_joinproc, egg_partproc, egg_msgproc, egg_quitproc, egg_topicproc, egg_kickproc, egg_nickproc, egg_modeproc},
-	{mirc_joinproc, mirc_partproc, mirc_msgproc, mirc_quitproc, mirc_topicproc, mirc_kickproc, mirc_nickproc, mirc_modeproc},
-	{xchat_joinproc, xchat_partproc, xchat_msgproc, xchat_quitproc, xchat_topicproc, xchat_kickproc, xchat_nickproc, xchat_modeproc},
-};
-
 
 /** Copyright info */
 const char *ls_copyright[] = {
@@ -65,7 +56,7 @@ ModuleInfo module_info = {
 	ls_copyright,
 	ls_about,
 	NEOSTATS_VERSION,
-	CORE_MODULE_VERSION,
+	MODULE_VERSION,
 	__DATE__,
 	__TIME__,
 	0,
@@ -89,7 +80,8 @@ bot_setting lgs_settings[]=
 	NS_ULEVEL_ADMIN,
 	"LogType",
 	"Log Type",
-	lgs_help_set_logtype },
+	lgs_help_set_logtype,
+	NULL, (void*)1},
 	{"LOGSIZE",		
 	&LogServ.maxlogsize,	
 	SET_TYPE_INT,	
@@ -98,7 +90,8 @@ bot_setting lgs_settings[]=
 	NS_ULEVEL_ADMIN,
 	"LogSwitchSize",
 	"Bytes",
-	lgs_help_set_logsize },
+	lgs_help_set_logsize,
+	NULL, (void*)1000000},
 	{"LOGAGE",		
 	&LogServ.maxopentime,	
 	SET_TYPE_INT,	
@@ -107,56 +100,43 @@ bot_setting lgs_settings[]=
 	NS_ULEVEL_ADMIN,
 	"LogSwitchTime",
 	"Seconds",
-	lgs_help_set_logtime },
+	lgs_help_set_logtime ,
+	NULL, (void*)3600},
 	{NULL,			NULL,			0,		0, 	0,	0,			NULL,		NULL,		NULL },
 };
 
-/** Channel message processing
- * What do we do with messages in channes
- * This is required if you want your module to respond to channel messages
- */
-#if 0 //temp
-int __ChanMessage(char *origin, char **argv, int argc)
+static int lgs_event_cprivate (CmdParams* cmdparams) 
 {
-	char *chan = argv[0]; 
-	Channel *c;
 	ChannelLog *cl;
-	char **data;
-	int datasize = 0;
-	char *buf;
-
-	if (argc <= 1) {
-		return NS_FAILURE;
-	}
-		
-	c = find_chan (chan);
-	if (c && c->moddata[lgs_module->modnum]) {
-		cl = c->moddata[lgs_module->modnum];
-		AddStringToList(&data, origin, &datasize);
-		if (argv[1][0] == '\1') {
+	if (cmdparams->channel->moddata[lgs_module->modnum]) {
+		cl = cmdparams->channel->moddata[lgs_module->modnum];
+/*		if (argv[1][0] == '\1') {
 			AddStringToList(&data, argv[1], &datasize);
 			buf = joinbuf(argv, argc, 2);
-		} else {
-			buf = joinbuf(argv, argc, 1);
-		}
-		strip_mirc_codes(buf);
-		AddStringToList(&data, buf, &datasize);
-		lgs_send_to_logproc(LGSMSG_MSG, cl, data, datasize);		
-		free(data);
+		} else {*/
+		lgs_send_to_logproc(LGSMSG_MSG, cl, cmdparams);		
 	}
 	return 1;
 }
-#endif
+
+static int lgs_event_cnotice (CmdParams* cmdparams) 
+{
+	ChannelLog *cl;
+	if (cmdparams->channel->moddata[lgs_module->modnum]) {
+		cl = cmdparams->channel->moddata[lgs_module->modnum];
+/*		if (argv[1][0] == '\1') {
+			AddStringToList(&data, argv[1], &datasize);
+			buf = joinbuf(argv, argc, 2);
+		} else {*/
+		lgs_send_to_logproc(LGSMSG_MSG, cl, cmdparams);		
+	}
+	return 1;
+}
 
 static int lgs_event_part (CmdParams* cmdparams) 
 {
 	ChannelLog *cl;
 	
-	/* this function is called recursively, so ignore parts by LogServ */
-	if (!strcasecmp(cmdparams->source->name, lgs_bot->name)) {
-		return NS_FAILURE;
-	}
-
 	if ((cl = lgs_findactchanlog(cmdparams->channel)) != NULL) {
 		/* process the part message now */
 		lgs_send_to_logproc(LGSMSG_PART, cl, cmdparams);	
@@ -178,15 +158,8 @@ static int lgs_event_part (CmdParams* cmdparams)
 static int lgs_event_join (CmdParams* cmdparams) 
 {
 	ChannelLog *cl;
-	
-	if (!strcasecmp(cmdparams->source->name, lgs_bot->name)) {
-		/* its me, so ignore */
-		return NS_FAILURE;
-	}
-	
 	if ((cl = lgs_findactchanlog(cmdparams->channel)) != NULL) {
 		lgs_send_to_logproc(LGSMSG_JOIN, cl, cmdparams);
-		return NS_SUCCESS;
 	}	
 	return NS_SUCCESS;
 }
@@ -194,19 +167,14 @@ static int lgs_event_join (CmdParams* cmdparams)
 static int lgs_event_newchan (CmdParams* cmdparams) 
 {
 	ChannelLog *cl;
-	hnode_t *cn;
 
-	cn = hash_lookup(lgschans, cmdparams->channel);
-	if (!cn) 
-		return NS_FAILURE;
-		
-	cl = hnode_get(cn);
+	cl = (ChannelLog *)hnode_find (lgschans, cmdparams->channel);
 	if (cmdparams->channel && cl) {
 		if (irc_join (lgs_bot, cl->channame, 0) == NS_SUCCESS) {
 			cl->flags |= LGSACTIVE;
 			nlog (LOG_NOTICE, "Actived Logging on channel %s", cl->channame);
 			if (cl->statsurl[0] != '\0') {
-				irc_chanprivmsg (lgs_bot, cl->channame, "Stats will be avaiable at %s when Logs are processed next", cl->statsurl);
+				irc_chanprivmsg (lgs_bot, cl->channame, "Stats will be available at %s when Logs are processed next", cl->statsurl);
 			}	
 		}
 		cmdparams->channel->moddata[lgs_module->modnum] = cl;
@@ -293,11 +261,6 @@ static int lgs_event_kick(CmdParams* cmdparams)
 {
 	ChannelLog *cl;
 
-	if (!strcasecmp(cmdparams->source->name, lgs_bot->name)) {
-		/* its me, so ignore */
-		return NS_FAILURE;
-	}
-	
 	if ((cl = lgs_findactchanlog(cmdparams->channel)) != NULL) {
 		lgs_send_to_logproc(LGSMSG_KICK, cl, cmdparams);
 		if (cl->c->users == 2) {
@@ -319,11 +282,6 @@ static int lgs_event_topic(CmdParams* cmdparams)
 {
 	ChannelLog *cl;
 
-	if (!strcasecmp(cmdparams->source->name, lgs_bot->name)) {
-		/* its me, so ignore */
-		return NS_FAILURE;
-	}
-	
 	if ((cl = lgs_findactchanlog(cmdparams->channel)) != NULL) {
 		lgs_send_to_logproc(LGSMSG_TOPIC, cl, cmdparams);
 		return NS_SUCCESS;
@@ -336,41 +294,30 @@ static int lgs_event_nick(CmdParams* cmdparams)
 	ChannelLog *cl;
 	lnode_t *cm;
 
-	if (!strcasecmp(cmdparams->source->name, lgs_bot->name)) {
-		/* its me, so ignore */
-		return NS_FAILURE;
-	}
-
 	/* ok, move through each of the channels */
 	cm = list_first (cmdparams->source->user->chans);
 	while (cm) {
-		if ((cl = lgs_findactchanlog(find_chan (lnode_get (cm)))) != NULL) {
+		Channel *c;
+		c = find_chan (lnode_get (cm));
+		if (c && (cl = lgs_findactchanlog(c)) != NULL) 
+		{
 			lgs_send_to_logproc(LGSMSG_NICK, cl, cmdparams);
-                }
-                cm = list_next (cmdparams->source->user->chans, cm);
+		}
+        cm = list_next (cmdparams->source->user->chans, cm);
 	}
 	return NS_SUCCESS;
 }
 
-/* damn, 2.5.11 doesn't have a chan mode event. Duh! */
-#ifdef EVENT_CHANMODE
 static int lgs_event_cmode(CmdParams* cmdparams) 
 {
 	ChannelLog *cl;
 
-	if (!strcasecmp(cmdparams->source->name, lgs_bot->name)) {
-		/* its me, so ignore */
-		return NS_FAILURE;
-	}
-	
 	if ((cl = lgs_findactchanlog(cmdparams->channel)) != NULL) {
 		lgs_send_to_logproc(LGSMSG_CHANMODE, cl, cmdparams);
 		return NS_SUCCESS;
 	}	
 	return NS_SUCCESS;
 }
-#endif
-
 
 /** Module event list
  * What events we will act on
@@ -379,15 +326,15 @@ static int lgs_event_cmode(CmdParams* cmdparams)
  */
 ModuleEvent module_events[] = 
 {
-	{EVENT_NEWCHAN, lgs_event_newchan},
-	{EVENT_JOIN, lgs_event_join,	EVENT_FLAG_EXCLUDE_ME},
-	{EVENT_PART, lgs_event_part},
-	{EVENT_KICK, lgs_event_kick},
-	{EVENT_TOPIC, lgs_event_topic},
-	{EVENT_NICK, lgs_event_nick},
-#ifdef EVENT_CHANMODE
-	{EVENT_CHANMODE, lgs_event_cmode},
-#endif
+	{EVENT_CPRIVATE,	lgs_event_cprivate},
+	{EVENT_CNOTICE,		lgs_event_cnotice},
+	{EVENT_NEWCHAN,		lgs_event_newchan},
+	{EVENT_JOIN,		lgs_event_join,		EVENT_FLAG_EXCLUDE_MODME},
+	{EVENT_PART,		lgs_event_part,		EVENT_FLAG_EXCLUDE_MODME},
+	{EVENT_KICK,		lgs_event_kick,		EVENT_FLAG_EXCLUDE_MODME},
+	{EVENT_TOPIC,		lgs_event_topic,	EVENT_FLAG_EXCLUDE_MODME},
+	{EVENT_NICK,		lgs_event_nick,		EVENT_FLAG_EXCLUDE_MODME},
+	{EVENT_CHANMODE,	lgs_event_cmode,	EVENT_FLAG_EXCLUDE_MODME},
 	{EVENT_NULL, NULL}
 };
 
@@ -404,21 +351,19 @@ int ModInit (Module *mod_ptr)
 	ircsnprintf(LogServ.logdir, MAXPATH, "logs/chanlogs");
 	ircsnprintf(LogServ.savedir, MAXPATH, "ChanLogs");
 	lgs_module = mod_ptr;
-	return 1;
+	return NS_SUCCESS;
 }
 
 /** Init module
  * This is required if you need to do cleanup of your module when it ends
  */
-void __ModFini()
+void ModFini()
 {
 	/* close the log files */
 	lgs_close_logs();
 	
 	/* delete the hash */
 	hash_destroy(lgschans);
-
-
 };
 
 /* ok, now here are logservs functions */
@@ -536,48 +481,6 @@ static int lgs_stats(CmdParams* cmdparams)
 	irc_prefmsg (lgs_bot, cmdparams->source, "LogServ Stats:");
 	irc_prefmsg (lgs_bot, cmdparams->source, "Monitoring %d channels", (int)hash_count(lgschans));
 	return NS_SUCCESS;
-}
-
-
-/* @breif Send the Log Message to the relevent Log Processor 
- *
- * @param msgtype the type of message (join, part etc)
- * @param av contents of the message 
- * @param ac message size 
- * @returns NS_SUCCESS or NS_FAILURE
- */
-static int lgs_send_to_logproc( logmsgtype msgtype, ChannelLog *lgschan, CmdParams* cmdparams) {
-	switch (msgtype) {
-		case 0:
-			return logging_funcs[LogServ.logtype].joinproc(lgschan, cmdparams);
-			break;
-		case 1:
-			return logging_funcs[LogServ.logtype].partproc(lgschan, cmdparams);
-			break;
-		case 2:
-			return logging_funcs[LogServ.logtype].msgproc(lgschan, cmdparams);
-			break;
-		case 3:
-			return logging_funcs[LogServ.logtype].quitproc(lgschan, cmdparams);
-			break;
-		case 4: 
-			return logging_funcs[LogServ.logtype].topicproc(lgschan, cmdparams);
-			break;
-		case 5:
-			return logging_funcs[LogServ.logtype].kickproc(lgschan, cmdparams);
-			break;
-		case 6:
-			return logging_funcs[LogServ.logtype].nickproc(lgschan, cmdparams);
-			break;
-		case 7:
-			return logging_funcs[LogServ.logtype].modeproc(lgschan, cmdparams);
-			break;
-		default:
-			nlog (LOG_WARNING, "Unknown msgtype %d", msgtype);
-			return NS_FAILURE;
-			break;
-	}	
-	return NS_FAILURE;
 }
 
 

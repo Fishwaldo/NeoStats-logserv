@@ -1,10 +1,6 @@
 /* NeoStats - IRC Statistical Services 
-** Copyright (c) 1999-2004 Adam Rutter, Justin Hammond
+** Copyright (c) 1999-2004 Adam Rutter, Justin Hammond, Mark Hetherington
 ** http://www.neostats.net/
-**
-**  Portions Copyright (c) 2000-2001 ^Enigma^
-**
-**  Portions Copyright (c) 1999 Johnathan George net@lite.net
 **
 **  This program is free software; you can redistribute it and/or modify
 **  it under the terms of the GNU General Public License as published by
@@ -27,7 +23,6 @@
 
 #include "neostats.h"
 
-const char lgs_help_version_oneline[]="Shows you the current LogServ Version";
 const char lgs_help_chan_oneline[]="Manipulate Channel Logging List";
 const char lgs_help_stats_oneline[]="Simple LogServ Stats";
 
@@ -62,11 +57,6 @@ const char *lgs_help_chan[] = {
 const char *lgs_help_stats[] = {
 	"Syntax: \2STATS\2",
 	"        \2STATS\2 displays some simple stats about LogServ",
-	NULL
-};
-
-const char *lgs_help_version[] = {
-	"Displays LogServ's Version Number",
 	NULL
 };
 

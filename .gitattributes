@@ -15,7 +15,15 @@
 /install-sh -text
 /lgs_help.c -text
 /log_processing.c -text
+/logdefault.c -text
+/logdefault.h -text
+/logeggdrop.c -text
+/logeggdrop.h -text
+/logmirc.c -text
+/logmirc.h -text
 /logserv.c -text
 /logserv.h -text
+/logxchat.c -text
+/logxchat.h -text
 /modconfig.h.in -text
 /onisconfig -text
