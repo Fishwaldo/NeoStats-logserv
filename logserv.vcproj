@@ -163,9 +163,6 @@
 			<File
 				RelativePath=".\logxchat.h">
 			</File>
-			<File
-				RelativePath=".\win32modconfig.h">
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -183,6 +180,9 @@
 		</File>
 		<File
 			RelativePath=".\modconfig.h.in">
+		</File>
+		<File
+			RelativePath=".\Relnotes">
 		</File>
 	</Files>
 	<Globals>

@@ -1,3 +1,4 @@
+#Neostats Module Makefile
 CC = @CC@
 CFLAGS = @CFLAGS@ -g
 LDFLAGS = @LIBS@
@@ -13,7 +14,7 @@ TARGET = logserv.so
 DOCS = LogServ.README LogServ.README.html
 DATA =
 SCRIPTS = OnisDoLogs.sh onisconfig
-DISTFILES = $(SRCS) $(DOCS) $(SCRIPTS) *.in configure install-sh ChangeLog *.h LICENSE
+DISTFILES = $(SRCS) $(DOCS) $(SCRIPTS) *.in configure install-sh ChangeLog *.h LICENSE RELNOTES logserv.vcproj modconfigwin32.h
 DISTDIR = @PACKAGE@-@VERSION@
 
 all:	module

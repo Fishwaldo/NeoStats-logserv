@@ -28,5 +28,5 @@
 /logxchat.c -text
 /logxchat.h -text
 /modconfig.h.in -text
+/modconfigwin32.h -text
 /onisconfig -text
-/win32modconfig.h -text
