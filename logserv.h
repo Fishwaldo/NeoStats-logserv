@@ -28,25 +28,10 @@
 
 #include "neostats.h"
 
-#ifndef NS_ULEVEL_LOCOPER
-#define NS_ULEVEL_LOCOPER 40
-#endif
-
-
-/** 
- * A string to hold the name of our bot
- */
-char s_LogServ[MAXNICK];
-
-/** 
- * out ModUser struct 
- */
-ModUser *lgs_bot;
-
 /* Channel Logging Struct. */
 typedef struct CL_ {
-	char channame[CHANLEN];
-	Chans *c;
+	char channame[MAXCHANLEN];
+	Channel *c;
 	FILE *logfile;
 	char filename[MAXPATH];
 	unsigned long flags;
@@ -58,9 +43,6 @@ typedef struct CL_ {
 
 /* settings for LogServ */
 struct LogServ {
-	char user[MAXUSER]; 
-	char host[MAXHOST]; 
-	char realname[MAXREALNAME]; 
 	int logtype;
 	int modnum;
 	char logdir[MAXPATH];
@@ -91,7 +73,7 @@ typedef enum {
 	
 
 /* logging function prototype */
-typedef int (log_proc) (ChannelLog *, char **, int);
+typedef int (log_proc) (ChannelLog *chandata, CmdParams* cmdparams);
 
 /* LogType Proc table */
 
@@ -110,48 +92,47 @@ typedef struct logtype_proc {
 /* log_procssing.c decl */
 
 
-int logserv_joinproc(ChannelLog *, char **, int);
-int logserv_partproc(ChannelLog *, char **, int);
-int logserv_msgproc(ChannelLog *, char **, int);
-int logserv_quitproc(ChannelLog *, char **, int);
-int logserv_topicproc(ChannelLog *, char **, int);
-int logserv_kickproc(ChannelLog *, char **, int);
-int logserv_nickproc(ChannelLog *, char **, int);
-int logserv_modeproc(ChannelLog *, char **, int);
-int egg_joinproc(ChannelLog *, char **, int);
-int egg_partproc(ChannelLog *, char **, int);
-int egg_msgproc(ChannelLog *, char **, int);
-int egg_quitproc(ChannelLog *, char **, int);
-int egg_topicproc(ChannelLog *, char **, int);
-int egg_kickproc(ChannelLog *, char **, int);
-int egg_nickproc(ChannelLog *, char **, int);
-int egg_modeproc(ChannelLog *, char **, int);
-int mirc_joinproc(ChannelLog *, char **, int);
-int mirc_partproc(ChannelLog *, char **, int);
-int mirc_msgproc(ChannelLog *, char **, int);
-int mirc_quitproc(ChannelLog *, char **, int);
-int mirc_topicproc(ChannelLog *, char **, int);
-int mirc_kickproc(ChannelLog *, char **, int);
-int mirc_nickproc(ChannelLog *, char **, int);
-int mirc_modeproc(ChannelLog *, char **, int);
-int xchat_joinproc(ChannelLog *, char **, int);
-int xchat_partproc(ChannelLog *, char **, int);
-int xchat_msgproc(ChannelLog *, char **, int);
-int xchat_quitproc(ChannelLog *, char **, int);
-int xchat_topicproc(ChannelLog *, char **, int);
-int xchat_kickproc(ChannelLog *, char **, int);
-int xchat_nickproc(ChannelLog *, char **, int);
-int xchat_modeproc(ChannelLog *, char **, int);
+int logserv_joinproc(ChannelLog *chandata, CmdParams* cmdparams);
+int logserv_partproc(ChannelLog *chandata, CmdParams* cmdparams);
+int logserv_msgproc(ChannelLog *chandata, CmdParams* cmdparams);
+int logserv_quitproc(ChannelLog *chandata, CmdParams* cmdparams);
+int logserv_topicproc(ChannelLog *chandata, CmdParams* cmdparams);
+int logserv_kickproc(ChannelLog *chandata, CmdParams* cmdparams);
+int logserv_nickproc(ChannelLog *chandata, CmdParams* cmdparams);
+int logserv_modeproc(ChannelLog *chandata, CmdParams* cmdparams);
+int egg_joinproc(ChannelLog *chandata, CmdParams* cmdparams);
+int egg_partproc(ChannelLog *chandata, CmdParams* cmdparams);
+int egg_msgproc(ChannelLog *chandata, CmdParams* cmdparams);
+int egg_quitproc(ChannelLog *chandata, CmdParams* cmdparams);
+int egg_topicproc(ChannelLog *chandata, CmdParams* cmdparams);
+int egg_kickproc(ChannelLog *chandata, CmdParams* cmdparams);
+int egg_nickproc(ChannelLog *chandata, CmdParams* cmdparams);
+int egg_modeproc(ChannelLog *chandata, CmdParams* cmdparams);
+int mirc_joinproc(ChannelLog *chandata, CmdParams* cmdparams);
+int mirc_partproc(ChannelLog *chandata, CmdParams* cmdparams);
+int mirc_msgproc(ChannelLog *chandata, CmdParams* cmdparams);
+int mirc_quitproc(ChannelLog *chandata, CmdParams* cmdparams);
+int mirc_topicproc(ChannelLog *chandata, CmdParams* cmdparams);
+int mirc_kickproc(ChannelLog *chandata, CmdParams* cmdparams);
+int mirc_nickproc(ChannelLog *chandata, CmdParams* cmdparams);
+int mirc_modeproc(ChannelLog *chandata, CmdParams* cmdparams);
+int xchat_joinproc(ChannelLog *chandata, CmdParams* cmdparams);
+int xchat_partproc(ChannelLog *chandata, CmdParams* cmdparams);
+int xchat_msgproc(ChannelLog *chandata, CmdParams* cmdparams);
+int xchat_quitproc(ChannelLog *chandata, CmdParams* cmdparams);
+int xchat_topicproc(ChannelLog *chandata, CmdParams* cmdparams);
+int xchat_kickproc(ChannelLog *chandata, CmdParams* cmdparams);
+int xchat_nickproc(ChannelLog *chandata, CmdParams* cmdparams);
+int xchat_modeproc(ChannelLog *chandata, CmdParams* cmdparams);
 
-void lgs_RotateLogs();
+int lgs_RotateLogs(void);
 void lgs_close_logs();
 void lgs_switch_file(ChannelLog *cl);
 
-extern const char lgs_help_about_oneline[];
 extern const char lgs_help_version_oneline[];
 extern const char lgs_help_chan_oneline[];
 extern const char lgs_help_stats_oneline[];
-extern const char *lgs_help_about[];
+extern const char *ls_about[];
 extern const char *lgs_help_chan[];
 extern const char *lgs_help_stats[];
 extern const char *lgs_help_version[];
@@ -159,5 +140,6 @@ extern const char *lgs_help_set_logtype[];
 extern const char *lgs_help_set_logsize[];
 extern const char *lgs_help_set_logtime[];
 
+extern Module *lgs_module;
 
 #endif

@@ -28,7 +28,9 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include "logserv.h"  /* LogServ Definitions */
 
 /* only check logfile size every X calls */
@@ -132,7 +134,7 @@ static void lgs_write_log(ChannelLog *cl, char *fmt, ...) {
 				fprintf(cl->logfile, "%s", xchat_startlog(cl));
 				break;
 			default:
-				nlog(LOG_WARNING, LOG_MOD, "Unknown LogType");
+				nlog (LOG_WARNING, "Unknown LogType");
 		}
 	}
 	/* ok, file is opened. write the string to it */
@@ -170,19 +172,23 @@ static int lgs_open_log(ChannelLog *cl) {
 		/* hrm, error */
 		if (errno == ENOENT) {
 			/* ok, it doesn't exist, create it */
+#ifdef WIN32
+			res = mkdir(LogServ.logdir);
+#else
 			res = mkdir(LogServ.logdir, 0700);
+#endif
 			if (res != 0) {
 				/* error */
-				nlog(LOG_CRITICAL, LOG_MOD, "Couldn't create LogDir Directory: %s", strerror(errno));
+				nlog (LOG_CRITICAL, "Couldn't create LogDir Directory: %s", strerror(errno));
 				return NS_FAILURE;
 			}
-			nlog(LOG_NOTICE, LOG_MOD, "Created Channel Logging Dir %s", LogServ.logdir);
+			nlog (LOG_NOTICE, "Created Channel Logging Dir %s", LogServ.logdir);
 		} else {
-			nlog(LOG_CRITICAL, LOG_MOD, "Stat Returned A error: %s", strerror(errno));
+			nlog (LOG_CRITICAL, "Stat Returned A error: %s", strerror(errno));
 			return NS_FAILURE;
 		}
 	} else if (!S_ISDIR(st.st_mode))	{
-		nlog(LOG_CRITICAL, LOG_MOD, "%s is not a Directory", LogServ.logdir);
+		nlog (LOG_CRITICAL, "%s is not a Directory", LogServ.logdir);
 		return NS_FAILURE;
 	}
 	
@@ -193,10 +199,10 @@ static int lgs_open_log(ChannelLog *cl) {
 	/* open the file */
 	cl->logfile = fopen(fname, "a");
 	if (!cl->logfile) {
-		nlog(LOG_CRITICAL, LOG_MOD, "Could not open %s for Appending: %s", cl->filename, strerror(errno));
+		nlog (LOG_CRITICAL, "Could not open %s for Appending: %s", cl->filename, strerror(errno));
 		return NS_FAILURE;
 	}
-	nlog(LOG_DEBUG1, LOG_MOD, "Opened %s for Appending", cl->filename);
+	dlog (DEBUG1, "Opened %s for Appending", cl->filename);
 	/* set hte flag */
 	cl->flags |= LGSFDOPENED;
 	cl->fdopened = me.now;
@@ -220,16 +226,16 @@ static void lgs_stat_file(ChannelLog *cl) {
 	if (res != 0) {
 		if (errno == ENOENT) {
 			/* wtf, this is bad */
-			nlog(LOG_CRITICAL, LOG_MOD, "LogFile went away: %s", fname);
+			nlog (LOG_CRITICAL, "LogFile went away: %s", fname);
 			return;
 		} else {
-			nlog(LOG_CRITICAL, LOG_MOD, "Logfile Error: %s", strerror(errno));
+			nlog (LOG_CRITICAL, "Logfile Error: %s", strerror(errno));
 			return;
 		}
 	}
-	nlog(LOG_DEBUG1, LOG_MOD, "Logfile Size of %s is %d", fname, (int)st.st_size);
+	dlog (DEBUG1, "Logfile Size of %s is %d", fname, (int)st.st_size);
 	if (st.st_size > LogServ.maxlogsize) {
-		nlog(LOG_DEBUG1, LOG_MOD, "Switching Logfile %s", fname);
+		dlog (DEBUG1, "Switching Logfile %s", fname);
 		/* ok, the file exceeds out limits, lets switch it */
 		lgs_switch_file(cl);
 	}
@@ -256,26 +262,30 @@ void lgs_switch_file(ChannelLog *cl) {
 	cl->fdopened = 0;
 	cl->flags &= ~ LGSFDOPENED;
 	/* check if the target directory exists */
-	ircsnprintf(savedir, MAXPATH, "%s/\%s", LogServ.savedir, cl->filename);
+	ircsnprintf(savedir, MAXPATH, "%s/%s", LogServ.savedir, cl->filename);
 	
 	res = stat(savedir, &st);
 	if (res != 0) {
 		/* hrm, error */
 		if (errno == ENOENT) {
 			/* ok, it doesn't exist, create it */
+#ifdef WIN32
+			res = mkdir(savedir);
+#else
 			res = mkdir(savedir, 0700);
+#endif
 			if (res != 0) {
 				/* error */
-				nlog(LOG_CRITICAL, LOG_MOD, "Couldn't create LogDir Directory: %s", strerror(errno));
+				nlog (LOG_CRITICAL, "Couldn't create LogDir Directory: %s", strerror(errno));
 				return;
 			}
-			nlog(LOG_NOTICE, LOG_MOD, "Created Channel Logging Dir %s", savedir);
+			nlog (LOG_NOTICE, "Created Channel Logging Dir %s", savedir);
 		} else {
-			nlog(LOG_CRITICAL, LOG_MOD, "Stat Returned A error: %s", strerror(errno));
+			nlog (LOG_CRITICAL, "Stat Returned A error: %s", strerror(errno));
 			return;
 		}
 	} else if (!S_ISDIR(st.st_mode))	{
-		nlog(LOG_CRITICAL, LOG_MOD, "%s is not a Directory", savedir);
+		nlog (LOG_CRITICAL, "%s is not a Directory", savedir);
 		return;
 	}
 	strftime(tmbuf, MAXPATH, "%d%m%Y%H%M%S", localtime(&me.now));
@@ -283,9 +293,9 @@ void lgs_switch_file(ChannelLog *cl) {
 	ircsnprintf(oldfname, MAXPATH, "%s/%s.log", LogServ.logdir, cl->filename);
 	res = rename(oldfname, newfname);
 	if (res != 0) {
-		nlog(LOG_CRITICAL, LOG_MOD, "Couldn't Rename file %s: %s", oldfname, strerror(errno));
+		nlog (LOG_CRITICAL, "Couldn't Rename file %s: %s", oldfname, strerror(errno));
 	}	
-	nlog(LOG_NORMAL, LOG_MOD, "Switched Logfile for %s from %s to %s", cl->channame, oldfname, newfname);
+	nlog (LOG_NORMAL, "Switched Logfile for %s from %s to %s", cl->channame, oldfname, newfname);
 }
 /* @brief Close all logfiles and delete the struct assocated with them
  *
@@ -296,7 +306,7 @@ void lgs_close_logs() {
 	hscan_t hs;
 	hnode_t *hn;
 	ChannelLog *cl;
-	Chans *c;
+	Channel *c;
 	
 	/* scan through the log files */
 	hash_scan_begin(&hs, lgschans);
@@ -309,7 +319,7 @@ void lgs_close_logs() {
 		/* delete them from the hash */
 		c = cl->c;
 		if (c) {
-			c->moddata[LogServ.modnum] = NULL;
+			c->moddata[lgs_module->modnum] = NULL;
 			cl->c = NULL;
 		}
 		hash_delete(lgschans, hn);
@@ -323,14 +333,15 @@ void lgs_close_logs() {
  * 
  * Runs through all active opened logfiles only
  */
-void lgs_RotateLogs() {
+int lgs_RotateLogs(void) 
+{
 	hscan_t hs;
 	hnode_t *hn;
 	ChannelLog *cl;
 	
 	/* if Logage is 0, just bail out */
 	if (LogServ.maxopentime <= 0) {
-		return;
+		return NS_SUCCESS;
 	}
 
 	/* scan through the log files */
@@ -342,6 +353,7 @@ void lgs_RotateLogs() {
 			lgs_switch_file(cl);
 		}
 	}
+	return NS_SUCCESS;
 }
 
 
@@ -350,40 +362,40 @@ char *logserv_startlog(ChannelLog *chandata) {
 }
 
 
-int logserv_joinproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_joinproc(ChannelLog *chandata, CmdParams* cmdparams) {
 
 	return NS_SUCCESS;
 }
 
-int logserv_partproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_partproc(ChannelLog *chandata, CmdParams* cmdparams) {
 
 	return NS_SUCCESS;
 }
 
-int logserv_msgproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_msgproc(ChannelLog *chandata, CmdParams* cmdparams) {
 printf("doing msgproc\n");
 	return NS_SUCCESS;
 }
 
-int logserv_quitproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_quitproc(ChannelLog *chandata, CmdParams* cmdparams) {
 
 	return NS_SUCCESS;
 }
 
-int logserv_topicproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_topicproc(ChannelLog *chandata, CmdParams* cmdparams) {
 
 	return NS_SUCCESS;
 }
 
-int logserv_kickproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_kickproc(ChannelLog *chandata, CmdParams* cmdparams) {
 
 	return NS_SUCCESS;
 }
-int logserv_nickproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_nickproc(ChannelLog *chandata, CmdParams* cmdparams) {
 
 	return NS_SUCCESS;
 }
-int logserv_modeproc(ChannelLog *chandata, char **av, int ac) {
+int logserv_modeproc(ChannelLog *chandata, CmdParams* cmdparams) {
 
 	return NS_SUCCESS;
 }
@@ -407,23 +419,18 @@ char *egg_time() {
 /* [22:02] Fish (~Fish@Server-Admin.irc-chat.net) joined #neostats. */
 #define EJOINPROC "%s %s (%s@%s) joined %s.\n"
 
-int egg_joinproc(ChannelLog *chandata, char **av, int ac) {
-	User *u;
-	u = finduser(av[1]);
-	if (u)
-		lgs_write_log(chandata, EJOINPROC, egg_time(), u->nick, u->username, u->vhost, av[0]);
+int egg_joinproc(ChannelLog *chandata, CmdParams* cmdparams) 
+{
+	lgs_write_log(chandata, EJOINPROC, egg_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name);
 	return NS_SUCCESS;
 }
 
 /* [22:02] Fish (~Fish@Server-Admin.irc-chat.net) left #neostats (ha). */
 #define EPARTPROC "%s %s (%s@%s) left %s (%s).\n"
 
-int egg_partproc(ChannelLog *chandata, char **av, int ac) {
-	User *u;
-	u = finduser(av[1]);
-	if (u) 
-		lgs_write_log(chandata, EPARTPROC, egg_time(), u->nick, u->username, u->vhost, av[0], ac == 3 ? av[2] : "");
-	
+int egg_partproc(ChannelLog *chandata, CmdParams* cmdparams) 
+{
+	lgs_write_log(chandata, EPARTPROC, egg_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 
@@ -433,23 +440,20 @@ int egg_partproc(ChannelLog *chandata, char **av, int ac) {
 #define EMSGPROC "%s <%s> %s\n"
 #define EACTPROC "%s Action: %s %s\n"
 
-int egg_msgproc(ChannelLog *chandata, char **av, int ac) {
-	if (ac == 3) 
-		lgs_write_log(chandata, EACTPROC, egg_time(), av[0], av[2]);
+int egg_msgproc(ChannelLog *chandata, CmdParams* cmdparams) {
+	if (cmdparams->ac == 3) 
+		lgs_write_log(chandata, EACTPROC, egg_time(), cmdparams->source->name, cmdparams->param);
 	else 
-		lgs_write_log(chandata, EMSGPROC, egg_time(), av[0], av[1]);
+		lgs_write_log(chandata, EMSGPROC, egg_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 
 /* [22:03] Fishwaldo (~Fish@3cbc6b2b.22d996b6.singnet.com.sg) left irc: Client closed */
 #define EQUITPROC "%s %s (%s@%s) left irc: %s\n"
 
-int egg_quitproc(ChannelLog *chandata, char **av, int ac) {
-	User *u;
-	u = finduser(av[0]);
-	if (u) 
-		lgs_write_log(chandata, EQUITPROC, egg_time(), u->nick, u->username, u->vhost, ac == 2 ? av[1] : "");
-		
+int egg_quitproc(ChannelLog *chandata, CmdParams* cmdparams) 
+{
+	lgs_write_log(chandata, EQUITPROC, egg_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->param);	
 	return NS_SUCCESS;
 }
 
@@ -457,37 +461,35 @@ int egg_quitproc(ChannelLog *chandata, char **av, int ac) {
 #define ETOPICPROC "%s Topic changed on %s by %s!%s@%s: %s\n"
 #define ENOUSERTOPICPROC "%s Topic changed on %s by %s: %s\n"
 
-int egg_topicproc(ChannelLog *chandata, char **av, int ac) {
-	User *u;
-	u = finduser(av[1]);
-	if (u)
-		lgs_write_log(chandata, ETOPICPROC, egg_time(), av[0], u->nick, u->username, u->vhost, ac == 3 ? av[2] : "");
+int egg_topicproc(ChannelLog *chandata, CmdParams* cmdparams) 
+{
+	if (cmdparams->source)
+		lgs_write_log(chandata, ETOPICPROC, egg_time(), cmdparams->channel->name, cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->param);
 	else 
-		lgs_write_log(chandata, ENOUSERTOPICPROC, egg_time(), av[0], av[1], ac == 3 ? av[2] : "");
+		lgs_write_log(chandata, ENOUSERTOPICPROC, egg_time(), cmdparams->channel->name, cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 
 /* [22:02] Fish kicked from #neostats by Fish: Fish */
 #define EKICKPROC "%s %s kicked from %s by %s: %s\n"
 
-int egg_kickproc(ChannelLog *chandata, char **av, int ac) {
-	lgs_write_log(chandata, EKICKPROC, egg_time(), av[1], av[0], av[2], ac == 4 ? av[3] : ""); 
+int egg_kickproc(ChannelLog *chandata, CmdParams* cmdparams) {
+	lgs_write_log(chandata, EKICKPROC, egg_time(), cmdparams->target->name, cmdparams->channel->name, cmdparams->source->name, cmdparams->param); 
 	return NS_SUCCESS;
 }
 
 /* [22:02] #NeoStats: mode change '+oa Fish Fish' by SuperSexSquirrel!super@supersexsquirrel.org */
 #define EMODEPROC "%s %s: mode change '%s' by %s!%s@%s\n"
 #define ENOUSERMODEPROC "%s %s: mode change '%s' by %s\n"
-int egg_modeproc(ChannelLog *chandata, char **av, int ac) {
-	User *u;
+int egg_modeproc(ChannelLog *chandata, CmdParams* cmdparams) 
+{
 	char *modebuf;
 	
-	modebuf = joinbuf(av, ac, 2);
-	u = finduser(av[0]);
-	if (u) {
-		lgs_write_log(chandata, EMODEPROC, egg_time(), av[1], modebuf, u->nick, u->username, u->vhost);
+	modebuf = joinbuf(cmdparams->av, cmdparams->ac, 0);
+	if (cmdparams->source) {
+		lgs_write_log(chandata, EMODEPROC, egg_time(), cmdparams->channel->name, modebuf, cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost);
 	} else {
-		lgs_write_log(chandata, ENOUSERMODEPROC, egg_time(), av[1], modebuf, av[0]);
+		lgs_write_log(chandata, ENOUSERMODEPROC, egg_time(), cmdparams->channel->name, modebuf, cmdparams->source->name);
 	}	
 	return NS_SUCCESS;
 }
@@ -495,8 +497,8 @@ int egg_modeproc(ChannelLog *chandata, char **av, int ac) {
 /* [22:02] Nick change: Fish -> haha */
 #define ENICKPROC "%s Nick change: %s -> %s\n"
 
-int egg_nickproc(ChannelLog *chandata, char **av, int ac) {
-	lgs_write_log(chandata, ENICKPROC, egg_time(), av[0], av[1]);
+int egg_nickproc(ChannelLog *chandata, CmdParams* cmdparams) {
+	lgs_write_log(chandata, ENICKPROC, egg_time(), cmdparams->param, cmdparams->source->name);
 	return NS_SUCCESS;
 }
 
@@ -531,20 +533,18 @@ char *mirc_time() {
 /* [21:47] * Dirk-Digler has joined #neostats */
 #define MJOINPROC "%s * %s (%s@%s) has joined %s\n"
 
-int mirc_joinproc(ChannelLog *chandata, char **av, int ac) {
-	User *u;
-	u = finduser(av[1]);
-	lgs_write_log(chandata, MJOINPROC, mirc_time(), u->nick, u->username, u->vhost, av[0]);
+int mirc_joinproc(ChannelLog *chandata, CmdParams* cmdparams) 
+{
+	lgs_write_log(chandata, MJOINPROC, mirc_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name);
 	return NS_SUCCESS;
 }
 
 /* [22:07] * DigiGuy has left #neostats */
 #define MPARTPROC "%s * %s (%s@%s) has left %s (%s)\n"
 
-int mirc_partproc(ChannelLog *chandata, char **av, int ac) {
-	User *u;
-	u = finduser(av[1]);
-	lgs_write_log(chandata, MPARTPROC, mirc_time(), u->nick, u->username, u->vhost, av[0], ac == 3 ? av[2] : "");
+int mirc_partproc(ChannelLog *chandata, CmdParams* cmdparams) 
+{
+	lgs_write_log(chandata, MPARTPROC, mirc_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 
@@ -553,11 +553,11 @@ int mirc_partproc(ChannelLog *chandata, char **av, int ac) {
 #define MMSGPROC "%s <%s> %s\n"
 #define MACTPROC "%s * %s %s\n"
 
-int mirc_msgproc(ChannelLog *chandata, char **av, int ac) {
-	if (ac == 3) {
-		lgs_write_log(chandata, MACTPROC, mirc_time(), av[0], av[2]);
+int mirc_msgproc(ChannelLog *chandata, CmdParams* cmdparams) {
+	if (cmdparams->ac == 3) {
+		lgs_write_log(chandata, MACTPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
 	} else {
-		lgs_write_log(chandata, MMSGPROC, mirc_time(), av[0], av[1]);
+		lgs_write_log(chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
 	}
 	return NS_SUCCESS;
 }
@@ -565,43 +565,44 @@ int mirc_msgproc(ChannelLog *chandata, char **av, int ac) {
 /* [21:49] * DigiGuy has quit IRC (Quit: ha) */
 #define MQUITPROC "%s * %s has quit IRC (%s)\n"
 
-int mirc_quitproc(ChannelLog *chandata, char **av, int ac) {
-	lgs_write_log(chandata, MQUITPROC, mirc_time(), av[0], ac == 2 ? av[1] : "");
+int mirc_quitproc(ChannelLog *chandata, CmdParams* cmdparams) 
+{
+	lgs_write_log(chandata, MQUITPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 
 /* [21:48] * Digi|Away changes topic to 'FREE PORN - DETAILS ' */
 #define MTOPICPROC "%s * %s changes topic to '%s'\n"
 
-int mirc_topicproc(ChannelLog *chandata, char **av, int ac) {
-	lgs_write_log(chandata, MTOPICPROC, mirc_time(), av[1], ac == 3 ? av[2] : "");
+int mirc_topicproc(ChannelLog *chandata, CmdParams* cmdparams) {
+	lgs_write_log(chandata, MTOPICPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 
 /* [21:47] * Dirk-Digler was kicked by Fish (Fish) */
 #define MKICKPROC "%s * %s was kicked by %s (%s)\n"
 
-int mirc_kickproc(ChannelLog *chandata, char **av, int ac) {
-	lgs_write_log(chandata, MKICKPROC, mirc_time(), av[1], av[2], ac == 4 ? av[3] : "");
+int mirc_kickproc(ChannelLog *chandata, CmdParams* cmdparams) {
+	lgs_write_log(chandata, MKICKPROC, mirc_time(), cmdparams->target->name, cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 
 /* [21:48] * Fish is now known as Fishy */
 #define MNICKPROC "%s * %s is now known as %s\n"
 
-int mirc_nickproc(ChannelLog *chandata, char **av, int ac) {
-	lgs_write_log(chandata, MNICKPROC, mirc_time(), av[0], av[1]);
+int mirc_nickproc(ChannelLog *chandata, CmdParams* cmdparams) {
+	lgs_write_log(chandata, MNICKPROC, mirc_time(), cmdparams->param, cmdparams->source->name);
 	return NS_SUCCESS;
 }
 
 /* [21:47] * Fish sets mode: +o Dirk-Digler */
 #define MMODEPROC "%s * %s sets mode: %s\n"
 
-int mirc_modeproc(ChannelLog *chandata, char **av, int ac) {
+int mirc_modeproc(ChannelLog *chandata, CmdParams* cmdparams) {
 	char *modebuf;
 	
-	modebuf = joinbuf(av, ac, 2);
-	lgs_write_log(chandata, MMODEPROC, mirc_time(), av[0], modebuf);
+	modebuf = joinbuf(cmdparams->av, cmdparams->ac, 0);
+	lgs_write_log(chandata, MMODEPROC, mirc_time(), cmdparams->source->name, modebuf);
 	free(modebuf);
 	return NS_SUCCESS;
 }
@@ -630,25 +631,19 @@ char *xchat_startlog(ChannelLog *cl) {
 /* Jan 02 17:27:10 -->     Dirk-Digler (fish@Dirk-Digler.Users.irc-chat.net) has joined #neostats */
 #define XJOINFMT "%s -->\t%s (%s@%s) has joined %s\n"
 
-int xchat_joinproc(ChannelLog *chandata, char **av, int ac) {
-	User *u;
-	u = finduser(av[1]);
-	if (u) 
-		lgs_write_log(chandata, XJOINFMT, xchat_time(), u->nick, u->username, u->vhost, av[0]); return NS_SUCCESS;
+int xchat_joinproc(ChannelLog *chandata, CmdParams* cmdparams) 
+{
+	lgs_write_log(chandata, XJOINFMT, xchat_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name); return NS_SUCCESS;
 }
 
 /* Jan 02 17:56:52 <--     DigiGuy (~b.dole@Oper.irc-chat.net) has left #neostats (part)*/
 #define XPARTPROC "%s <--\t%s (%s@%s) has left %s (%s)\n"
 
-int xchat_partproc(ChannelLog *chandata, char **av, int ac) {
-	User *u;
-	u = finduser(av[1]);
-	if (u)
-		lgs_write_log(chandata, XPARTPROC, xchat_time(), u->nick, u->username, u->vhost, av[0], ac == 3 ? av[2] : "");
-
+int xchat_partproc(ChannelLog *chandata, CmdParams* cmdparams) 
+{
+	lgs_write_log(chandata, XPARTPROC, xchat_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name, cmdparams->param);
 	return NS_SUCCESS;
 }
-
 
 /* Jan 02 17:25:43 <SecureServ>    Akilling jojo!~jojo@pD9E60152.dip.t-dialin.net for Virus IRCORK */
 
@@ -658,54 +653,59 @@ int xchat_partproc(ChannelLog *chandata, char **av, int ac) {
  * Jan 02 17:28:52 *       Fish-Away sighs */
 #define XACTFMT "%s *\t%s %s\n"
 
-int xchat_msgproc(ChannelLog *chandata, char **av, int ac) {
-	if (ac == 3) {
-		lgs_write_log(chandata, XACTFMT, xchat_time(), av[0], av[2]);
+int xchat_msgproc(ChannelLog *chandata, CmdParams* cmdparams) {
+	if (cmdparams->ac == 3) {
+		lgs_write_log(chandata, XACTFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
 	} else {
-		lgs_write_log(chandata, XMSGFMT, xchat_time(), av[0], av[1]);
+		lgs_write_log(chandata, XMSGFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
 	}
 	return NS_SUCCESS;
 }
 /* Jan 02 17:47:26 <--     Dirk-Digler has quit (Killed (Fish (get lost))) */
 #define XQUITFMT "%s <--\t%s has quit (%s)\n"
 
-int xchat_quitproc(ChannelLog *chandata, char **av, int ac) {
-	lgs_write_log(chandata, XQUITFMT, xchat_time(), av[0], ac == 2 ? av[1] : "");
+int xchat_quitproc(ChannelLog *chandata, CmdParams* cmdparams) {
+	lgs_write_log(chandata, XQUITFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 
 /* Jan 02 17:48:12 ---     Digi|Away has changed the topic to: FREE PORN - DETAILS INSIDE */
 #define XTOPICPROC "%s ---\t%s has changed the topic to: %s\n"
 
-int xchat_topicproc(ChannelLog *chandata, char **av, int ac) {
-	lgs_write_log(chandata, XTOPICPROC, xchat_time(), av[1], ac == 3 ? av[2] : "");
+int xchat_topicproc(ChannelLog *chandata, CmdParams* cmdparams) {
+	lgs_write_log(chandata, XTOPICPROC, xchat_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 
 /* Jan 02 17:27:10 <-- Fish-Away has kicked Dirk-Digler from #neostats (ha) */
 #define XKICKPROC "%s <--\t%s has kicked %s from %s (%s)\n"
 
-int xchat_kickproc(ChannelLog *chandata, char **av, int ac) {
-	lgs_write_log(chandata, XKICKPROC, xchat_time(), av[2], av[1], av[0], ac == 4 ? av[3] : "");
+int xchat_kickproc(ChannelLog *chandata, CmdParams* cmdparams) {
+	lgs_write_log(chandata, XKICKPROC, xchat_time(), cmdparams->source->name, cmdparams->target->name, cmdparams->channel->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 
 /* Jan 02 17:50:32 ---     DigiGuy is now known as Bob */
 #define XNICKPROC "%s ---\t%s is now known as %s\n"
 
-int xchat_nickproc(ChannelLog *chandata, char **av, int ac) {
-	lgs_write_log(chandata, XNICKPROC, xchat_time(), av[0], av[1]);
+int xchat_nickproc(ChannelLog *chandata, CmdParams* cmdparams) {
+	lgs_write_log(chandata, XNICKPROC, xchat_time(), cmdparams->param, cmdparams->source->name);
 	return NS_SUCCESS;
 }
 
 /* Jan 02 17:27:10 ---     SuperSexSquirrel sets modes [#NeoStats +v Dirk-Digler] */
 #define XMODEPROC "%s ---\t%s sets modes[%s %s]\n"
 
-int xchat_modeproc(ChannelLog *chandata, char **av, int ac) {
+int xchat_modeproc(ChannelLog *chandata, CmdParams* cmdparams) {
 	char *modebuf;
 	
-	modebuf = joinbuf(av, ac, 2);
-	lgs_write_log(chandata, XMODEPROC, xchat_time(), av[0], chandata->channame, modebuf);
+	modebuf = joinbuf(cmdparams->av, cmdparams->ac, 0);
+	lgs_write_log(chandata, XMODEPROC, xchat_time(), cmdparams->source->name, chandata->channame, modebuf);
 	free(modebuf);
 	return NS_SUCCESS;
 }
+
+#ifdef WIN32
+/* temporary work around for linker error */
+void main(void) {}
+#endif

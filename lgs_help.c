@@ -27,12 +27,11 @@
 
 #include "neostats.h"
 
-const char lgs_help_about_oneline[]="About LogServ";
 const char lgs_help_version_oneline[]="Shows you the current LogServ Version";
 const char lgs_help_chan_oneline[]="Manipulate Channel Logging List";
 const char lgs_help_stats_oneline[]="Simple LogServ Stats";
 
-const char *lgs_help_about[] = {
+const char *ls_about[] = {
 	"\2LogServ\2 provides a Logging Service for Channels on IRC",
 	"That can be used to generate statistical information about the channel",
 	NULL
