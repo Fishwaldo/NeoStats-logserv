@@ -23,7 +23,9 @@
 /logmirc.h -text
 /logserv.c -text
 /logserv.h -text
+/logserv.vcproj -text
 /logxchat.c -text
 /logxchat.h -text
 /modconfig.h.in -text
 /onisconfig -text
+/win32modconfig.h -text
