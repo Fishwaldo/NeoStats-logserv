@@ -611,7 +611,7 @@ char *xchat_time() {
  
 char *xchat_startlog(ChannelLog *cl) {
 	char tmbuf[TIMEBUFSIZE];
-	strftime(tmbuf, TIMEBUFSIZE, "%a %b %d %H:%M:%S", localtime(&me.now));
+	strftime(tmbuf, TIMEBUFSIZE, "%a %b %d %H:%M:%S %Y", localtime(&me.now));
 	ircsnprintf(startlog, BUFSIZE, XSTARTLOG, tmbuf);
 	return startlog;
 }
