@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifndef WIN32
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include "logserv.h"

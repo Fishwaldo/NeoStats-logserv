@@ -487,7 +487,7 @@ static int lgs_cmd_list (CmdParams* cmdparams)
 			irc_prefmsg (lgs_bot, cmdparams->source, "%s (%c) URL: %s", cl->channame, (cl->flags & LGSACTIVE) ? '*' : '-', (cl->statsurl[0] != 0) ? cl->statsurl : "None");
 		}							
 	}
-	irc_prefmsg (lgs_bot, cmdparams->source, "End Of List.");				
+	irc_prefmsg (lgs_bot, cmdparams->source, "End of list.");				
 	return NS_SUCCESS;
 }
 
