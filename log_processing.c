@@ -422,7 +422,7 @@ int egg_partproc(ChannelLog *chandata, char **av, int ac) {
 	User *u;
 	u = finduser(av[1]);
 	if (u) 
-		lgs_write_log(chandata, EPARTPROC, egg_time(), u->nick, u->username, u->vhost, av[0], ac = 3 ? av[2] : "");
+		lgs_write_log(chandata, EPARTPROC, egg_time(), u->nick, u->username, u->vhost, av[0], ac == 3 ? av[2] : "");
 	
 	return NS_SUCCESS;
 }
