@@ -366,7 +366,7 @@ static int lgs_cmd_add (CmdParams* cmdparams)
 	}
 	nlog (LOG_NOTICE, "%s activated logging on %s", cmdparams->source->name, cl->channame);
 	irc_prefmsg (lgs_bot, cmdparams->source, "Activated logging on %s", cl->channame);
-	irc_chanalert (lgs_bot, "%s activated logging on %s", cmdparams->source->name, cl->channame);
+	command_report(lgs_bot, "%s activated logging on %s", cmdparams->source->name, cl->channame);
 	return NS_SUCCESS;
 }
 
@@ -394,11 +394,11 @@ static int lgs_cmd_del (CmdParams* cmdparams)
 	}
 	hash_delete(lgschans, hn);
 	hnode_destroy(hn);
-	irc_part (lgs_bot, cl->channame);
+	irc_part( lgs_bot, cl->channame, NULL );
 	ns_free (cl);
 	DBADelete( "Channel", cmdparams->av[1] );
 	irc_prefmsg (lgs_bot, cmdparams->source, "Deleted channel %s", cmdparams->av[0]);
-	irc_chanalert (lgs_bot, "%s deleted %s from logging", cmdparams->source->name, cmdparams->av[0]);
+	command_report(lgs_bot, "%s deleted %s from logging", cmdparams->source->name, cmdparams->av[0]);
 	return NS_SUCCESS;
 }
 
@@ -437,7 +437,7 @@ static int lgs_cmd_url (CmdParams* cmdparams)
 	}
 	ircsnprintf(cl->statsurl, MAXPATH, "%s", cmdparams->av[1]);
 	irc_prefmsg (lgs_bot, cmdparams->source, "Changed URL for %s to: %s", cl->channame, cl->statsurl);
-	irc_chanalert (lgs_bot, "%s changed the URL for %s to: %s", cmdparams->source->name, cl->channame, cl->statsurl);
+	command_report(lgs_bot, "%s changed the URL for %s to: %s", cmdparams->source->name, cl->channame, cl->statsurl);
 	lgs_save_channel_data (cl);
 	return NS_SUCCESS;
 }

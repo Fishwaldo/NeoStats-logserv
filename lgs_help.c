@@ -36,14 +36,13 @@ const char *ls_about[] = {
 };
 
 const char *lgs_help_add[] = {
-	"Syntax: \2ADD \37<Channame> <\"public\"/\"private\"> <url>\37\2",
+	"Syntax: \2ADD \37<#channel name> <PUBLIC|PRIVATE> [url]\37\2",
 	"",
-	"Adds a channel to LogServ for Monitoring. You must specify:",
-	"The Channel Name",
-	"Public/Private to indicate if the logging for this channel should be",
-	"made known to users",
-	"a URL to display when joining the channel showing where users can view",
-	"Statistics about the channel",
+	"Adds a channel to LogServ for Monitoring. ",
+	"Use PUBLIC to announce to the channel that logging has started",
+	"or PRIVATE to avoid this announcement.",
+	"You can provide an optional URL to display to users when they join",
+	"the channel showing where users can view channel statistics",
 	NULL
 };
 
@@ -56,7 +55,7 @@ const char *lgs_help_del[] = {
 };
 
 const char *lgs_help_list[] = {
-	"Syntax: \2LIST2",
+	"Syntax: \2LIST\2",
 	"",
 	"Lists the channels that LogServ is currently logging",
 	NULL
@@ -71,12 +70,14 @@ const char *lgs_help_url[] = {
 
 const char *lgs_help_stats[] = {
 	"Syntax: \2STATS\2",
+	"",
 	"Displays some simple stats about LogServ",
 	NULL
 };
 
 const char *lgs_help_set_logtype[] = {
 	"\2LOGTYPE\2 <type>",
+	"",
 	"Modifies the logfile format that LogServ uses.",
 	"The options are:",
 	"\2 1\2 - EggDrop Format",
@@ -89,8 +90,8 @@ const char *lgs_help_set_logtype[] = {
 };
 
 const char *lgs_help_set_logsize[] = {
-	"\2LOGSIZE\2 <bytes> - Specify the size in bytes at which a logfile is automatically",
-	"rotated",
+	"\2LOGSIZE\2 <bytes>",
+	"File size in bytes at which a logfile is automatically rotated",
 	NULL
 };
 
