@@ -1,4 +1,8 @@
 LogServ ChangeLog
 =============================================================================
+1.1 * Fish * 17/1/2003
+- Fixed up help text.
+- Fixed a crash when adding the first channel
+
 1.0 - Fish 
 - Initial Release

@@ -181,7 +181,6 @@ static int lgs_open_log(ChannelLog *cl) {
 				return NS_FAILURE;
 			}
 			nlog(LOG_NOTICE, LOG_MOD, "Created Channel Logging Dir %s", LogServ.logdir);
-			return NS_SUCCESS;
 		} else {
 			nlog(LOG_CRITICAL, LOG_MOD, "Stat Returned A error: %s", strerror(errno));
 			return NS_FAILURE;
