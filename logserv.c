@@ -142,35 +142,24 @@ static int lgs_join_logged_channel (Channel* c, ChannelLog *cl)
 	return NS_SUCCESS;
 }
 
-void LoadLogChannels (void)
+void LoadLogChannel (void *data)
 {
 	ChannelLog *cl;
-	char **row;
-	int count;
 	Channel *c;
-	char *tmp;
 
-	if (GetTableData("Channel", &row) > 0) {
-		for (count = 0; row[count] != NULL; count++) {
-			dlog (DEBUG1, "Loading Channel %s", row[count]);
-			cl = ns_calloc (sizeof(ChannelLog));
-			strlcpy(cl->channame, row[count], MAXCHANLEN);
-			if (GetData((void *)&cl->flags, CFGINT, "Channel", cl->channame, "Flags") > 0) {
-				cl->flags &= ~LGSACTIVE;
-				cl->flags &= ~LGSFDNEEDFLUSH;
-			}
-			if (GetData((void *)&tmp, CFGSTR, "Channel", cl->channame, "URL") < 0) {
-				cl->statsurl[0] = '\0';
-			} else {
-				strlcpy(cl->statsurl, tmp, MAXPATH);
-			}
-			c = find_chan (cl->channame);
-			if (c) {
-				lgs_join_logged_channel (c, cl);
-			}
-			hnode_create_insert (lgschans, cl, cl->channame);
-		}	
+	cl = ns_calloc (sizeof(ChannelLog));
+	memcpy (cl, data, sizeof(ChannelLog));
+	dlog (DEBUG1, "Loading Channel %s", cl->channame);
+	c = find_channel (cl->channame);
+	if (c) {
+		lgs_join_logged_channel (c, cl);
 	}
+	hnode_create_insert (lgschans, cl, cl->channame);
+}
+
+void LoadLogChannels (void)
+{
+	DBAFetchRows ("Channel", LoadLogChannel);
 }
 
 /** BotInfo */
@@ -262,7 +251,7 @@ static int lgs_event_nick(CmdParams* cmdparams)
 	/* ok, move through each of the channels */
 	cm = list_first (cmdparams->source->user->chans);
 	while (cm) {
-		lgs_send_to_logproc (LGSMSG_NICK, ((Channel *)find_chan(lnode_get (cm))), cmdparams);
+		lgs_send_to_logproc (LGSMSG_NICK, ((Channel *)find_channel(lnode_get (cm))), cmdparams);
         cm = list_next (cmdparams->source->user->chans, cm);
 	}
 	return NS_SUCCESS;
@@ -370,7 +359,7 @@ static int lgs_cmd_add (CmdParams* cmdparams)
 	}
 	hnode_create_insert (lgschans, cl, cl->channame);
 	lgs_save_channel_data (cl);
-	c = find_chan (cmdparams->av[0]);
+	c = find_channel (cmdparams->av[0]);
 	if (c) {
 		lgs_join_logged_channel (c, cl); 
 		irc_chanprivmsg (lgs_bot, cl->channame, "%s activated logging on %s", cmdparams->source->name, cl->channame);
@@ -407,7 +396,7 @@ static int lgs_cmd_del (CmdParams* cmdparams)
 	hnode_destroy(hn);
 	irc_part (lgs_bot, cl->channame);
 	ns_free (cl);
-	DelRow("Channel", cmdparams->av[1]);
+	DBADelete( "Channel", cmdparams->av[1] );
 	irc_prefmsg (lgs_bot, cmdparams->source, "Deleted channel %s", cmdparams->av[0]);
 	irc_chanalert (lgs_bot, "%s deleted %s from logging", cmdparams->source->name, cmdparams->av[0]);
 	return NS_SUCCESS;
@@ -468,6 +457,13 @@ static int lgs_cmd_stats (CmdParams* cmdparams)
 static void lgs_save_channel_data (ChannelLog *cl) {
 	
 	dlog (DEBUG1, "Saving Channel Data for %s", cl->channame);
-	SetData((void *)cl->flags, CFGINT, "Channel", cl->channame, "Flags");
-	SetData((void *)cl->statsurl, CFGSTR, "Channel", cl->channame, "URL");
+	DBAStore ("Channel", cl->channame, cl, sizeof (ChannelLog));
 }	
+
+#ifdef WIN32 /* temp */
+
+int main (int argc, char **argv)
+{
+	return 0;
+}
+#endif
