@@ -186,9 +186,7 @@ static int lgs_open_log(ChannelLog *cl) {
 			nlog(LOG_CRITICAL, LOG_MOD, "Stat Returned A error: %s", strerror(errno));
 			return NS_FAILURE;
 		}
-	}
-	/* is it a directory ? */
-	if (!S_ISDIR(st.st_mode))	{
+	} else if (!S_ISDIR(st.st_mode))	{
 		nlog(LOG_CRITICAL, LOG_MOD, "%s is not a Directory", LogServ.logdir);
 		return NS_FAILURE;
 	}
