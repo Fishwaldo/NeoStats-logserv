@@ -129,6 +129,9 @@ int __ChanMessage(char *origin, char **argv, int argc)
 	char *buf;
 
 	SET_SEGV_INMODULE(__module_info.module_name);
+	if (argc <= 1) {
+		return NS_FAILURE;
+	}
 		
 	c = findchan(chan);
 	if (c && c->moddata[LogServ.modnum]) {
