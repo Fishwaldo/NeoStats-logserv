@@ -30,10 +30,25 @@
 #include "stats.h"    /* Required for bot support */
 #include "log.h"      /* Log systems support */
 
+#include "lgs_help.c"
+
+/* forward decl */
+static int lgs_about(User * u, char **av, int ac);
+static int lgs_version(User * u, char **av, int ac);
+static int lgs_chans(User * u, char **av, int ac);
+static int lgs_stats(User * u, char **av, int ac);
+
+
 /** 
  * A string to hold the name of our bot
  */
-char s_module_bot_name[MAXNICK];
+char s_LogServ[MAXNICK];
+
+/** 
+ * out ModUser struct 
+ */
+ModUser *lgs_bot;
+
 
 /** Module Info definition 
  * version information about our module
@@ -42,22 +57,24 @@ char s_module_bot_name[MAXNICK];
 ModuleInfo __module_info = {
 	"LogServ",
 	"Channel Logging Bot",
-	"$REV$"
+	"$Rev$\0"
 	__DATE__,
 	__TIME__
 };
 
-/** printf version information
- * respond to the /VERSION command on IRC with this text
- * This is recommended for your module to load and run on NeoStats
- */
-int new_m_version(char *origin, char **av, int ac)
+bot_cmd lgs_commands[]=
 {
-	numeric(351, origin, "Module Template Loaded, Version: %s %s %s",
-		__module_info.module_version, __module_info.module_build_date,
-		__module_info.module_build_time);
-	return 0;
-}
+	{"ABOUT",			lgs_about,		0, 	0,			lgs_help_about, 		lgs_help_about_oneline},
+	{"VERSION",			lgs_version,		0, 	0,			lgs_help_version, 	 	lgs_help_version_oneline},
+	{"CHANS",			lgs_chans,		1, 	NS_ULEVEL_OPER,		lgs_help_chan, 		 	lgs_help_chan_oneline},
+	{"STATS",			lgs_stats,		1, 	0,			lgs_help_stats, 		lgs_help_stats_oneline},
+	{NULL,				NULL,			0, 	0,			NULL, 				NULL}
+};
+
+bot_setting lgs_settings[]=
+{
+	{NULL,			NULL,				0,					0, 0,	0,					NULL,				NULL,		NULL },
+};
 
 /** Module function list
  * A list of IRCd (server) commands that we will respond to
@@ -66,48 +83,16 @@ int new_m_version(char *origin, char **av, int ac)
  * but you do not have to have any functions in it
  */
 Functions __module_functions[] = {
-	{MSG_VERSION, new_m_version, 1},
-#ifdef GOTTOKENSUPPORT
-	{TOK_VERSION, new_m_version, 1},
-#endif
 	{NULL, NULL, 0}
 };
 
 /** Channel message processing
- * What do we do with messages in channels
+ * What do we do with messages in channelgs
  * This is required if you want your module to respond to channel messages
  */
 int __ChanMessage(char *origin, char **argv, int argc)
 {
 	char *chan = argv[0];
-	return 1;
-}
-
-/** Bot message processing
- *  What do we do with messages sent to our bot with /msg
- *  This is required if you want your module to respond to /msg
- *  Parameters:
- *      origin - who sent the message to you. It could be a user nickname 
- *               or could be a server message
- *      argv[0] - Your bot name;
- *      argv[1] .. argv[argc] - the parameters sent in the message
- *      argc - The count of arguments received
- */
-int __BotMessage(char *origin, char **argv, int argc)
-{
-	User *u;
-	char *buf;
-
-	u = finduser(origin);
-	if (!u) {
-		nlog(LOG_WARNING, LOG_CORE, "Unable to find user %s ", origin);
-		return -1;
-	}
-	buf = joinbuf(argv, argc, 1);
-	globops(me.name, "Bot recieved %s from (%s!%s@%s)", buf, u->nick, u->username, u->hostname);
-	chanalert(s_module_bot_name, "Bot recieved %s from (%s!%s@%s)", buf, u->nick, u->username, u->hostname);
-	nlog(LOG_NORMAL, LOG_MOD, "Bot recieved %s from (%s!%s@%s)", buf, u->nick, u->username, u->hostname);
-	free(buf);
 	return 1;
 }
 
@@ -117,11 +102,9 @@ int __BotMessage(char *origin, char **argv, int argc)
 static int Online(char **av, int ac)
 {
 	/* Introduce a bot onto the network */
-	if (init_bot(s_module_bot_name, "user", me.name, "Real Name", "-x",
-		__module_info.module_name) == -1) {
-			/* Nick was in use */
-			return 0;
-	}
+	
+	lgs_bot = init_mod_bot(s_LogServ, "LogBot", me.name, "Channel Logging Bot", services_bot_modes,
+		BOT_FLAG_ONLY_OPERS, lgs_commands, lgs_settings, __module_info.module_name);		
 	return 1;
 };
 
@@ -141,7 +124,7 @@ EventFnList __module_events[] = {
  */
 int __ModInit(int modnum, int apiver)
 {
-	strlcpy(s_module_bot_name, "LogServ", MAXNICK);
+	strlcpy(s_LogServ, "LogServ", MAXNICK);
 	return 1;
 }
 
@@ -152,3 +135,57 @@ void __ModFini()
 {
 
 };
+
+
+
+/* ok, now here are logservs functions */
+
+/* @brief Send Description of Module to user
+ *
+ * @param u The user requesting help
+ * @param av the text sent
+ * @param ac the number of words in av
+ * @returns NS_SUCCESS or NS_FAILURE
+ */
+static int lgs_about(User * u, char **av, int ac) {
+	privmsg_list(u->nick, s_LogServ, lgs_help_about);
+	return 1; 
+}
+
+/* @brief Send version of Module to user
+ *
+ * @param u The user requesting version
+ * @param av the text sent
+ * @param ac the number of words in av
+ * @returns NS_SUCCESS or NS_FAILURE
+ */
+static int lgs_version(User * u, char **av, int ac) {
+	SET_SEGV_LOCATION();
+	prefmsg(u->nick, s_LogServ, "\2%s Version Information\2", s_LogServ);
+	prefmsg(u->nick, s_LogServ, "%s Version: %s Compiled %s at %s", s_LogServ, __module_info.module_version, __module_info.module_build_date, __module_info.module_build_time);
+	return 1;
+}
+
+/* @brief manipulate the logged channels
+ *
+ * @param u The user requesting channel data
+ * @param av the text sent
+ * @param ac the number of words in av
+ * @returns NS_SUCCESS or NS_FAILURE
+ */
+static int lgs_chans(User * u, char **av, int ac) {
+
+
+}
+
+/* @brief Send some very simple stats to the user
+ *
+ * @param u The user requesting stats data
+ * @param av the text sent
+ * @param ac the number of words in av
+ * @returns NS_SUCCESS or NS_FAILURE
+ */
+static int lgs_stats(User * u, char **av, int ac) {
+
+
+}
