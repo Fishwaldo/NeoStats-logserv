@@ -61,7 +61,7 @@ typedef struct CL_ {
 struct LogServ {
 	char user[MAXUSER]; 
 	char host[MAXHOST]; 
-	char rname[MAXREALNAME]; 
+	char realname[MAXREALNAME]; 
 	int logtype;
 	int modnum;
 	char logdir[MAXPATH];
