@@ -1,8 +1,6 @@
 /* NeoStats - IRC Statistical Services 
-** Copyright (c) 1999-2003 Adam Rutter, Justin Hammond, Mark Hetherington
+** Copyright (c) 1999-2003 Justin Hammond
 ** http://www.neostats.net/
-**
-**  Portions Copyright (c) 2000-2001 ^Enigma^
 **
 **  This program is free software; you can redistribute it and/or modify
 **  it under the terms of the GNU General Public License as published by
@@ -20,7 +18,7 @@
 **  USA
 **
 ** NeoStats CVS Identification
-** $Id: template.c 1148 2003-12-26 21:43:43Z Mark $
+** $Id$
 */
 
 /** template.c 
@@ -42,9 +40,9 @@ char s_module_bot_name[MAXNICK];
  * This structure is required for your module to load and run on NeoStats
  */
 ModuleInfo __module_info = {
-	"example",
-	"example Module Description",
-	"version 1.0"
+	"LogServ",
+	"Channel Logging Bot",
+	"$REV$"
 	__DATE__,
 	__TIME__
 };
@@ -143,7 +141,7 @@ EventFnList __module_events[] = {
  */
 int __ModInit(int modnum, int apiver)
 {
-	strlcpy(s_module_bot_name, "TemplateBot", MAXNICK);
+	strlcpy(s_module_bot_name, "LogServ", MAXNICK);
 	return 1;
 }
 
