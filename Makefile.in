@@ -12,8 +12,10 @@ SOURCES= logserv.c log_processing.c
 OBJECTS= logserv.o log_processing.o
 TARGET= logserv.so
 DOCS=README.LogServ
+SCRIPTS=OnisDoLogs.sh onisconfig
 DATA=
-
+DISTFILES=$(SOURCES) $(DOCS) $(SCRIPTS) *.in configure install-sh ChangeLog *.h lgs_help.c
+distdir= @PACKAGE@-@VERSION@
 
 all:	 module
 
@@ -29,6 +31,26 @@ clean:
 install: module
 	 $(INSTALL) -m 644 $(TARGET) $(DIRECTORY)
 	 $(INSTALL) -m 644 $(DOCS) $(DIRECTORY)../doc/
+	 @if ! test -d $(DIRECTORY)../ChanLogs/ ; then mkdir $(DIRECTORY)../ChanLogs/ ; fi 
+	 $(INSTALL) -m 644 $(SCRIPTS) $(DIRECTORY)../ChanLogs/
+
+dist:	
+	@echo -n "Creating Directories"
+	@-rm -rf $(distdir)
+	@mkdir $(distdir)
+	@echo "Done"
+	@echo -n "Copying Core Distribution Files"
+	@for file in $(DISTFILES); do \
+		echo -n "."; \
+		cp -pr $$file $(distdir)/$$file; \
+	done
+	@echo "Done"
+	@tar -czf $(distdir).tar.gz $(distdir)/*
+	@echo "Tar file $(distdir).tar.gz created, Freshmeat Time"
+
+
 
 $(OBJECTS): Makefile
 
+logserv.o:	logserv.c lgs_help.c logserv.h
+log_procssing.o: logserv.h
