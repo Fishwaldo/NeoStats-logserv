@@ -42,7 +42,7 @@ const char *lgs_help_chan[] = {
 	"Syntax: \2CHANS \37ADD <Channame> <\"public\"/\"private\"> <url>\37\2",
 	"        \2CHANS \37DEL <Channame>\37\2",
 	"        \2CHANS \37LIST\37\2",
-	"        \2CHANS \37SET URL <url>\37\2",
+	"        \2CHANS \37SET <Channame> URL <url>\37\2",
 	"",
 	"Provides Logging Services for Channels on the network",
 	"\2ADD\2 Adds a channel to LogServ for Monitoring. You must specify:",

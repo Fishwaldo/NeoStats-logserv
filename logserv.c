@@ -580,7 +580,7 @@ static int lgs_chans(User * u, char **av, int ac) {
 			prefmsg(u->nick, s_LogServ, "/msg %s HELP CHANS for more information", s_LogServ);
 			return NS_FAILURE;
 		}
-		hn = hash_lookup(lgschans, av[4]);
+		hn = hash_lookup(lgschans, av[3]);
 		if (hn) {
 			cl = hnode_get(hn);
 		} else {
@@ -591,7 +591,7 @@ static int lgs_chans(User * u, char **av, int ac) {
 			prefmsg(u->nick, s_LogServ, "Can not find Channel %s in Logging System", av[3]);
 			return NS_FAILURE;
 		}
-		if (!strcasecmp(av[3], "URL")) {
+		if (!strcasecmp(av[4], "URL")) {
 			ircsnprintf(cl->statsurl, MAXPATH, "%s", av[5]);
 			prefmsg(u->nick, s_LogServ, "Changed URL for %s to: %s", cl->channame, cl->statsurl);
 			chanalert(s_LogServ, "%s changed the URL for %s to: %s", u->nick, cl->channame, cl->statsurl);
