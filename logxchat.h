@@ -29,6 +29,7 @@ int xchat_joinproc(ChannelLog *chandata, CmdParams* cmdparams);
 int xchat_partproc(ChannelLog *chandata, CmdParams* cmdparams);
 int xchat_msgproc(ChannelLog *chandata, CmdParams* cmdparams);
 int xchat_noticeproc(ChannelLog *chandata, CmdParams* cmdparams);
+int xchat_ctcpaction(ChannelLog *chandata, CmdParams* cmdparams);
 int xchat_quitproc(ChannelLog *chandata, CmdParams* cmdparams);
 int xchat_topicproc(ChannelLog *chandata, CmdParams* cmdparams);
 int xchat_kickproc(ChannelLog *chandata, CmdParams* cmdparams);

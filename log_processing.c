@@ -45,10 +45,10 @@ char timebuf[TIMEBUFSIZE];
 char startlog[BUFSIZE];
 
 log_proc logging_funcs[][LGSMSG_NUMTYPES] = {
-	{logserv_joinproc, logserv_partproc, logserv_msgproc, logserv_noticeproc, logserv_quitproc, logserv_topicproc, logserv_kickproc, logserv_nickproc, logserv_modeproc},
-	{egg_joinproc, egg_partproc, egg_msgproc, egg_noticeproc, egg_quitproc, egg_topicproc, egg_kickproc, egg_nickproc, egg_modeproc},
-	{mirc_joinproc, mirc_partproc, mirc_msgproc, mirc_noticeproc, mirc_quitproc, mirc_topicproc, mirc_kickproc, mirc_nickproc, mirc_modeproc},
-	{xchat_joinproc, xchat_partproc, xchat_msgproc, xchat_noticeproc, xchat_quitproc, xchat_topicproc, xchat_kickproc, xchat_nickproc, xchat_modeproc},
+	{logserv_joinproc, logserv_partproc, logserv_msgproc, logserv_noticeproc, logserv_ctcpaction, logserv_quitproc, logserv_topicproc, logserv_kickproc, logserv_nickproc, logserv_modeproc},
+	{egg_joinproc, egg_partproc, egg_msgproc, egg_noticeproc, egg_ctcpaction, egg_quitproc, egg_topicproc, egg_kickproc, egg_nickproc, egg_modeproc},
+	{mirc_joinproc, mirc_partproc, mirc_msgproc, mirc_noticeproc, mirc_ctcpaction, mirc_quitproc, mirc_topicproc, mirc_kickproc, mirc_nickproc, mirc_modeproc},
+	{xchat_joinproc, xchat_partproc, xchat_msgproc, xchat_noticeproc, xchat_ctcpaction, xchat_quitproc, xchat_topicproc, xchat_kickproc, xchat_nickproc, xchat_modeproc},
 };
 
 static int lgs_open_log(ChannelLog *cl);

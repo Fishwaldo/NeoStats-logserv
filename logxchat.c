@@ -65,27 +65,25 @@ int xchat_partproc(ChannelLog *chandata, CmdParams* cmdparams)
 
 #define XMSGFMT "%s <%s>\t%s\n"
 
-/* Action: 
- * Jan 02 17:28:52 *       Fish-Away sighs */
-#define XACTFMT "%s *\t%s %s\n"
-
 int xchat_msgproc(ChannelLog *chandata, CmdParams* cmdparams) {
-	if (cmdparams->ac == 3) {
-		lgs_write_log(chandata, XACTFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
-	} else {
-		lgs_write_log(chandata, XMSGFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
-	}
+	lgs_write_log(chandata, XMSGFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 
 int xchat_noticeproc(ChannelLog *chandata, CmdParams* cmdparams) {
-	if (cmdparams->ac == 3) {
-		lgs_write_log(chandata, XACTFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
-	} else {
-		lgs_write_log(chandata, XMSGFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
-	}
+	lgs_write_log(chandata, XMSGFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
+
+/* Action: 
+ * Jan 02 17:28:52 *       Fish-Away sighs */
+#define XACTFMT "%s *\t%s %s\n"
+
+int xchat_ctcpaction(ChannelLog *chandata, CmdParams* cmdparams) {
+	lgs_write_log(chandata, XACTFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
+	return NS_SUCCESS;
+}
+
 /* Jan 02 17:47:26 <--     Dirk-Digler has quit (Killed (Fish (get lost))) */
 #define XQUITFMT "%s <--\t%s has quit (%s)\n"
 

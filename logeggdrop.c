@@ -57,25 +57,24 @@ int egg_partproc(ChannelLog *chandata, CmdParams* cmdparams)
 	return NS_SUCCESS;
 }
 
-/* [22:04] <Fish> I think that is it
- * [22:04] Action: Fish waits for the eggdrop to flush its logs now
- */
+/* [22:04] <Fish> I think that is it */
 #define EMSGPROC "%s <%s> %s\n"
-#define EACTPROC "%s Action: %s %s\n"
 
 int egg_msgproc(ChannelLog *chandata, CmdParams* cmdparams) {
-	if (cmdparams->ac == 3) 
-		lgs_write_log(chandata, EACTPROC, egg_time(), cmdparams->source->name, cmdparams->param);
-	else 
-		lgs_write_log(chandata, EMSGPROC, egg_time(), cmdparams->source->name, cmdparams->param);
+	lgs_write_log(chandata, EMSGPROC, egg_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 
 int egg_noticeproc(ChannelLog *chandata, CmdParams* cmdparams) {
-	if (cmdparams->ac == 3) 
-		lgs_write_log(chandata, EACTPROC, egg_time(), cmdparams->source->name, cmdparams->param);
-	else 
-		lgs_write_log(chandata, EMSGPROC, egg_time(), cmdparams->source->name, cmdparams->param);
+	lgs_write_log(chandata, EMSGPROC, egg_time(), cmdparams->source->name, cmdparams->param);
+	return NS_SUCCESS;
+}
+
+/* [22:04] Action: Fish waits for the eggdrop to flush its logs now */
+#define EACTPROC "%s Action: %s %s\n"
+
+int egg_ctcpaction(ChannelLog *chandata, CmdParams* cmdparams) {
+	lgs_write_log(chandata, EACTPROC, egg_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 

@@ -70,25 +70,23 @@ int mirc_partproc(ChannelLog *chandata, CmdParams* cmdparams)
 }
 
 /* [21:47] <Digi|Away> yes we are feeling nice today */
-/* [21:47] * Fish does a action for Digi|Away's log */
 #define MMSGPROC "%s <%s> %s\n"
-#define MACTPROC "%s * %s %s\n"
 
 int mirc_msgproc(ChannelLog *chandata, CmdParams* cmdparams) {
-	if (cmdparams->ac == 3) {
-		lgs_write_log(chandata, MACTPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
-	} else {
-		lgs_write_log(chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
-	}
+	lgs_write_log(chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 
 int mirc_noticeproc(ChannelLog *chandata, CmdParams* cmdparams) {
-	if (cmdparams->ac == 3) {
-		lgs_write_log(chandata, MACTPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
-	} else {
-		lgs_write_log(chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
-	}
+	lgs_write_log(chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
+	return NS_SUCCESS;
+}
+
+/* [21:47] * Fish does a action for Digi|Away's log */
+#define MACTPROC "%s * %s %s\n"
+
+int mirc_ctcpaction(ChannelLog *chandata, CmdParams* cmdparams) {
+	lgs_write_log(chandata, MACTPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 

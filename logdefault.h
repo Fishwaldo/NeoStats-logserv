@@ -29,6 +29,7 @@ int logserv_joinproc(ChannelLog *chandata, CmdParams* cmdparams);
 int logserv_partproc(ChannelLog *chandata, CmdParams* cmdparams);
 int logserv_msgproc(ChannelLog *chandata, CmdParams* cmdparams);
 int logserv_noticeproc(ChannelLog *chandata, CmdParams* cmdparams);
+int logserv_ctcpaction(ChannelLog *chandata, CmdParams* cmdparams);
 int logserv_quitproc(ChannelLog *chandata, CmdParams* cmdparams);
 int logserv_topicproc(ChannelLog *chandata, CmdParams* cmdparams);
 int logserv_kickproc(ChannelLog *chandata, CmdParams* cmdparams);

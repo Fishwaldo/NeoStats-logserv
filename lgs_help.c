@@ -71,7 +71,7 @@ const char *lgs_help_url[] = {
 
 const char *lgs_help_stats[] = {
 	"Syntax: \2STATS\2",
-	"        \2STATS\2 displays some simple stats about LogServ",
+	"Displays some simple stats about LogServ",
 	NULL
 };
 

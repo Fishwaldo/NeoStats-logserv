@@ -138,6 +138,20 @@ static int lgs_event_cnotice (CmdParams* cmdparams)
 	return 1;
 }
 
+static int lgs_event_ctcpaction (CmdParams* cmdparams) 
+{
+	ChannelLog *cl;
+	if (cmdparams->channel->moddata[lgs_module->modnum]) {
+		cl = cmdparams->channel->moddata[lgs_module->modnum];
+/*		if (argv[1][0] == '\1') {
+			AddStringToList(&data, argv[1], &datasize);
+			buf = joinbuf(argv, argc, 2);
+		} else {*/
+		lgs_send_to_logproc(LGSMSG_CTCPACTION, cl, cmdparams);		
+	}
+	return 1;
+}
+
 static int lgs_event_part (CmdParams* cmdparams) 
 {
 	ChannelLog *cl;
@@ -334,6 +348,7 @@ ModuleEvent module_events[] =
 {
 	{EVENT_CPRIVATE,	lgs_event_cprivate},
 	{EVENT_CNOTICE,		lgs_event_cnotice},
+	{EVENT_CTCPACTIONREQ,lgs_event_ctcpaction},
 	{EVENT_NEWCHAN,		lgs_event_newchan},
 	{EVENT_JOIN,		lgs_event_join,		EVENT_FLAG_EXCLUDE_MODME},
 	{EVENT_PART,		lgs_event_part,		EVENT_FLAG_EXCLUDE_MODME},

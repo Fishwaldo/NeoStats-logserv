@@ -46,6 +46,10 @@ int logserv_noticeproc(ChannelLog *chandata, CmdParams* cmdparams) {
 	return NS_SUCCESS;
 }
 
+int logserv_ctcpaction(ChannelLog *chandata, CmdParams* cmdparams) {
+	return NS_SUCCESS;
+}
+
 int logserv_quitproc(ChannelLog *chandata, CmdParams* cmdparams) {
 
 	return NS_SUCCESS;
