@@ -3,6 +3,7 @@
 /COPYING -text
 /ChangeLog -text
 /LICENSE -text
+/LogServ.README -text
 /LogServ.README.html -text
 /LogServ.xml -text
 /Makefile.in -text
