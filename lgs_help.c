@@ -71,3 +71,13 @@ const char *lgs_help_set_logtype[] = {
 	"The Log format to use",
 	NULL
 };
+
+const char *lgs_help_set_logsize[] = {
+	"THe LogSize when we switch",
+	NULL
+};
+
+const char *lgs_help_set_logtime[] = {
+	"The age of a logfile before we switch",
+	NULL
+};

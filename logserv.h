@@ -59,6 +59,7 @@ struct LogServ {
 	char logdir[MAXPATH];
 	char savedir[MAXPATH];
 	long maxlogsize;
+	long maxopentime;
 } LogServ;
 
 /* Definitions for flags */
@@ -135,6 +136,7 @@ int xchat_kickproc(ChannelLog *, char **, int);
 int xchat_nickproc(ChannelLog *, char **, int);
 int xchat_modeproc(ChannelLog *, char **, int);
 
-
+void lgs_RotateLogs();
+void lgs_close_logs();
 
 #endif

@@ -124,6 +124,9 @@ static void lgs_write_log(ChannelLog *cl, char *fmt, ...) {
 		}
 	}
 	/* ok, file is opened. write the string to it */
+#ifdef DEBUG
+	printf("%s\n", log_buf);
+#endif
 	fprintf(cl->logfile, "%s", log_buf);
 	cl->dostat++;
 #ifdef DEBUG
@@ -180,6 +183,7 @@ static int lgs_open_log(ChannelLog *cl) {
 	nlog(LOG_DEBUG1, LOG_MOD, "Opened %s for Appending", cl->filename);
 	/* set hte flag */
 	cl->flags |= LGSFDOPENED;
+	cl->fdopened = me.now;
 	return NS_SUCCESS;
 }
 
@@ -216,25 +220,28 @@ static void lgs_switch_file(ChannelLog *cl) {
 	char tmbuf[MAXPATH];
 	char newfname[MAXPATH];
 	char oldfname[MAXPATH];
+	char savedir[MAXPATH];
 	int res;
 
 	/* close the logfile */
 	fclose(cl->logfile);
+	cl->fdopened = 0;
 	cl->flags &= ~ LGSFDOPENED;
-	
 	/* check if the target directory exists */
-	res = stat(LogServ.savedir, &st);
+	ircsnprintf(savedir, MAXPATH, "%s/\%s", LogServ.savedir, cl->filename);
+	
+	res = stat(savedir, &st);
 	if (res != 0) {
 		/* hrm, error */
 		if (errno == ENOENT) {
 			/* ok, it doesn't exist, create it */
-			res = mkdir(LogServ.savedir, 0700);
+			res = mkdir(savedir, 0700);
 			if (res != 0) {
 				/* error */
 				nlog(LOG_CRITICAL, LOG_MOD, "Couldn't create LogDir Directory: %s", strerror(errno));
 				return;
 			}
-			nlog(LOG_NOTICE, LOG_MOD, "Created Channel Logging Dir %s", LogServ.savedir);
+			nlog(LOG_NOTICE, LOG_MOD, "Created Channel Logging Dir %s", savedir);
 		} else {
 			nlog(LOG_CRITICAL, LOG_MOD, "Stat Returned A error: %s", strerror(errno));
 			return;
@@ -242,20 +249,62 @@ static void lgs_switch_file(ChannelLog *cl) {
 	}
 	/* is it a directory ? */
 	if (!S_ISDIR(st.st_mode))	{
-		nlog(LOG_CRITICAL, LOG_MOD, "%s is not a Directory", LogServ.savedir);
+		nlog(LOG_CRITICAL, LOG_MOD, "%s is not a Directory", savedir);
 		return;
 	}
 	strftime(tmbuf, MAXPATH, "%d%m%Y%H%M%S", localtime(&me.now));
-	ircsnprintf(newfname, MAXPATH, "%s/%s-%s.log", LogServ.savedir, cl->filename, tmbuf);
+	ircsnprintf(newfname, MAXPATH, "%s/%s-%s.log", savedir, cl->filename, tmbuf);
 	ircsnprintf(oldfname, MAXPATH, "%s/%s.log", LogServ.logdir, cl->filename);
 	res = rename(oldfname, newfname);
 	if (res != 0) {
 		nlog(LOG_CRITICAL, LOG_MOD, "Couldn't Rename file %s: %s", oldfname, strerror(errno));
 	}	
+	nlog(LOG_NORMAL, LOG_MOD, "Switched Logfile for %s from %s to %s", cl->channame, oldfname, newfname);
 }
-static void lgs_close_logs() {
+void lgs_close_logs() {
+	hscan_t hs;
+	hnode_t *hn;
+	ChannelLog *cl;
+	Chans *c;
+	
+	/* scan through the log files */
+	hash_scan_begin(&hs, lgschans);
+	while (( hn = hash_scan_next(&hs)) != NULL) {
+		cl = hnode_get(hn);
+		/* if the log is opened then close it */
+		if (cl->flags & LGSFDOPENED) {
+			fclose(cl->logfile);
+		}
+		/* delete them from the hash */
+		c = cl->c;
+		if (c) {
+			c->moddata[LogServ.modnum] = NULL;
+			cl->c = NULL;
+		}
+		hash_delete(lgschans, hn);
+		hnode_destroy(hn);
+		free(cl);
+	}
 
 }
+
+void lgs_RotateLogs() {
+	hscan_t hs;
+	hnode_t *hn;
+	ChannelLog *cl;
+	
+	/* scan through the log files */
+	hash_scan_begin(&hs, lgschans);
+	while (( hn = hash_scan_next(&hs)) != NULL) {
+		cl = hnode_get(hn);
+		/* if the log has been opened more than X, then rotate */
+		if ((cl->flags & LGSFDOPENED) && ((me.now - cl->fdopened) > LogServ.maxopentime)) {
+			lgs_switch_file(cl);
+		}
+	}
+}
+
+
 
 char *dirc_startlog(ChannelLog *chandata) {
 	return startlog;

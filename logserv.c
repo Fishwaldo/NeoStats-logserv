@@ -89,6 +89,24 @@ bot_setting lgs_settings[]=
 	"LogType",
 	"Log Type",
 	lgs_help_set_logtype },
+	{"LOGSIZE",		
+	&LogServ.maxlogsize,	
+	SET_TYPE_INT,	
+	0,	
+	10000000,	
+	NS_ULEVEL_ADMIN,
+	"LogSwitchSize",
+	"Bytes",
+	lgs_help_set_logsize },
+	{"LOGAGE",		
+	&LogServ.maxopentime,	
+	SET_TYPE_INT,	
+	0,	
+	86400,	
+	NS_ULEVEL_ADMIN,
+	"LogSwitchTime",
+	"Seconds",
+	lgs_help_set_logtime },
 	{NULL,			NULL,			0,		0, 	0,	0,			NULL,		NULL,		NULL },
 };
 
@@ -250,7 +268,11 @@ static int lgs_Online(char **av, int ac)
 			cn = hnode_create(cl);
 			hash_insert(lgschans, cn, cl->channame);
 		}	
-	}		
+	}
+	
+	/* start a timer to scan the logs for rotation */
+	add_mod_timer("lgs_RotateLogs", "Rotate_LogServ_Logs", __module_info.module_name, 300);
+			
 	return 1;
 };
 
@@ -390,12 +412,19 @@ int __ModInit(int modnum, int apiver)
 	if (GetConf((void *)&LogServ.logtype, CFGINT, "LogType") < 0) {
 		LogServ.logtype = 0;
 	} 
-
+	/* get the logsize switch */
+	if (GetConf((void *)&LogServ.maxlogsize, CFGINT, "LogSwitchSize") < 0) {
+		/* 1Mb, or there abouts is default */
+		LogServ.maxlogsize = 1000000;
+	}
+	/* get the logage time */
+	if (GetConf((void *)&LogServ.maxopentime, CFGINT, "LogSwitchTime") < 0) {
+		/* switch every 1 hour */
+		LogServ.maxopentime = 3600;
+	}
 	/*XXX TODO */
 	ircsnprintf(LogServ.logdir, MAXPATH, "logs/chanlogs");
 	ircsnprintf(LogServ.savedir, MAXPATH, "ChanLogs");
-	LogServ.maxlogsize = 2000;
-		
 	LogServ.modnum = modnum;
 	return 1;
 }
@@ -405,6 +434,9 @@ int __ModInit(int modnum, int apiver)
  */
 void __ModFini()
 {
+	/* close the log files */
+	lgs_close_logs();
+
 
 };
 
