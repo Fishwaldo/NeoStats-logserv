@@ -129,9 +129,46 @@ int __ChanMessage(char *origin, char **argv, int argc)
  */
 static int Online(char **av, int ac)
 {
+	ChannelLog *cl;
+	hnode_t *cn;
+	char **row;
+	int count;
+	Chans *c;
 	/* Introduce a bot onto the network */
 	lgs_bot = init_mod_bot(s_LogServ, "LogBot", me.name, "Channel Logging Bot", services_bot_modes,
 		BOT_FLAG_ONLY_OPERS, lgs_commands, lgs_settings, __module_info.module_name);		
+
+	/* load Channels and join them */
+	if (GetTableData("Chans", &row) > 0) {
+		for (count = 0; row[count] != NULL; count++) {
+			nlog(LOG_DEBUG1, LOG_MOD, "Loading Channel %s", row[count]);
+			cl = malloc(sizeof(ChannelLog));
+			bzero(cl, sizeof(ChannelLog));
+			strlcpy(cl->channame, row[count], CHANLEN);
+			if (GetData((void *)&cl->flags, CFGINT, "Chans", cl->channame, "Flags") > 0) {
+				cl->flags &= ~LGSACTIVE;
+				cl->flags &= ~LGSFDNEEDFLUSH;
+				cl->flags &= ~LGSFDOPENED;
+			}
+			if (GetData((void *)&cl->statsurl, CFGSTR, "Chans", cl->channame, "URL") == 0) {
+				cl->statsurl[0] = '\0';
+			}
+			c = findchan(cl->channame);
+			if (c) {
+				if (join_bot_to_chan(s_LogServ, cl->channame, 0) == NS_SUCCESS) {
+					cl->flags |= LGSACTIVE;
+					nlog(LOG_NOTICE, LOG_MOD, "Actived Logging on channel %s", cl->channame);
+					if (cl->statsurl[0] != '\0') {
+						prefmsg(cl->channame, s_LogServ, "Stats will be avaiable at %s when Logs are processed next", cl->statsurl);
+					}	
+				}
+				c->moddata[LogServ.modnum] = cl;
+				cl->c = c;
+			}
+			cn = hnode_create(cl);
+			hash_insert(lgschans, cn, cl->channame);
+		}	
+	}		
 	return 1;
 };
 
