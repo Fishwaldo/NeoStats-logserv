@@ -507,10 +507,16 @@ int egg_nickproc(ChannelLog *chandata, char **av, int ac) {
  * [21:46] * Set by LuShes on Fri Jan 02 11:11:57
  */
 
-#define MSTARTLOG "Session Start:%s\nSession Ident: %s\n%s * Now talking in %s\n%s * Topic is '%s'\n%s * Set by %s on %s\n"
+#define MSTARTLOG "Session Start: %s\nSession Ident: %s\n%s * Now talking in %s\n%s * Topic is '%s'\n%s * Set by %s on %s\n"
 
 char *mirc_startlog(ChannelLog *cl) {
-
+	char timebuf2[TIMEBUFSIZE];
+	char timebuf3[TIMEBUFSIZE];
+	
+	strftime(timebuf, TIMEBUFSIZE, "%a %b %d %H:%M:%S %Y", localtime(&me.now));
+	strftime(timebuf2, TIMEBUFSIZE, "[%H:%M]", localtime(&me.now));
+	strftime(timebuf3, TIMEBUFSIZE, "%a %b %d %H:%M:%S", localtime(&cl->c->topictime));
+	ircsnprintf(startlog, BUFSIZE, MSTARTLOG, timebuf, cl->channame, timebuf2, cl->channame, timebuf2, cl->c->topic[0] != '0' ? cl->c->topic : "", timebuf2, cl->c->topicowner[0] != '0' ? cl->c->topicowner: "", timebuf3);
 
 	return startlog;
 }
@@ -523,18 +529,22 @@ char *mirc_time() {
 
 
 /* [21:47] * Dirk-Digler has joined #neostats */
-#define MJOINPROC "%s * %s has joined %s\n"
+#define MJOINPROC "%s * %s (%s@%s) has joined %s\n"
 
 int mirc_joinproc(ChannelLog *chandata, char **av, int ac) {
-	lgs_write_log(chandata, MJOINPROC, mirc_time(), av[1], av[0]);
+	User *u;
+	u = finduser(av[1]);
+	lgs_write_log(chandata, MJOINPROC, mirc_time(), u->nick, u->username, u->vhost, av[0]);
 	return NS_SUCCESS;
 }
 
 /* [22:07] * DigiGuy has left #neostats */
-#define MPARTPROC "%s * %s has left %s\n"
+#define MPARTPROC "%s * %s (%s@%s) has left %s (%s)\n"
 
 int mirc_partproc(ChannelLog *chandata, char **av, int ac) {
-	lgs_write_log(chandata, MPARTPROC, mirc_time(), av[1], av[0]);
+	User *u;
+	u = finduser(av[1]);
+	lgs_write_log(chandata, MPARTPROC, mirc_time(), u->nick, u->username, u->vhost, av[0], ac == 3 ? av[2] : "");
 	return NS_SUCCESS;
 }
 
@@ -624,8 +634,7 @@ int xchat_joinproc(ChannelLog *chandata, char **av, int ac) {
 	User *u;
 	u = finduser(av[1]);
 	if (u) 
-		lgs_write_log(chandata, XJOINFMT, xchat_time(), u->nick, u->username, u->vhost, av[0]);
-	return NS_SUCCESS;
+		lgs_write_log(chandata, XJOINFMT, xchat_time(), u->nick, u->username, u->vhost, av[0]); return NS_SUCCESS;
 }
 
 /* Jan 02 17:56:52 <--     DigiGuy (~b.dole@Oper.irc-chat.net) has left #neostats (part)*/
