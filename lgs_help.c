@@ -48,13 +48,13 @@ const char *lgs_help_chan[] = {
 	"\2ADD\2 Adds a channel to LogServ for Monitoring. You must specify:",
 	"      The Channel Name",
 	"      Public/Private to indicate if the logging for this channel should be",
-	"      make know to users",
+	"      made known to users",
 	"      a URL to display when joining the channel showing where users can view",
 	"      Statistics about the channel",
-	"\2DEL\2 Deletes a channel from LogServ for Monitoring",
-	"      Requires the channel names",
-	"\2LIST\2 Lists the channels that LogServ is currently monitoring",
-	"\2SET\2 Modifies certian features of LogServ on that channel",
+	"\2DEL\2 Deletes a logged channel from LogServ",
+	"      Requires the channel name",
+	"\2LIST\2 Lists the channels that LogServ is currently logging",
+	"\2SET\2 Modifies certain features of LogServ on that channel",
 	"      Those options include:",
 	"      \2URL\2 - Modifies the URL for the stats on that channel",
 	NULL
@@ -73,14 +73,14 @@ const char *lgs_help_version[] = {
 
 const char *lgs_help_set_logtype[] = {
 	"\2LOGTYPE\2 <type>",
-	"Modifies the logfile format that LogServ should Use.",
+	"Modifies the logfile format that LogServ uses.",
 	"The options are:",
 	"\2 1\2 - EggDrop Format",
 	"\2 2\2 - Mirc Format",
 	"\2 3\2 - Xchat Format",
 	"",
 	"You should restart NeoStats, or reload the LogServ module after changing",
-	"the log file format so knew log files will be created",
+	"the log file format so new log files will be created",
 	NULL
 };
 
@@ -91,6 +91,6 @@ const char *lgs_help_set_logsize[] = {
 };
 
 const char *lgs_help_set_logtime[] = {
-	"\2LOGAGE\2 <seconds> - Specify the age in seconds that we rotate the log file, irregardless of log file size",
+	"\2LOGAGE\2 <seconds> - Specify the age in seconds that we rotate the log file, regardless of log file size",
 	NULL
 };
