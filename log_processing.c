@@ -231,7 +231,7 @@ static void lgs_stat_file(ChannelLog *cl) {
 			return;
 		}
 	}
-	nlog(LOG_DEBUG1, LOG_MOD, "Logfile Size of %s is %d", fname, st.st_size);
+	nlog(LOG_DEBUG1, LOG_MOD, "Logfile Size of %s is %d", fname, (int)st.st_size);
 	if (st.st_size > LogServ.maxlogsize) {
 		nlog(LOG_DEBUG1, LOG_MOD, "Switching Logfile %s", fname);
 		/* ok, the file exceeds out limits, lets switch it */
