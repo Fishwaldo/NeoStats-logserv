@@ -1,6 +1,6 @@
 #Neostats Module Makefile!
 CC=@CC@
-CFLAGS=@CFLAGS@
+CFLAGS=@CFLAGS@ -g
 LDFLAGS= @LIBS@
 INSTALL = @INSTALL@                                                                                                                 
 INSTALL_PROGRAM = @INSTALL_PROGRAM@                                                                                                 

@@ -112,13 +112,19 @@ int __ChanMessage(char *origin, char **argv, int argc)
 	Chans *c;
 	ChannelLog *cl;
 	char **data;
-	int datasize;
-	char *buf = joinbuf(argv, argc, 1);
+	int datasize = 0;
+	char *buf;
 	
 	c = findchan(chan);
 	if (c && c->moddata[LogServ.modnum]) {
 		cl = c->moddata[LogServ.modnum];
 		AddStringToList(&data, origin, &datasize);
+		if (argv[1][0] == '\1') {
+			AddStringToList(&data, argv[1], &datasize);
+			buf = joinbuf(argv, argc, 2);
+		} else {
+			buf = joinbuf(argv, argc, 1);
+		}
 		AddStringToList(&data, buf, &datasize);
 		lgs_send_to_logproc(LGSMSG_MSG, cl, data, datasize);		
 		free(data);

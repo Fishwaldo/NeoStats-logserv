@@ -95,6 +95,8 @@ typedef struct logtype_proc {
 
 
 /* log_procssing.c decl */
+
+
 int dirc_joinproc(ChannelLog *, char **, int);
 int dirc_partproc(ChannelLog *, char **, int);
 int dirc_msgproc(ChannelLog *, char **, int);
