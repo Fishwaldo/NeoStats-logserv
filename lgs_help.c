@@ -27,57 +27,69 @@
 
 #include "stats.h"
 
-const char lgs_help_about_oneline[]="About StatServ";
-const char lgs_help_version_oneline[]="Shows you the current StatServ Version";
-const char lgs_help_chan_oneline[]="Channel Information";
-const char lgs_help_stats_oneline[]="Modify Statistic Entries.";
+const char lgs_help_about_oneline[]="About LogServ";
+const char lgs_help_version_oneline[]="Shows you the current LogServ Version";
+const char lgs_help_chan_oneline[]="Manipulate Channel Logging List";
+const char lgs_help_stats_oneline[]="Simple LogServ Stats";
 
 const char *lgs_help_about[] = {
-	"\2StatServ\2 provides detailed statistics about your",
-	"IRC network users, channels and servers.",
+	"\2LogServ\2 provides a Logging Service for Channels on IRC",
+	"That can be used to generate statistical information about the channel",
 	NULL
 };
 
 const char *lgs_help_chan[] = {
-	"Syntax: \2CHAN \37<POP/KICKS/TOPICS/<Channame>>\37\2",
+	"Syntax: \2CHANS \37ADD <Channame> <\"public\"/\"private\"> <url>\37\2",
+	"        \2CHANS \37DEL <Channame>\37\2",
+	"        \2CHANS \37LIST\37\2",
+	"        \2CHANS \37SET URL <url>\37\2",
 	"",
-	"Provides Statistics on Channels on the network",
-	"\2CHAN\2 By itself provides a list of the top 10 channels",
-	"    based on the current number of members",
-	"\2CHAN POP\2 gives you information on the most popular",
-	"    channels on the network based on the number of joins",
-	"\2CHAN KICKS\2 Gives you the top 10 kicking channels",
-	"\2CHAN TOPICS\2 Gives you the top 10 topic changing channels",
-	"\2CHAN <name>\2 Gives you specific information on a channel",
+	"Provides Logging Services for Channels on the network",
+	"\2ADD\2 Adds a channel to LogServ for Monitoring. You must specify:",
+	"      The Channel Name",
+	"      Public/Private to indicate if the logging for this channel should be",
+	"      make know to users",
+	"      a URL to display when joining the channel showing where users can view",
+	"      Statistics about the channel",
+	"\2DEL\2 Deletes a channel from LogServ for Monitoring",
+	"      Requires the channel names",
+	"\2LIST\2 Lists the channels that LogServ is currently monitoring",
+	"\2SET\2 Modifies certian features of LogServ on that channel",
+	"      Those options include:",
+	"      \2URL\2 - Modifies the URL for the stats on that channel",
 	NULL
 };
 
 const char *lgs_help_stats[] = {
-	"Syntax: \2STATS LIST\2",
-	"        \2STATS DEL <servername>\2",
-	"        \2STATS COPY <oldservername> <newservername>\2",
-	"",
-	"Use, LIST to list all database entries. DEL to remove an",
-	"entry and COPY to copy an entry.",
+	"Syntax: \2STATS\2",
+	"        \2STATS\2 displays some simple stats about LogServ",
 	NULL
 };
 
 const char *lgs_help_version[] = {
-	"hrm",
+	"Displays LogServ's Version Number",
 	NULL
 };
 
 const char *lgs_help_set_logtype[] = {
-	"The Log format to use",
+	"Modifies the logfile format that LogServ should Use.",
+	"The options are:",
+	"\21\2 - EggDrop Format",
+	"\22\2 - Mirc Format",
+	"\23\2 - Xchat Format",
+	"",
+	"You should restart NeoStats, or reload the LogServ module after changing",
+	"the log file format so knew log files will be created",
 	NULL
 };
 
 const char *lgs_help_set_logsize[] = {
-	"THe LogSize when we switch",
+	"Specify the size in bytes at which a logfile is automatically",
+	"rotated",
 	NULL
 };
 
 const char *lgs_help_set_logtime[] = {
-	"The age of a logfile before we switch",
+	"Specify the age in seconds that we rotate the log file, irregardless of log file size",
 	NULL
 };
