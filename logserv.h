@@ -147,4 +147,17 @@ void lgs_RotateLogs();
 void lgs_close_logs();
 void lgs_switch_file(ChannelLog *cl);
 
+extern const char lgs_help_about_oneline[];
+extern const char lgs_help_version_oneline[];
+extern const char lgs_help_chan_oneline[];
+extern const char lgs_help_stats_oneline[];
+extern const char *lgs_help_about[];
+extern const char *lgs_help_chan[];
+extern const char *lgs_help_stats[];
+extern const char *lgs_help_version[];
+extern const char *lgs_help_set_logtype[];
+extern const char *lgs_help_set_logsize[];
+extern const char *lgs_help_set_logtime[];
+
+
 #endif

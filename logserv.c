@@ -26,9 +26,7 @@
  */
 
 #include <stdio.h>
-#include "neostats.h"
 #include "logserv.h"
-#include "lgs_help.c"
 
 /* forward decl */
 static int lgs_about(User * u, char **av, int ac);

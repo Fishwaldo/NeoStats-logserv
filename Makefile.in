@@ -8,13 +8,13 @@ INSTALL_DATA = @INSTALL_DATA@
 DIRECTORY = @DIRINST@/dl/
 INCLUDES = -I@DIRINST@/include/ -I.
 
-SRCS= logserv.c log_processing.c
+SRCS= logserv.c log_processing.c lgs_help.c
 OBJS= ${SRCS:.c=.o}
 TARGET= logserv.so
 DOCS=LogServ.README LogServ.README.html
 SCRIPTS=OnisDoLogs.sh onisconfig
 DATA=
-DISTFILES=$(SRCS) $(DOCS) $(SCRIPTS) *.in configure install-sh ChangeLog *.h lgs_help.c LICENSE
+DISTFILES=$(SRCS) $(DOCS) $(SCRIPTS) *.in configure install-sh ChangeLog *.h LICENSE
 DISTDIR= @PACKAGE@-@VERSION@
 
 all:	 module
