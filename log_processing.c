@@ -628,14 +628,15 @@ int xchat_joinproc(ChannelLog *chandata, char **av, int ac) {
 	return NS_SUCCESS;
 }
 
-/* Jan 02 17:56:52 <--     DigiGuy (~b.dole@Oper.irc-chat.net) has left #neostats */
-#define XPARTPROC "%s <--\t%s (%s@%s) has left %s\n"
+/* Jan 02 17:56:52 <--     DigiGuy (~b.dole@Oper.irc-chat.net) has left #neostats (part)*/
+#define XPARTPROC "%s <--\t%s (%s@%s) has left %s (%s)\n"
 
 int xchat_partproc(ChannelLog *chandata, char **av, int ac) {
 	User *u;
 	u = finduser(av[1]);
 	if (u)
-		lgs_write_log(chandata, XPARTPROC, xchat_time(), u->nick, u->username, u->vhost, av[0]);
+		lgs_write_log(chandata, XPARTPROC, xchat_time(), u->nick, u->username, u->vhost, av[0], ac == 3 ? av[2] : "");
+
 	return NS_SUCCESS;
 }
 
