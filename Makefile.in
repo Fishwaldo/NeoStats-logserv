@@ -32,7 +32,7 @@ install: module
 	 $(INSTALL) -m 644 $(TARGET) $(DIRECTORY)
 	 $(INSTALL) -m 644 $(DOCS) $(DIRECTORY)../doc/
 	 @if ! test -d $(DIRECTORY)../ChanLogs/ ; then mkdir $(DIRECTORY)../ChanLogs/ ; fi 
-	 $(INSTALL) -m 644 $(SCRIPTS) $(DIRECTORY)../ChanLogs/
+	 $(INSTALL) -m 755 $(SCRIPTS) $(DIRECTORY)../ChanLogs/
 
 dist:	
 	@echo -n "Creating Directories"
