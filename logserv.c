@@ -137,7 +137,7 @@ static int lgs_join_logged_channel (Channel* c, ChannelLog *cl)
 			irc_chanprivmsg (lgs_bot, cl->channame, "Stats will be available at %s when Logs are processed next", cl->statsurl);
 		}	
 	}
-	set_channel_moddata (c, cl);
+	SetChannelModValue (c, cl);
 	cl->c = c;
 	return NS_SUCCESS;
 }
@@ -215,11 +215,11 @@ static int lgs_event_emptychan (CmdParams* cmdparams)
 {
 	ChannelLog *cl;
 	
-	cl = (ChannelLog *)get_channel_moddata (cmdparams->channel);
+	cl = (ChannelLog *)GetChannelModValue (cmdparams->channel);
 	if (cl) {
 		/*close/switch the logfile*/
 		lgs_switch_file(cl);
-		clear_channel_moddata (cl->c);
+		ClearChannelModValue (cl->c);
 		cl->c = NULL;
 		cl->flags &= ~LGSACTIVE;
 	}
@@ -401,7 +401,7 @@ static int lgs_cmd_del (CmdParams* cmdparams)
 		lgs_switch_file(cl);
 	}
 	if (cl->c) {
-		clear_channel_moddata (cl->c);
+		ClearChannelModValue (cl->c);
 	}
 	hash_delete(lgschans, hn);
 	hnode_destroy(hn);

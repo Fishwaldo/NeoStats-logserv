@@ -220,7 +220,7 @@ void lgs_close_logs() {
 		/* delete them from the hash */
 		c = cl->c;
 		if (c) {
-			clear_channel_moddata (c);
+			ClearChannelModValue (c);
 			cl->c = NULL;
 		}
 		hash_delete(lgschans, hn);
@@ -269,7 +269,7 @@ int lgs_send_to_logproc(LGSMSG_TYPE msgtype, Channel *c, CmdParams* cmdparams)
 
 	if (c)
 	{
-		cl = (ChannelLog *)get_channel_moddata (c);
+		cl = (ChannelLog *)GetChannelModValue (c);
 		if (cl)
 		{
 			return logging_funcs[LogServ.logtype][msgtype](cl, cmdparams);
