@@ -54,6 +54,40 @@ logtype_proc logging_funcs[] = {
 static int lgs_open_log(ChannelLog *cl);
 static void lgs_stat_file(ChannelLog *cl);
 
+
+/* 
+ *
+ */
+
+static int check_create_logdir (char* dirname)
+{
+	struct stat st;
+	int res;
+
+	/* first, make sure the logdir dir exists */
+	res = stat(dirname, &st);
+	if (res != 0) {
+		/* hrm, error */
+		if (errno == ENOENT) {
+			/* ok, it doesn't exist, create it */
+			res = sys_mkdir (dirname, 0700);
+			if (res != 0) {
+				/* error */
+				nlog (LOG_CRITICAL, "Couldn't create LogDir Directory: %s", strerror(errno));
+				return NS_FAILURE;
+			}
+			nlog (LOG_NOTICE, "Created Channel Logging Dir %s", dirname);
+		} else {
+			nlog (LOG_CRITICAL, "Stat Returned A error: %s", strerror(errno));
+			return NS_FAILURE;
+		}
+	} else if (!S_ISDIR(st.st_mode))	{
+		nlog (LOG_CRITICAL, "%s is not a Directory", dirname);
+		return NS_FAILURE;
+	}
+	return NS_SUCCESS;
+}
+
 /* @brief write a formatted log to the log files, and check if we should switch th logfile
  * 
  * writes a message to a log file. If the logfile hasn't been opened yet, we 
@@ -81,16 +115,16 @@ void lgs_write_log(ChannelLog *cl, char *fmt, ...) {
 		/* ok, we just opened the file, write the start out */
 		switch (LogServ.logtype) {
 			case 0:
-				fprintf(cl->logfile, "%s", logserv_startlog(cl));
+				sys_file_printf (cl->logfile, "%s", logserv_startlog(cl));
 				break;
 			case 1:
-				fprintf(cl->logfile, "%s", egg_startlog(cl));
+				sys_file_printf (cl->logfile, "%s", egg_startlog(cl));
 				break;
 			case 2:
-				fprintf(cl->logfile, "%s", mirc_startlog(cl));
+				sys_file_printf (cl->logfile, "%s", mirc_startlog(cl));
 				break;
 			case 3:
-				fprintf(cl->logfile, "%s", xchat_startlog(cl));
+				sys_file_printf (cl->logfile, "%s", xchat_startlog(cl));
 				break;
 			default:
 				nlog (LOG_WARNING, "Unknown LogType");
@@ -100,15 +134,15 @@ void lgs_write_log(ChannelLog *cl, char *fmt, ...) {
 #ifdef DEBUG
 	printf("%s\n", log_buf);
 #endif
-	fprintf(cl->logfile, "%s", log_buf);
+	sys_file_printf (cl->logfile, "%s", log_buf);
 	cl->dostat++;
 #ifdef DEBUG
 	/* only flush the logfile in debug mode */
-	fflush(cl->logfile);
+	sys_file_flush (cl->logfile);
 #endif
 	/* ok, now stat the file to check size */
 	if (cl->dostat >= DOSIZE) { 
-		fflush(cl->logfile);
+		sys_file_flush (cl->logfile);
 		lgs_stat_file(cl);
 	}
 }
@@ -121,38 +155,19 @@ void lgs_write_log(ChannelLog *cl, char *fmt, ...) {
  */ 
 
 static int lgs_open_log(ChannelLog *cl) {
-	struct stat st;
-	int res;
 	char fname[MAXPATH];
 
 	/* first, make sure the logdir dir exists */
-	res = stat(LogServ.logdir, &st);
-	if (res != 0) {
-		/* hrm, error */
-		if (errno == ENOENT) {
-			/* ok, it doesn't exist, create it */
-			res = sys_mkdir (LogServ.logdir, 0700);
-			if (res != 0) {
-				/* error */
-				nlog (LOG_CRITICAL, "Couldn't create LogDir Directory: %s", strerror(errno));
-				return NS_FAILURE;
-			}
-			nlog (LOG_NOTICE, "Created Channel Logging Dir %s", LogServ.logdir);
-		} else {
-			nlog (LOG_CRITICAL, "Stat Returned A error: %s", strerror(errno));
-			return NS_FAILURE;
-		}
-	} else if (!S_ISDIR(st.st_mode))	{
-		nlog (LOG_CRITICAL, "%s is not a Directory", LogServ.logdir);
+	if (check_create_logdir (LogServ.logdir) != NS_SUCCESS)
+	{
 		return NS_FAILURE;
 	}
-	
 	/* copy name to the filename holder (in case of invalid paths) */
 	strlcpy(cl->filename, cl->channame, MAXPATH);
 	ircsnprintf(fname, MAXPATH, "%s/%s.log", LogServ.logdir, make_safe_filename (cl->filename));
 
 	/* open the file */
-	cl->logfile = fopen(fname, "a");
+	cl->logfile = sys_file_open (fname, "a");
 	if (!cl->logfile) {
 		nlog (LOG_CRITICAL, "Could not open %s for Appending: %s", cl->filename, strerror(errno));
 		return NS_FAILURE;
@@ -201,11 +216,9 @@ static void lgs_stat_file(ChannelLog *cl) {
  * @param cl the ChannelLog struct 
  */
 void lgs_switch_file(ChannelLog *cl) {
-	struct stat st;
 	char tmbuf[MAXPATH];
 	char newfname[MAXPATH];
 	char oldfname[MAXPATH];
-	char savedir[MAXPATH];
 	int res;
 
 	if (!(cl->flags & LGSFDOPENED)) {
@@ -213,34 +226,16 @@ void lgs_switch_file(ChannelLog *cl) {
 		return;
 	}
 	/* close the logfile */
-	fclose(cl->logfile);
+	sys_file_close (cl->logfile);
 	cl->fdopened = 0;
 	cl->flags &= ~ LGSFDOPENED;
 	/* check if the target directory exists */
-	ircsnprintf(savedir, MAXPATH, "%s/%s", LogServ.savedir, cl->filename);
-	
-	res = stat(savedir, &st);
-	if (res != 0) {
-		/* hrm, error */
-		if (errno == ENOENT) {
-			/* ok, it doesn't exist, create it */
-			res = sys_mkdir (savedir, 0700);
-			if (res != 0) {
-				/* error */
-				nlog (LOG_CRITICAL, "Couldn't create LogDir Directory: %s", strerror(errno));
-				return;
-			}
-			nlog (LOG_NOTICE, "Created Channel Logging Dir %s", savedir);
-		} else {
-			nlog (LOG_CRITICAL, "Stat Returned A error: %s", strerror(errno));
-			return;
-		}
-	} else if (!S_ISDIR(st.st_mode))	{
-		nlog (LOG_CRITICAL, "%s is not a Directory", savedir);
+	if (check_create_logdir (LogServ.savedir) != NS_SUCCESS)
+	{
 		return;
 	}
 	strftime(tmbuf, MAXPATH, "%d%m%Y%H%M%S", localtime(&me.now));
-	ircsnprintf(newfname, MAXPATH, "%s/%s-%s.log", savedir, cl->filename, tmbuf);
+	ircsnprintf(newfname, MAXPATH, "%s/%s-%s.log", LogServ.savedir, cl->filename, tmbuf);
 	ircsnprintf(oldfname, MAXPATH, "%s/%s.log", LogServ.logdir, cl->filename);
 	res = rename(oldfname, newfname);
 	if (res != 0) {
@@ -265,7 +260,7 @@ void lgs_close_logs() {
 		cl = hnode_get(hn);
 		/* if the log is opened then close it */
 		if (cl->flags & LGSFDOPENED) {
-			fclose(cl->logfile);
+			sys_file_close (cl->logfile);
 		}
 		/* delete them from the hash */
 		c = cl->c;
