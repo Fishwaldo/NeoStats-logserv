@@ -137,7 +137,7 @@ static int lgs_join_logged_channel (Channel* c, ChannelLog *cl)
 	return NS_SUCCESS;
 }
 
-int LoadLogChannel (void *data)
+int LoadLogChannel (void *data, int size)
 {
 	ChannelLog *cl;
 	Channel *c;
