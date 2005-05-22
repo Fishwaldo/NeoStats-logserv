@@ -22,11 +22,7 @@
 */
 
 #include "neostats.h"
-#ifdef WIN32
-#include "modconfigwin32.h"
-#else
-#include "modconfig.h"
-#endif
+#include MODULECONFIG
 #include "logserv.h"
 
 Bot *lgs_bot;
