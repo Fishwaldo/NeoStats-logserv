@@ -61,12 +61,12 @@ ModuleInfo module_info = {
 
 bot_cmd lgs_commands[]=
 {
-	{"ADD",		lgs_cmd_add ,	3, 	NS_ULEVEL_OPER,	lgs_help_add, 	lgs_help_add_oneline},
-	{"DEL",		lgs_cmd_del,	1, 	NS_ULEVEL_OPER,	lgs_help_del, 	lgs_help_del_oneline},
-	{"LIST",	lgs_cmd_list,	0, 	NS_ULEVEL_OPER,	lgs_help_list, 	lgs_help_list_oneline},
-	{"URL",		lgs_cmd_url,	2, 	NS_ULEVEL_OPER,	lgs_help_url, 	lgs_help_url_oneline},
-	{"STATS",	lgs_cmd_stats,	0, 	NS_ULEVEL_OPER,	lgs_help_stats, lgs_help_stats_oneline},
-	{NULL,		NULL,			0, 	0,				NULL, 			NULL}
+	{"ADD",		lgs_cmd_add ,	3, 	NS_ULEVEL_OPER,	lgs_help_add},
+	{"DEL",		lgs_cmd_del,	1, 	NS_ULEVEL_OPER,	lgs_help_del},
+	{"LIST",	lgs_cmd_list,	0, 	NS_ULEVEL_OPER,	lgs_help_list},
+	{"URL",		lgs_cmd_url,	2, 	NS_ULEVEL_OPER,	lgs_help_url},
+	{"STATS",	lgs_cmd_stats,	0, 	NS_ULEVEL_OPER,	lgs_help_stats},
+	{NULL,		NULL,			0, 	0,				NULL}
 };
 
 bot_setting lgs_settings[]=

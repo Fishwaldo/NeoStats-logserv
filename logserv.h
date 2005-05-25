@@ -80,11 +80,6 @@ void lgs_close_logs();
 void lgs_switch_file(ChannelLog *cl);
 void lgs_write_log(ChannelLog *cl, char *fmt, ...) __attribute__((format(printf,2,3)));
 
-extern const char lgs_help_add_oneline[];
-extern const char lgs_help_del_oneline[];
-extern const char lgs_help_list_oneline[];
-extern const char lgs_help_url_oneline[];
-extern const char lgs_help_stats_oneline[];
 extern const char *ls_about[];
 extern const char *lgs_help_add[];
 extern const char *lgs_help_del[];

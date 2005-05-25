@@ -23,12 +23,6 @@
 
 #include "neostats.h"
 
-const char lgs_help_add_oneline[]="Add channel to log";
-const char lgs_help_del_oneline[]="Stop logging channel";
-const char lgs_help_list_oneline[]="List current channel log list";
-const char lgs_help_url_oneline[]="Change channel URL";
-const char lgs_help_stats_oneline[]="Simple LogServ Stats";
-
 const char *ls_about[] = {
 	"\2LogServ\2 provides a channel logging service that",
 	"can be used to generate statistical information.",
@@ -36,6 +30,7 @@ const char *ls_about[] = {
 };
 
 const char *lgs_help_add[] = {
+	"Add channel to log",
 	"Syntax: \2ADD \37<#channel name> <PUBLIC|PRIVATE> [url]\37\2",
 	"",
 	"Adds a channel to LogServ for Monitoring. ",
@@ -47,6 +42,7 @@ const char *lgs_help_add[] = {
 };
 
 const char *lgs_help_del[] = {
+	"Stop logging channel",
 	"Syntax: \2DEL \37<Channame>\37\2",
 	"",
 	"Deletes a logged channel from LogServ",
@@ -55,6 +51,7 @@ const char *lgs_help_del[] = {
 };
 
 const char *lgs_help_list[] = {
+	"List current channel log list",
 	"Syntax: \2LIST\2",
 	"",
 	"Lists the channels that LogServ is currently logging",
@@ -62,6 +59,7 @@ const char *lgs_help_list[] = {
 };
 
 const char *lgs_help_url[] = {
+	"Change channel URL",
 	"Syntax: \2URL \37<url>\37\2",
 	"",
 	"Modifies the URL for the stats on that channel",
@@ -69,6 +67,7 @@ const char *lgs_help_url[] = {
 };
 
 const char *lgs_help_stats[] = {
+	"Simple LogServ Stats",
 	"Syntax: \2STATS\2",
 	"",
 	"Displays some simple stats about LogServ",
