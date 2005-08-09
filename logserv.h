@@ -75,7 +75,7 @@ typedef int (*log_proc) (ChannelLog *chandata, CmdParams* cmdparams);
 
 /* log_procssing.c decl */
 int lgs_send_to_logproc (LGSMSG_TYPE msgtype, Channel *c, CmdParams* cmdparams);
-int lgs_RotateLogs(void);
+int lgs_RotateLogs(void *);
 void lgs_close_logs();
 void lgs_switch_file(ChannelLog *cl);
 void lgs_write_log(ChannelLog *cl, char *fmt, ...) __attribute__((format(printf,2,3)));

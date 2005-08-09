@@ -306,7 +306,7 @@ int ModSynch (void)
 	/* load Channels and join them */
 	LoadLogChannels ();
 	/* start a timer to scan the logs for rotation */
-	AddTimer (TIMER_TYPE_INTERVAL, lgs_RotateLogs, "lgs_RotateLogs", 300);
+	AddTimer (TIMER_TYPE_INTERVAL, lgs_RotateLogs, "lgs_RotateLogs", 300, NULL);
 	return NS_SUCCESS;
 }
 

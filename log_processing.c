@@ -230,7 +230,7 @@ void lgs_close_logs() {
  * 
  * Runs through all active opened logfiles only
  */
-int lgs_RotateLogs(void) 
+int lgs_RotateLogs(void *userptr) 
 {
 	hscan_t hs;
 	hnode_t *hn;
