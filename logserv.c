@@ -66,7 +66,7 @@ bot_cmd lgs_commands[]=
 	{"LIST",	lgs_cmd_list,	0, 	NS_ULEVEL_OPER,	lgs_help_list},
 	{"URL",		lgs_cmd_url,	2, 	NS_ULEVEL_OPER,	lgs_help_url},
 	{"STATS",	lgs_cmd_stats,	0, 	NS_ULEVEL_OPER,	lgs_help_stats},
-	{NULL,		NULL,			0, 	0,				NULL}
+	NS_CMD_END()
 };
 
 bot_setting lgs_settings[]=
@@ -116,7 +116,7 @@ bot_setting lgs_settings[]=
 	NULL,
 	lgs_help_set_savedir,
 	NULL, (void*)"chanlogs"},
-	{NULL,			NULL,			0,		0, 	0,	0,			NULL,		NULL,		NULL },
+	NS_SETTING_END()
 };
 
 static int lgs_join_logged_channel (Channel* c, ChannelLog *cl)
