@@ -273,7 +273,7 @@ ModuleEvent module_events[] =
 	{EVENT_TOPIC,		lgs_event_topic,	EVENT_FLAG_EXCLUDE_MODME},
 	{EVENT_NICK,		lgs_event_nick,		EVENT_FLAG_EXCLUDE_MODME},
 	{EVENT_CMODE,		lgs_event_cmode,	EVENT_FLAG_EXCLUDE_MODME},
-	{EVENT_NULL, NULL}
+	NS_EVENT_END()
 };
 
 /** Init module
