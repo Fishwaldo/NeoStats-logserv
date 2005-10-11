@@ -283,7 +283,7 @@ ModuleEvent module_events[] =
 int ModInit( void )
 {
 	ModuleConfig (lgs_settings);
-	lgschans = hash_create(-1, 0,0);
+	lgschans = hash_create(HASHCOUNT_T_MAX, 0,0);
 	return NS_SUCCESS;
 }
 
