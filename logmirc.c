@@ -55,7 +55,7 @@ char *mirc_time() {
 /* [21:47] * Dirk-Digler has joined #neostats */
 #define MJOINPROC "%s * %s (%s@%s) has joined %s\n"
 
-int mirc_joinproc(ChannelLog *chandata, CmdParams* cmdparams) 
+int mirc_joinproc(ChannelLog *chandata, const CmdParams *cmdparams) 
 {
 	lgs_write_log(chandata, MJOINPROC, mirc_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name);
 	return NS_SUCCESS;
@@ -64,7 +64,7 @@ int mirc_joinproc(ChannelLog *chandata, CmdParams* cmdparams)
 /* [22:07] * DigiGuy has left #neostats */
 #define MPARTPROC "%s * %s (%s@%s) has left %s (%s)\n"
 
-int mirc_partproc(ChannelLog *chandata, CmdParams* cmdparams) 
+int mirc_partproc(ChannelLog *chandata, const CmdParams *cmdparams) 
 {
 	lgs_write_log(chandata, MPARTPROC, mirc_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name, cmdparams->param);
 	return NS_SUCCESS;
@@ -73,12 +73,12 @@ int mirc_partproc(ChannelLog *chandata, CmdParams* cmdparams)
 /* [21:47] <Digi|Away> yes we are feeling nice today */
 #define MMSGPROC "%s <%s> %s\n"
 
-int mirc_msgproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int mirc_msgproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 	lgs_write_log(chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 
-int mirc_noticeproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int mirc_noticeproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 	lgs_write_log(chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
@@ -86,7 +86,7 @@ int mirc_noticeproc(ChannelLog *chandata, CmdParams* cmdparams) {
 /* [21:47] * Fish does a action for Digi|Away's log */
 #define MACTPROC "%s * %s %s\n"
 
-int mirc_ctcpaction(ChannelLog *chandata, CmdParams* cmdparams) {
+int mirc_ctcpaction(ChannelLog *chandata, const CmdParams *cmdparams) {
 	lgs_write_log(chandata, MACTPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
@@ -94,7 +94,7 @@ int mirc_ctcpaction(ChannelLog *chandata, CmdParams* cmdparams) {
 /* [21:49] * DigiGuy has quit IRC (Quit: ha) */
 #define MQUITPROC "%s * %s has quit IRC (%s)\n"
 
-int mirc_quitproc(ChannelLog *chandata, CmdParams* cmdparams) 
+int mirc_quitproc(ChannelLog *chandata, const CmdParams *cmdparams) 
 {
 	lgs_write_log(chandata, MQUITPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
@@ -103,7 +103,7 @@ int mirc_quitproc(ChannelLog *chandata, CmdParams* cmdparams)
 /* [21:48] * Digi|Away changes topic to 'FREE PORN - DETAILS ' */
 #define MTOPICPROC "%s * %s changes topic to '%s'\n"
 
-int mirc_topicproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int mirc_topicproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 	lgs_write_log(chandata, MTOPICPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
@@ -111,7 +111,7 @@ int mirc_topicproc(ChannelLog *chandata, CmdParams* cmdparams) {
 /* [21:47] * Dirk-Digler was kicked by Fish (Fish) */
 #define MKICKPROC "%s * %s was kicked by %s (%s)\n"
 
-int mirc_kickproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int mirc_kickproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 	lgs_write_log(chandata, MKICKPROC, mirc_time(), cmdparams->target->name, cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
@@ -119,7 +119,7 @@ int mirc_kickproc(ChannelLog *chandata, CmdParams* cmdparams) {
 /* [21:48] * Fish is now known as Fishy */
 #define MNICKPROC "%s * %s is now known as %s\n"
 
-int mirc_nickproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int mirc_nickproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 	lgs_write_log(chandata, MNICKPROC, mirc_time(), cmdparams->param, cmdparams->source->name);
 	return NS_SUCCESS;
 }
@@ -127,7 +127,7 @@ int mirc_nickproc(ChannelLog *chandata, CmdParams* cmdparams) {
 /* [21:47] * Fish sets mode: +o Dirk-Digler */
 #define MMODEPROC "%s * %s sets mode: %s\n"
 
-int mirc_modeproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int mirc_modeproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 	char *modebuf;
 	
 	modebuf = joinbuf(cmdparams->av, cmdparams->ac, 0);

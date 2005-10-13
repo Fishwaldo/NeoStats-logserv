@@ -260,7 +260,7 @@ int lgs_RotateLogs(void *userptr)
  * @param ac message size 
  * @returns NS_SUCCESS or NS_FAILURE
  */
-int lgs_send_to_logproc(LGSMSG_TYPE msgtype, Channel *c, CmdParams* cmdparams) 
+int lgs_send_to_logproc(LGSMSG_TYPE msgtype, Channel *c, const CmdParams *cmdparams) 
 {
 	ChannelLog *cl;
 

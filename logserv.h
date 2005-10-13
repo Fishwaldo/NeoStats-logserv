@@ -71,10 +71,10 @@ typedef enum {
 	
 
 /* logging function prototype */
-typedef int (*log_proc) (ChannelLog *chandata, CmdParams* cmdparams);
+typedef int (*log_proc) (ChannelLog *chandata, const CmdParams *cmdparams);
 
 /* log_procssing.c decl */
-int lgs_send_to_logproc (LGSMSG_TYPE msgtype, Channel *c, CmdParams* cmdparams);
+int lgs_send_to_logproc (LGSMSG_TYPE msgtype, Channel *c, const CmdParams *cmdparams);
 int lgs_RotateLogs(void *);
 void lgs_close_logs();
 void lgs_switch_file(ChannelLog *cl);

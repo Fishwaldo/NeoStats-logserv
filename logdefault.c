@@ -29,47 +29,47 @@ char *logserv_startlog(ChannelLog *chandata) {
 }
 
 
-int logserv_joinproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int logserv_joinproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 
 	return NS_SUCCESS;
 }
 
-int logserv_partproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int logserv_partproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 
 	return NS_SUCCESS;
 }
 
-int logserv_msgproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int logserv_msgproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 	return NS_SUCCESS;
 }
 
-int logserv_noticeproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int logserv_noticeproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 	return NS_SUCCESS;
 }
 
-int logserv_ctcpaction(ChannelLog *chandata, CmdParams* cmdparams) {
+int logserv_ctcpaction(ChannelLog *chandata, const CmdParams *cmdparams) {
 	return NS_SUCCESS;
 }
 
-int logserv_quitproc(ChannelLog *chandata, CmdParams* cmdparams) {
-
-	return NS_SUCCESS;
-}
-
-int logserv_topicproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int logserv_quitproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 
 	return NS_SUCCESS;
 }
 
-int logserv_kickproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int logserv_topicproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 
 	return NS_SUCCESS;
 }
-int logserv_nickproc(ChannelLog *chandata, CmdParams* cmdparams) {
+
+int logserv_kickproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 
 	return NS_SUCCESS;
 }
-int logserv_modeproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int logserv_nickproc(ChannelLog *chandata, const CmdParams *cmdparams) {
+
+	return NS_SUCCESS;
+}
+int logserv_modeproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 
 	return NS_SUCCESS;
 }

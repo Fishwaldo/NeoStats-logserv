@@ -28,11 +28,11 @@
 Bot *lgs_bot;
 
 /* forward decl */
-static int lgs_cmd_add (CmdParams* cmdparams);
-static int lgs_cmd_del (CmdParams* cmdparams);
-static int lgs_cmd_list (CmdParams* cmdparams);
-static int lgs_cmd_url (CmdParams* cmdparams);
-static int lgs_cmd_stats (CmdParams* cmdparams);
+static int lgs_cmd_add (const CmdParams *cmdparams);
+static int lgs_cmd_del (const CmdParams *cmdparams);
+static int lgs_cmd_list (const CmdParams *cmdparams);
+static int lgs_cmd_url (const CmdParams *cmdparams);
+static int lgs_cmd_stats (const CmdParams *cmdparams);
 static void lgs_save_channel_data (ChannelLog *cl);
 
 /** Copyright info */
@@ -167,32 +167,32 @@ static BotInfo ls_botinfo =
 	lgs_settings,
 };
 
-static int lgs_event_cprivate (CmdParams* cmdparams) 
+static int lgs_event_cprivate (const CmdParams *cmdparams) 
 {
 	lgs_send_to_logproc (LGSMSG_MSG, cmdparams->channel, cmdparams);		
 	return NS_SUCCESS;
 }
 
-static int lgs_event_cnotice (CmdParams* cmdparams) 
+static int lgs_event_cnotice (const CmdParams *cmdparams) 
 {
 	lgs_send_to_logproc (LGSMSG_NOTICE, cmdparams->channel, cmdparams);		
 	return NS_SUCCESS;
 }
 
-static int lgs_event_ctcpaction (CmdParams* cmdparams) 
+static int lgs_event_ctcpaction (const CmdParams *cmdparams) 
 {
 	lgs_send_to_logproc (LGSMSG_CTCPACTION, cmdparams->channel, cmdparams);		
 	return NS_SUCCESS;
 }
 
-static int lgs_event_part (CmdParams* cmdparams) 
+static int lgs_event_part (const CmdParams *cmdparams) 
 {
 	lgs_send_to_logproc (LGSMSG_PART, cmdparams->channel, cmdparams);	
 	return NS_SUCCESS;
 }
 
 
-static int lgs_event_emptychan (CmdParams* cmdparams) 
+static int lgs_event_emptychan (const CmdParams *cmdparams) 
 {
 	ChannelLog *cl;
 	
@@ -207,13 +207,13 @@ static int lgs_event_emptychan (CmdParams* cmdparams)
 	return NS_SUCCESS;
 }
 
-static int lgs_event_join (CmdParams* cmdparams) 
+static int lgs_event_join (const CmdParams *cmdparams) 
 {
 	lgs_send_to_logproc (LGSMSG_JOIN, cmdparams->channel, cmdparams);
 	return NS_SUCCESS;
 }
 
-static int lgs_event_newchan (CmdParams* cmdparams) 
+static int lgs_event_newchan (const CmdParams *cmdparams) 
 {
 	ChannelLog *cl;
 
@@ -224,19 +224,19 @@ static int lgs_event_newchan (CmdParams* cmdparams)
 	return NS_SUCCESS;
 }	
 
-static int lgs_event_kick(CmdParams* cmdparams) 
+static int lgs_event_kick(const CmdParams *cmdparams) 
 {
 	lgs_send_to_logproc (LGSMSG_KICK, cmdparams->channel, cmdparams);
 	return NS_SUCCESS;
 }
 
-static int lgs_event_topic(CmdParams* cmdparams) 
+static int lgs_event_topic(const CmdParams *cmdparams) 
 {
 	lgs_send_to_logproc (LGSMSG_TOPIC, cmdparams->channel, cmdparams);
 	return NS_SUCCESS;
 }
 
-static int lgs_event_nick(CmdParams* cmdparams) 
+static int lgs_event_nick(const CmdParams *cmdparams) 
 {
 	lnode_t *cm;
 
@@ -249,7 +249,7 @@ static int lgs_event_nick(CmdParams* cmdparams)
 	return NS_SUCCESS;
 }
 
-static int lgs_event_cmode(CmdParams* cmdparams) 
+static int lgs_event_cmode(const CmdParams *cmdparams) 
 {
 	lgs_send_to_logproc (LGSMSG_CHANMODE, cmdparams->channel, cmdparams);
 	return NS_SUCCESS;
@@ -324,7 +324,7 @@ int ModFini( void )
 
 /* ok, now here are logservs functions */
 
-static int lgs_cmd_add (CmdParams* cmdparams)
+static int lgs_cmd_add (const CmdParams *cmdparams)
 {
 	Channel *c;
 	ChannelLog *cl;
@@ -363,7 +363,7 @@ static int lgs_cmd_add (CmdParams* cmdparams)
 	return NS_SUCCESS;
 }
 
-static int lgs_cmd_del (CmdParams* cmdparams)
+static int lgs_cmd_del (const CmdParams *cmdparams)
 {
 	hnode_t *hn;
 	ChannelLog *cl;
@@ -395,7 +395,7 @@ static int lgs_cmd_del (CmdParams* cmdparams)
 	return NS_SUCCESS;
 }
 
-static int lgs_cmd_list (CmdParams* cmdparams)
+static int lgs_cmd_list (const CmdParams *cmdparams)
 {
 	hscan_t hs;
 	hnode_t *hn;
@@ -414,7 +414,7 @@ static int lgs_cmd_list (CmdParams* cmdparams)
 	return NS_SUCCESS;
 }
 
-static int lgs_cmd_url (CmdParams* cmdparams)
+static int lgs_cmd_url (const CmdParams *cmdparams)
 {
 	ChannelLog *cl;
 
@@ -440,7 +440,7 @@ static int lgs_cmd_url (CmdParams* cmdparams)
  * @param u The user requesting stats data
  * @returns NS_SUCCESS or NS_FAILURE
  */
-static int lgs_cmd_stats (CmdParams* cmdparams)
+static int lgs_cmd_stats (const CmdParams *cmdparams)
 {
 	irc_prefmsg (lgs_bot, cmdparams->source, "Stats:");
 	irc_prefmsg (lgs_bot, cmdparams->source, "Logging %d channels", (int)hash_count(lgschans));

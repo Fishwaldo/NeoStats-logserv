@@ -48,7 +48,7 @@ char *xchat_startlog(ChannelLog *cl) {
 /* Jan 02 17:27:10 -->     Dirk-Digler (fish@Dirk-Digler.Users.irc-chat.net) has joined #neostats */
 #define XJOINFMT "%s -->\t%s (%s@%s) has joined %s\n"
 
-int xchat_joinproc(ChannelLog *chandata, CmdParams* cmdparams) 
+int xchat_joinproc(ChannelLog *chandata, const CmdParams *cmdparams) 
 {
 	lgs_write_log(chandata, XJOINFMT, xchat_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name); return NS_SUCCESS;
 }
@@ -56,7 +56,7 @@ int xchat_joinproc(ChannelLog *chandata, CmdParams* cmdparams)
 /* Jan 02 17:56:52 <--     DigiGuy (~b.dole@Oper.irc-chat.net) has left #neostats (part)*/
 #define XPARTPROC "%s <--\t%s (%s@%s) has left %s (%s)\n"
 
-int xchat_partproc(ChannelLog *chandata, CmdParams* cmdparams) 
+int xchat_partproc(ChannelLog *chandata, const CmdParams *cmdparams) 
 {
 	lgs_write_log(chandata, XPARTPROC, xchat_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name, cmdparams->param);
 	return NS_SUCCESS;
@@ -66,12 +66,12 @@ int xchat_partproc(ChannelLog *chandata, CmdParams* cmdparams)
 
 #define XMSGFMT "%s <%s>\t%s\n"
 
-int xchat_msgproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int xchat_msgproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 	lgs_write_log(chandata, XMSGFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
 
-int xchat_noticeproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int xchat_noticeproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 	lgs_write_log(chandata, XMSGFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
@@ -80,7 +80,7 @@ int xchat_noticeproc(ChannelLog *chandata, CmdParams* cmdparams) {
  * Jan 02 17:28:52 *       Fish-Away sighs */
 #define XACTFMT "%s *\t%s %s\n"
 
-int xchat_ctcpaction(ChannelLog *chandata, CmdParams* cmdparams) {
+int xchat_ctcpaction(ChannelLog *chandata, const CmdParams *cmdparams) {
 	lgs_write_log(chandata, XACTFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
@@ -88,7 +88,7 @@ int xchat_ctcpaction(ChannelLog *chandata, CmdParams* cmdparams) {
 /* Jan 02 17:47:26 <--     Dirk-Digler has quit (Killed (Fish (get lost))) */
 #define XQUITFMT "%s <--\t%s has quit (%s)\n"
 
-int xchat_quitproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int xchat_quitproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 	lgs_write_log(chandata, XQUITFMT, xchat_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
@@ -96,7 +96,7 @@ int xchat_quitproc(ChannelLog *chandata, CmdParams* cmdparams) {
 /* Jan 02 17:48:12 ---     Digi|Away has changed the topic to: FREE PORN - DETAILS INSIDE */
 #define XTOPICPROC "%s ---\t%s has changed the topic to: %s\n"
 
-int xchat_topicproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int xchat_topicproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 	lgs_write_log(chandata, XTOPICPROC, xchat_time(), cmdparams->source->name, cmdparams->param);
 	return NS_SUCCESS;
 }
@@ -104,7 +104,7 @@ int xchat_topicproc(ChannelLog *chandata, CmdParams* cmdparams) {
 /* Jan 02 17:27:10 <-- Fish-Away has kicked Dirk-Digler from #neostats (ha) */
 #define XKICKPROC "%s <--\t%s has kicked %s from %s (%s)\n"
 
-int xchat_kickproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int xchat_kickproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 	lgs_write_log(chandata, XKICKPROC, xchat_time(), cmdparams->source->name, cmdparams->target->name, cmdparams->channel->name, cmdparams->param);
 	return NS_SUCCESS;
 }
@@ -112,7 +112,7 @@ int xchat_kickproc(ChannelLog *chandata, CmdParams* cmdparams) {
 /* Jan 02 17:50:32 ---     DigiGuy is now known as Bob */
 #define XNICKPROC "%s ---\t%s is now known as %s\n"
 
-int xchat_nickproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int xchat_nickproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 	lgs_write_log(chandata, XNICKPROC, xchat_time(), cmdparams->param, cmdparams->source->name);
 	return NS_SUCCESS;
 }
@@ -120,7 +120,7 @@ int xchat_nickproc(ChannelLog *chandata, CmdParams* cmdparams) {
 /* Jan 02 17:27:10 ---     SuperSexSquirrel sets modes [#NeoStats +v Dirk-Digler] */
 #define XMODEPROC "%s ---\t%s sets modes[%s %s]\n"
 
-int xchat_modeproc(ChannelLog *chandata, CmdParams* cmdparams) {
+int xchat_modeproc(ChannelLog *chandata, const CmdParams *cmdparams) {
 	char *modebuf;
 	
 	modebuf = joinbuf(cmdparams->av, cmdparams->ac, 0);
