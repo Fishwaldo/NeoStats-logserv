@@ -91,7 +91,7 @@ void egg_quitproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void egg_topicproc( ChannelLog *chandata, const CmdParams *cmdparams ) 
 {
-	if( cmdparams->source )
+	if( cmdparams->source->user )
 		lgs_write_log( chandata, ETOPICPROC, egg_time(), cmdparams->channel->name, cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->param );
 	else 
 		lgs_write_log( chandata, ENOUSERTOPICPROC, egg_time(), cmdparams->channel->name, cmdparams->source->name, cmdparams->param );
@@ -113,7 +113,7 @@ void egg_modeproc( ChannelLog *chandata, const CmdParams *cmdparams )
 	char *modebuf;
 	
 	modebuf = joinbuf( cmdparams->av, cmdparams->ac, 0 );
-	if( cmdparams->source )
+	if( cmdparams->source->user )
 	{
 		lgs_write_log( chandata, EMODEPROC, egg_time(), cmdparams->channel->name, modebuf, cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost );
 	}

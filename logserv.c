@@ -387,7 +387,7 @@ static int lgs_cmd_del( const CmdParams *cmdparams )
 	hnode_destroy( hn );
 	irc_part( lgs_bot, cl->channame, NULL );
 	ns_free( cl );
-	DBADelete( "Channel", cmdparams->av[1] );
+	DBADelete( "Channel", cmdparams->av[0] );
 	irc_prefmsg( lgs_bot, cmdparams->source, "Deleted channel %s", cmdparams->av[0] );
 	CommandReport( lgs_bot, "%s deleted %s from logging", cmdparams->source->name, cmdparams->av[0] );
 	return NS_SUCCESS;
