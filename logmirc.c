@@ -24,6 +24,14 @@
 #include "neostats.h"
 #include "logserv.h"  /* LogServ Definitions */
 
+#define MIRCTIME "[%H:%M]"
+
+static char *mirc_time( void )
+{
+	os_strftime( timebuf, TIMEBUFSIZE, MIRCTIME, os_localtime( &me.now ) );
+	return timebuf;
+}
+
 /* Session Start: Fri Jan 02 21:46:22 2004
  * Session Ident: #neostats
  * [21:46] * Now talking in #neostats
@@ -33,106 +41,97 @@
 
 #define MSTARTLOG "Session Start: %s\nSession Ident: %s\n%s * Now talking in %s\n%s * Topic is '%s'\n%s * Set by %s on %s\n"
 
-char *mirc_startlog(ChannelLog *cl) {
+char *mirc_startlog( const ChannelLog *cl )
+{
 	char timebuf2[TIMEBUFSIZE];
 	char timebuf3[TIMEBUFSIZE];
 	
-	os_strftime (timebuf, TIMEBUFSIZE, "%a %b %d %H:%M:%S %Y", os_localtime (&me.now));
-	os_strftime (timebuf2, TIMEBUFSIZE, "[%H:%M]", os_localtime (&me.now));
-	os_strftime (timebuf3, TIMEBUFSIZE, "%a %b %d %H:%M:%S", os_localtime (&cl->c->topictime));
-	ircsnprintf(startlog, BUFSIZE, MSTARTLOG, timebuf, cl->channame, timebuf2, cl->channame, timebuf2, cl->c->topic[0] != '0' ? cl->c->topic : "", timebuf2, cl->c->topicowner[0] != '0' ? cl->c->topicowner: "", timebuf3);
+	os_strftime( timebuf, TIMEBUFSIZE, "%a %b %d %H:%M:%S %Y", os_localtime( &me.now ) );
+	os_strftime( timebuf2, TIMEBUFSIZE, "[%H:%M]", os_localtime( &me.now ) );
+	os_strftime( timebuf3, TIMEBUFSIZE, "%a %b %d %H:%M:%S", os_localtime( &cl->c->topictime ) );
+	ircsnprintf( startlog, BUFSIZE, MSTARTLOG, timebuf, cl->channame, timebuf2, cl->channame, timebuf2, cl->c->topic[0] != '0' ? cl->c->topic : "", timebuf2, cl->c->topicowner[0] != '0' ? cl->c->topicowner: "", timebuf3 );
 
 	return startlog;
 }
 
-#define MIRCTIME "[%H:%M]"
-char *mirc_time() {
-	os_strftime (timebuf, TIMEBUFSIZE, MIRCTIME, os_localtime (&me.now));
-	return timebuf;
-}
-
-
 /* [21:47] * Dirk-Digler has joined #neostats */
-#define MJOINPROC "%s * %s (%s@%s) has joined %s\n"
+#define MJOINPROC "%s * %s( %s@%s ) has joined %s\n"
 
-int mirc_joinproc(ChannelLog *chandata, const CmdParams *cmdparams) 
+void mirc_joinproc( ChannelLog *chandata, const CmdParams *cmdparams ) 
 {
-	lgs_write_log(chandata, MJOINPROC, mirc_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name);
-	return NS_SUCCESS;
+	lgs_write_log( chandata, MJOINPROC, mirc_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name );
 }
 
 /* [22:07] * DigiGuy has left #neostats */
-#define MPARTPROC "%s * %s (%s@%s) has left %s (%s)\n"
+#define MPARTPROC "%s * %s( %s@%s ) has left %s( %s )\n"
 
-int mirc_partproc(ChannelLog *chandata, const CmdParams *cmdparams) 
+void mirc_partproc( ChannelLog *chandata, const CmdParams *cmdparams ) 
 {
-	lgs_write_log(chandata, MPARTPROC, mirc_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name, cmdparams->param);
-	return NS_SUCCESS;
+	lgs_write_log( chandata, MPARTPROC, mirc_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name, cmdparams->param );
 }
 
 /* [21:47] <Digi|Away> yes we are feeling nice today */
 #define MMSGPROC "%s <%s> %s\n"
 
-int mirc_msgproc(ChannelLog *chandata, const CmdParams *cmdparams) {
-	lgs_write_log(chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
-	return NS_SUCCESS;
+void mirc_msgproc( ChannelLog *chandata, const CmdParams *cmdparams )
+{
+	lgs_write_log( chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
 }
 
-int mirc_noticeproc(ChannelLog *chandata, const CmdParams *cmdparams) {
-	lgs_write_log(chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
-	return NS_SUCCESS;
+void mirc_noticeproc( ChannelLog *chandata, const CmdParams *cmdparams )
+{
+	lgs_write_log( chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
 }
 
 /* [21:47] * Fish does a action for Digi|Away's log */
 #define MACTPROC "%s * %s %s\n"
 
-int mirc_ctcpaction(ChannelLog *chandata, const CmdParams *cmdparams) {
-	lgs_write_log(chandata, MACTPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
-	return NS_SUCCESS;
+void mirc_ctcpaction( ChannelLog *chandata, const CmdParams *cmdparams )
+{
+	lgs_write_log( chandata, MACTPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
 }
 
-/* [21:49] * DigiGuy has quit IRC (Quit: ha) */
-#define MQUITPROC "%s * %s has quit IRC (%s)\n"
+/* [21:49] * DigiGuy has quit IRC( Quit: ha ) */
+#define MQUITPROC "%s * %s has quit IRC( %s )\n"
 
-int mirc_quitproc(ChannelLog *chandata, const CmdParams *cmdparams) 
+void mirc_quitproc( ChannelLog *chandata, const CmdParams *cmdparams ) 
 {
-	lgs_write_log(chandata, MQUITPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
-	return NS_SUCCESS;
+	lgs_write_log( chandata, MQUITPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
 }
 
 /* [21:48] * Digi|Away changes topic to 'FREE PORN - DETAILS ' */
 #define MTOPICPROC "%s * %s changes topic to '%s'\n"
 
-int mirc_topicproc(ChannelLog *chandata, const CmdParams *cmdparams) {
-	lgs_write_log(chandata, MTOPICPROC, mirc_time(), cmdparams->source->name, cmdparams->param);
-	return NS_SUCCESS;
+void mirc_topicproc( ChannelLog *chandata, const CmdParams *cmdparams )
+{
+	lgs_write_log( chandata, MTOPICPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
 }
 
-/* [21:47] * Dirk-Digler was kicked by Fish (Fish) */
-#define MKICKPROC "%s * %s was kicked by %s (%s)\n"
+/* [21:47] * Dirk-Digler was kicked by Fish( Fish ) */
+#define MKICKPROC "%s * %s was kicked by %s( %s )\n"
 
-int mirc_kickproc(ChannelLog *chandata, const CmdParams *cmdparams) {
-	lgs_write_log(chandata, MKICKPROC, mirc_time(), cmdparams->target->name, cmdparams->source->name, cmdparams->param);
-	return NS_SUCCESS;
+void mirc_kickproc( ChannelLog *chandata, const CmdParams *cmdparams )
+{
+	lgs_write_log( chandata, MKICKPROC, mirc_time(), cmdparams->target->name, cmdparams->source->name, cmdparams->param );
 }
 
 /* [21:48] * Fish is now known as Fishy */
 #define MNICKPROC "%s * %s is now known as %s\n"
 
-int mirc_nickproc(ChannelLog *chandata, const CmdParams *cmdparams) {
-	lgs_write_log(chandata, MNICKPROC, mirc_time(), cmdparams->param, cmdparams->source->name);
-	return NS_SUCCESS;
+void mirc_nickproc( ChannelLog *chandata, const CmdParams *cmdparams )
+{
+	lgs_write_log( chandata, MNICKPROC, mirc_time(), cmdparams->param, cmdparams->source->name );
 }
 
 /* [21:47] * Fish sets mode: +o Dirk-Digler */
 #define MMODEPROC "%s * %s sets mode: %s\n"
 
-int mirc_modeproc(ChannelLog *chandata, const CmdParams *cmdparams) {
+void mirc_modeproc( ChannelLog *chandata, const CmdParams *cmdparams )
+{
 	char *modebuf;
 	
-	modebuf = joinbuf(cmdparams->av, cmdparams->ac, 0);
-	lgs_write_log(chandata, MMODEPROC, mirc_time(), cmdparams->source->name, modebuf);
-	ns_free (modebuf);
-	return NS_SUCCESS;
+	modebuf = joinbuf( cmdparams->av, cmdparams->ac, 0 );
+	lgs_write_log( chandata, MMODEPROC, mirc_time(), cmdparams->source->name, modebuf );
+	ns_free( modebuf );
 }
 

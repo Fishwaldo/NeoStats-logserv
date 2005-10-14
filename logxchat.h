@@ -24,16 +24,16 @@
 #ifndef LOGXCHAT_H
 #define LOGXCHAT_H
 
-char *xchat_startlog(ChannelLog *cl);
-int xchat_joinproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int xchat_partproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int xchat_msgproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int xchat_noticeproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int xchat_ctcpaction(ChannelLog *chandata, const CmdParams *cmdparams);
-int xchat_quitproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int xchat_topicproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int xchat_kickproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int xchat_nickproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int xchat_modeproc(ChannelLog *chandata, const CmdParams *cmdparams);
+char *xchat_startlog( const ChannelLog *cl );
+void xchat_joinproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void xchat_partproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void xchat_msgproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void xchat_noticeproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void xchat_ctcpaction( ChannelLog *chandata, const CmdParams *cmdparams );
+void xchat_quitproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void xchat_topicproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void xchat_kickproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void xchat_nickproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void xchat_modeproc( ChannelLog *chandata, const CmdParams *cmdparams );
 
 #endif

@@ -24,16 +24,16 @@
 #ifndef LOGEGGDROP_H
 #define LOGEGGDROP_H
 
-char *egg_startlog(ChannelLog *cl);
-int egg_joinproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int egg_partproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int egg_msgproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int egg_noticeproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int egg_ctcpaction(ChannelLog *chandata, const CmdParams *cmdparams);
-int egg_quitproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int egg_topicproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int egg_kickproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int egg_nickproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int egg_modeproc(ChannelLog *chandata, const CmdParams *cmdparams);
+char *egg_startlog( const ChannelLog *cl );
+void egg_joinproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void egg_partproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void egg_msgproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void egg_noticeproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void egg_ctcpaction( ChannelLog *chandata, const CmdParams *cmdparams );
+void egg_quitproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void egg_topicproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void egg_kickproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void egg_nickproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void egg_modeproc( ChannelLog *chandata, const CmdParams *cmdparams );
 
 #endif

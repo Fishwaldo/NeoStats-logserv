@@ -24,16 +24,16 @@
 #ifndef LOGMIRC_H
 #define LOGMIRC_H
 
-char *mirc_startlog(ChannelLog *cl);
-int mirc_joinproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int mirc_partproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int mirc_msgproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int mirc_noticeproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int mirc_ctcpaction(ChannelLog *chandata, const CmdParams *cmdparams);
-int mirc_quitproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int mirc_topicproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int mirc_kickproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int mirc_nickproc(ChannelLog *chandata, const CmdParams *cmdparams);
-int mirc_modeproc(ChannelLog *chandata, const CmdParams *cmdparams);
+char *mirc_startlog( const ChannelLog *cl );
+void mirc_joinproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void mirc_partproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void mirc_msgproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void mirc_noticeproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void mirc_ctcpaction( ChannelLog *chandata, const CmdParams *cmdparams );
+void mirc_quitproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void mirc_topicproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void mirc_kickproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void mirc_nickproc( ChannelLog *chandata, const CmdParams *cmdparams );
+void mirc_modeproc( ChannelLog *chandata, const CmdParams *cmdparams );
 
 #endif

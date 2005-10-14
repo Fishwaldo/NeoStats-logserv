@@ -24,53 +24,47 @@
 #include "neostats.h"
 #include "logserv.h"  /* LogServ Definitions */
 
-char *logserv_startlog(ChannelLog *chandata) {
+char *logserv_startlog( const ChannelLog *chandata )
+{
 	return startlog;
 }
 
-
-int logserv_joinproc(ChannelLog *chandata, const CmdParams *cmdparams) {
-
-	return NS_SUCCESS;
+void logserv_joinproc( ChannelLog *chandata, const CmdParams *cmdparams )
+{
 }
 
-int logserv_partproc(ChannelLog *chandata, const CmdParams *cmdparams) {
-
-	return NS_SUCCESS;
+void logserv_partproc( ChannelLog *chandata, const CmdParams *cmdparams )
+{
 }
 
-int logserv_msgproc(ChannelLog *chandata, const CmdParams *cmdparams) {
-	return NS_SUCCESS;
+void logserv_msgproc( ChannelLog *chandata, const CmdParams *cmdparams )
+{
 }
 
-int logserv_noticeproc(ChannelLog *chandata, const CmdParams *cmdparams) {
-	return NS_SUCCESS;
+void logserv_noticeproc( ChannelLog *chandata, const CmdParams *cmdparams )
+{
 }
 
-int logserv_ctcpaction(ChannelLog *chandata, const CmdParams *cmdparams) {
-	return NS_SUCCESS;
+void logserv_ctcpaction( ChannelLog *chandata, const CmdParams *cmdparams )
+{
 }
 
-int logserv_quitproc(ChannelLog *chandata, const CmdParams *cmdparams) {
-
-	return NS_SUCCESS;
+void logserv_quitproc( ChannelLog *chandata, const CmdParams *cmdparams )
+{
 }
 
-int logserv_topicproc(ChannelLog *chandata, const CmdParams *cmdparams) {
-
-	return NS_SUCCESS;
+void logserv_topicproc( ChannelLog *chandata, const CmdParams *cmdparams )
+{
 }
 
-int logserv_kickproc(ChannelLog *chandata, const CmdParams *cmdparams) {
-
-	return NS_SUCCESS;
-}
-int logserv_nickproc(ChannelLog *chandata, const CmdParams *cmdparams) {
-
-	return NS_SUCCESS;
-}
-int logserv_modeproc(ChannelLog *chandata, const CmdParams *cmdparams) {
-
-	return NS_SUCCESS;
+void logserv_kickproc( ChannelLog *chandata, const CmdParams *cmdparams )
+{
 }
 
+void logserv_nickproc( ChannelLog *chandata, const CmdParams *cmdparams )
+{
+}
+
+void logserv_modeproc( ChannelLog *chandata, const CmdParams *cmdparams )
+{
+}
