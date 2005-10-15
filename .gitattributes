@@ -15,13 +15,13 @@
 /configure.in -text
 /install-sh -text
 /lgs_help.c -text
-/log_processing.c -text
 /logdefault.c -text
 /logdefault.h -text
 /logeggdrop.c -text
 /logeggdrop.h -text
 /logmirc.c -text
 /logmirc.h -text
+/logprocessing.c -text
 /logserv.c -text
 /logserv.h -text
 /logserv.vcproj -text
