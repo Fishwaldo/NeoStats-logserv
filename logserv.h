@@ -53,7 +53,7 @@ struct LogServ {
 #define LGSACTIVE 0x8
 
 /* the hash that stores the monitored channels */
-hash_t *lgschans;
+extern hash_t *lschannelhash;
 
 typedef enum {
 	LGSMSG_JOIN=0,

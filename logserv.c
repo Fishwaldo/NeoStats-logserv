@@ -25,6 +25,7 @@
 #include MODULECONFIG
 #include "logserv.h"
 
+hash_t *lschannelhash;
 Bot *lgs_bot;
 
 /* forward decl */
@@ -143,7 +144,7 @@ static int LoadLogChannel( void *data, int size )
 	if( c ) {
 		lgs_join_logged_channel( c, cl );
 	}
-	hnode_create_insert( lgschans, cl, cl->channame );
+	hnode_create_insert( lschannelhash, cl, cl->channame );
 	return NS_FALSE;
 }
 
@@ -215,7 +216,7 @@ static int lgs_event_newchan( const CmdParams *cmdparams )
 {
 	ChannelLog *cl;
 
-	cl =( ChannelLog * )hnode_find( lgschans, cmdparams->channel );
+	cl =( ChannelLog * )hnode_find( lschannelhash, cmdparams->channel );
 	if( cl ) {
 		lgs_join_logged_channel( cmdparams->channel, cl );
 	}
@@ -281,7 +282,7 @@ ModuleEvent module_events[] =
 int ModInit( void )
 {
 	ModuleConfig( lgs_settings );
-	lgschans = hash_create( HASHCOUNT_T_MAX, 0,0 );
+	lschannelhash = hash_create( HASHCOUNT_T_MAX, 0,0 );
 	return NS_SUCCESS;
 }
 
@@ -316,7 +317,7 @@ int ModFini( void )
 	/* close the log files */
 	lgs_close_logs();
 	/* delete the hash */
-	hash_destroy( lgschans );
+	hash_destroy( lschannelhash );
 	return NS_SUCCESS;
 }
 
@@ -327,7 +328,7 @@ static int lgs_cmd_add( const CmdParams *cmdparams )
 	Channel *c;
 	ChannelLog *cl;
 
-	if( hash_lookup( lgschans, cmdparams->av[1] ) != NULL ) {
+	if( hash_lookup( lschannelhash, cmdparams->av[1] ) != NULL ) {
 		irc_prefmsg( lgs_bot, cmdparams->source, "Already Logging %s.", cmdparams->av[0] );
 		return NS_FAILURE;
 	}
@@ -348,7 +349,7 @@ static int lgs_cmd_add( const CmdParams *cmdparams )
 	} else {
 		irc_prefmsg( lgs_bot, cmdparams->source, "No Stats URL is Set" );
 	}
-	hnode_create_insert( lgschans, cl, cl->channame );
+	hnode_create_insert( lschannelhash, cl, cl->channame );
 	lgs_save_channel_data( cl );
 	c = FindChannel( cmdparams->av[0] );
 	if( c ) {
@@ -366,12 +367,12 @@ static int lgs_cmd_del( const CmdParams *cmdparams )
 	hnode_t *hn;
 	ChannelLog *cl;
 
-	hn = hash_lookup( lgschans, cmdparams->av[0] );
+	hn = hash_lookup( lschannelhash, cmdparams->av[0] );
 	if( !hn ) {
 		irc_prefmsg( lgs_bot, cmdparams->source, "Can not find channel %s in Logging System", cmdparams->av[0] );
 		return NS_FAILURE;
 	}
-	cl =( ChannelLog * ) hnode_find( lgschans, cmdparams->av[0] );
+	cl =( ChannelLog * ) hnode_find( lschannelhash, cmdparams->av[0] );
 	if( !cl ) {
 		irc_prefmsg( lgs_bot, cmdparams->source, "Can not find Channel %s in Logging System", cmdparams->av[0] );
 		return NS_FAILURE;
@@ -383,7 +384,7 @@ static int lgs_cmd_del( const CmdParams *cmdparams )
 	if( cl->c ) {
 		ClearChannelModValue( cl->c );
 	}
-	hash_delete( lgschans, hn );
+	hash_delete( lschannelhash, hn );
 	hnode_destroy( hn );
 	irc_part( lgs_bot, cl->channame, NULL );
 	ns_free( cl );
@@ -400,7 +401,7 @@ static int lgs_cmd_list( const CmdParams *cmdparams )
 	ChannelLog *cl;
 
 	irc_prefmsg( lgs_bot, cmdparams->source, "Log channel list:" );
-	hash_scan_begin( &hs, lgschans );
+	hash_scan_begin( &hs, lschannelhash );
 	while( ( hn = hash_scan_next( &hs ) ) != NULL ) {
 		cl = hnode_get( hn );
 		if( ( cl->flags & LGSPUBSTATS ) ||( UserLevel( cmdparams->source ) >= NS_ULEVEL_LOCOPER ) ) {
@@ -416,7 +417,7 @@ static int lgs_cmd_url( const CmdParams *cmdparams )
 {
 	ChannelLog *cl;
 
-	cl =( ChannelLog * ) hnode_find( lgschans, cmdparams->av[0] );
+	cl =( ChannelLog * ) hnode_find( lschannelhash, cmdparams->av[0] );
 	if( !cl ) {
 		irc_prefmsg( lgs_bot, cmdparams->source, "Can not find channel %s in Logging System", cmdparams->av[0] );
 		return NS_FAILURE;
@@ -441,7 +442,7 @@ static int lgs_cmd_url( const CmdParams *cmdparams )
 static int lgs_cmd_stats( const CmdParams *cmdparams )
 {
 	irc_prefmsg( lgs_bot, cmdparams->source, "Stats:" );
-	irc_prefmsg( lgs_bot, cmdparams->source, "Logging %d channels",( int )hash_count( lgschans ) );
+	irc_prefmsg( lgs_bot, cmdparams->source, "Logging %d channels",( int )hash_count( lschannelhash ) );
 	return NS_SUCCESS;
 }
 

@@ -68,12 +68,12 @@ static int lgs_open_log( ChannelLog *cl )
 	ircsnprintf( fname, MAXPATH, "%s/%s.log", LogServ.logdir, make_safe_filename( cl->filename ) );
 	/* open the file */
 	cl->logfile = os_fopen( fname, "a" );
-	if( !cl->logfile )
+	if( cl->logfile == NULL )
 	{
-		nlog( LOG_CRITICAL, "Could not open %s for Appending: %s", cl->filename, os_strerror() );
+		nlog( LOG_CRITICAL, "Could not open %s for appending: %s", cl->filename, os_strerror() );
 		return NS_FAILURE;
 	}
-	dlog( DEBUG1, "Opened %s for Appending", cl->filename );
+	dlog( DEBUG1, "Opened %s for appending", cl->filename );
 	cl->fdopened = me.now;
 	return NS_SUCCESS;
 }
@@ -125,7 +125,7 @@ void lgs_write_log( ChannelLog *cl, const char *fmt, ... )
 	va_end( ap );
 	                                
 	/* if the FD isn't opened yet, lets open a log file */
-	if( !( cl->logfile ) ) {
+	if( cl->logfile == NULL  ) {
 		if( lgs_open_log( cl ) != NS_SUCCESS ) {
 			return;
 		}
@@ -168,18 +168,19 @@ void lgs_write_log( ChannelLog *cl, const char *fmt, ... )
  *
  * @param cl the ChannelLog struct 
  */
-void lgs_switch_file( ChannelLog *cl ) {
+
+void lgs_switch_file( ChannelLog *cl )
+{
 	char tmbuf[MAXPATH];
 	char newfname[MAXPATH];
 	char oldfname[MAXPATH];
 	int res;
 
-	if( !( cl->logfile ) ) {
-		/* no need to switch, its not opened */
-		return;
-	}
+	/* no need to switch, its not opened */
+	if( cl->logfile == NULL  ) return;		
 	/* close the logfile */
 	os_fclose( cl->logfile );
+	cl->logfile = NULL;
 	cl->fdopened = 0;
 	/* check if the target directory exists */
 	if( os_check_create_dir( LogServ.savedir ) != NS_SUCCESS )
@@ -208,7 +209,7 @@ void lgs_close_logs( void )
 	ChannelLog *cl;
 	
 	/* scan through the log files */
-	hash_scan_begin( &hs, lgschans );
+	hash_scan_begin( &hs, lschannelhash );
 	while( ( hn = hash_scan_next( &hs ) ) != NULL )
 	{
 		cl = hnode_get( hn );
@@ -216,15 +217,16 @@ void lgs_close_logs( void )
 		if( cl->logfile )
 		{
 			os_fclose( cl->logfile );
+			cl->logfile = NULL;
+			cl->fdopened = 0;
 		}
-		/* delete them from the hash */
 		if( cl->c )
 		{
 			ClearChannelModValue( cl->c );
 			cl->c = NULL;
 		}
-		hash_delete( lgschans, hn );
-		hnode_destroy( hn );
+		/* delete from the hash */
+		hash_scan_delete_destroy_node( lschannelhash, hn );
 		ns_free( cl );
 	}
 }
@@ -245,7 +247,7 @@ int lgs_RotateLogs( void *userptr )
 	}
 
 	/* scan through the log files */
-	hash_scan_begin( &hs, lgschans );
+	hash_scan_begin( &hs, lschannelhash );
 	while( ( hn = hash_scan_next( &hs ) ) != NULL ) {
 		cl = hnode_get( hn );
 		/* if the log has been opened more than X, then rotate */
