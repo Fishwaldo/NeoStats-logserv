@@ -54,12 +54,12 @@ log_proc logging_funcs[][LGSMSG_NUMTYPES] =
  * @returns a boolen indicating success/failure
  */ 
 
-static int lgs_open_log( ChannelLog *cl )
+static int ls_open_log( ChannelLog *cl )
 {
-	char fname[MAXPATH];
+	static char fname[MAXPATH];
 
 	/* first, make sure the logdir dir exists */
-	if( os_check_create_dir( LogServ.logdir ) != NS_SUCCESS )
+	if( os_create_dir( LogServ.logdir ) != NS_SUCCESS )
 	{
 		return NS_FAILURE;
 	}
@@ -74,21 +74,52 @@ static int lgs_open_log( ChannelLog *cl )
 		return NS_FAILURE;
 	}
 	dlog( DEBUG1, "Opened %s for appending", cl->filename );
-	cl->fdopened = me.now;
+	cl->ts_open = me.now;
+	/* write the start out */
+	switch( LogServ.logtype ) {
+		case 0:
+			os_fprintf( cl->logfile, "%s", logserv_startlog( cl ) );
+			break;
+		case 1:
+			os_fprintf( cl->logfile, "%s", egg_startlog( cl ) );
+			break;
+		case 2:
+			os_fprintf( cl->logfile, "%s", mirc_startlog( cl ) );
+			break;
+		case 3:
+			os_fprintf( cl->logfile, "%s", xchat_startlog( cl ) );
+			break;
+		default:
+			nlog( LOG_WARNING, "Unknown LogType" );
+	}
 	return NS_SUCCESS;
+}
+
+/* @brief Close the log file
+ *
+ * @param cl the channel log function
+ *
+ * @return none
+ */ 
+
+static void ls_close_log( ChannelLog *cl )
+{
+	os_fclose( cl->logfile );
+	cl->logfile = NULL;
+	cl->ts_open = 0;
 }
 
 /* @brief check the logfile size, and rotate if necessary
  * 
  * @param cl the ChannelLog struct for the channel we are checking 
  */ 
-static void lgs_stat_file( ChannelLog *cl ) 
+static void ls_stat_file( ChannelLog *cl ) 
 {
+	static char fname[MAXPATH];
 	int filesize = 0;
-	char fname[MAXPATH];
 	
 	/* reset this counter */
-	cl->dostat = 0;
+	cl->writecount = 0;
 	/* construct the filename to stat */
 	ircsnprintf( fname, MAXPATH, "%s/%s.log", LogServ.logdir, cl->filename );
 	filesize = os_file_get_size( fname );
@@ -99,7 +130,7 @@ static void lgs_stat_file( ChannelLog *cl )
 	if( filesize > LogServ.maxlogsize ) {
 		dlog( DEBUG1, "Switching Logfile %s", fname );
 		/* ok, the file exceeds out limits, lets switch it */
-		lgs_switch_file( cl );
+		ls_switch_file( cl );
 	}
 }
 
@@ -114,10 +145,10 @@ static void lgs_stat_file( ChannelLog *cl )
  */
 
 
-void lgs_write_log( ChannelLog *cl, const char *fmt, ... )
+void ls_write_log( ChannelLog *cl, const char *fmt, ... )
 {
+	static char log_buf[BUFSIZE];
 	va_list ap;
-	char log_buf[BUFSIZE];
 	
 	/* format the string to write */
 	va_start( ap, fmt );
@@ -126,25 +157,8 @@ void lgs_write_log( ChannelLog *cl, const char *fmt, ... )
 	                                
 	/* if the FD isn't opened yet, lets open a log file */
 	if( cl->logfile == NULL  ) {
-		if( lgs_open_log( cl ) != NS_SUCCESS ) {
+		if( ls_open_log( cl ) != NS_SUCCESS ) {
 			return;
-		}
-		/* ok, we just opened the file, write the start out */
-		switch( LogServ.logtype ) {
-			case 0:
-				os_fprintf( cl->logfile, "%s", logserv_startlog( cl ) );
-				break;
-			case 1:
-				os_fprintf( cl->logfile, "%s", egg_startlog( cl ) );
-				break;
-			case 2:
-				os_fprintf( cl->logfile, "%s", mirc_startlog( cl ) );
-				break;
-			case 3:
-				os_fprintf( cl->logfile, "%s", xchat_startlog( cl ) );
-				break;
-			default:
-				nlog( LOG_WARNING, "Unknown LogType" );
 		}
 	}
 	/* ok, file is opened. write the string to it */
@@ -152,15 +166,15 @@ void lgs_write_log( ChannelLog *cl, const char *fmt, ... )
 	dlog( DEBUG1, "%s\n", log_buf );
 #endif
 	os_fprintf( cl->logfile, "%s", log_buf );
-	cl->dostat++;
+	cl->writecount++;
 #ifdef DEBUG
 	/* only flush the logfile in debug mode */
 	os_fflush( cl->logfile );
 #endif
 	/* ok, now stat the file to check size */
-	if( cl->dostat >= DOSIZE ) { 
+	if( cl->writecount >= DOSIZE ) { 
 		os_fflush( cl->logfile );
-		lgs_stat_file( cl );
+		ls_stat_file( cl );
 	}
 }
 
@@ -169,21 +183,18 @@ void lgs_write_log( ChannelLog *cl, const char *fmt, ... )
  * @param cl the ChannelLog struct 
  */
 
-void lgs_switch_file( ChannelLog *cl )
+void ls_switch_file( ChannelLog *cl )
 {
-	char tmbuf[MAXPATH];
-	char newfname[MAXPATH];
-	char oldfname[MAXPATH];
+	static char tmbuf[MAXPATH];
+	static char newfname[MAXPATH];
+	static char oldfname[MAXPATH];
 	int res;
 
 	/* no need to switch, its not opened */
 	if( cl->logfile == NULL  ) return;		
-	/* close the logfile */
-	os_fclose( cl->logfile );
-	cl->logfile = NULL;
-	cl->fdopened = 0;
+	ls_close_log( cl );
 	/* check if the target directory exists */
-	if( os_check_create_dir( LogServ.savedir ) != NS_SUCCESS )
+	if( os_create_dir( LogServ.savedir ) != NS_SUCCESS )
 	{
 		return;
 	}
@@ -202,7 +213,7 @@ void lgs_switch_file( ChannelLog *cl )
  * Called from ModFini when we are unloaded, to cleanup
  */
 
-void lgs_close_logs( void )
+void ls_close_logs( void )
 {
 	hscan_t hs;
 	hnode_t *hn;
@@ -213,13 +224,7 @@ void lgs_close_logs( void )
 	while( ( hn = hash_scan_next( &hs ) ) != NULL )
 	{
 		cl = hnode_get( hn );
-		/* if the log is opened then close it */
-		if( cl->logfile )
-		{
-			os_fclose( cl->logfile );
-			cl->logfile = NULL;
-			cl->fdopened = 0;
-		}
+		ls_close_log( cl );
 		if( cl->c )
 		{
 			ClearChannelModValue( cl->c );
@@ -235,7 +240,7 @@ void lgs_close_logs( void )
  * 
  * Runs through all active opened logfiles only
  */
-int lgs_RotateLogs( void *userptr ) 
+int ls_RotateLogs( void *userptr ) 
 {
 	hscan_t hs;
 	hnode_t *hn;
@@ -251,8 +256,8 @@ int lgs_RotateLogs( void *userptr )
 	while( ( hn = hash_scan_next( &hs ) ) != NULL ) {
 		cl = hnode_get( hn );
 		/* if the log has been opened more than X, then rotate */
-		if( ( cl->logfile ) &&( ( me.now - cl->fdopened ) > LogServ.maxopentime ) ) {
-			lgs_switch_file( cl );
+		if( ( cl->logfile ) &&( ( me.now - cl->ts_open ) > LogServ.maxopentime ) ) {
+			ls_switch_file( cl );
 		}
 	}
 	return NS_SUCCESS;
@@ -265,7 +270,7 @@ int lgs_RotateLogs( void *userptr )
  * @param ac message size 
  * @returns NS_SUCCESS or NS_FAILURE
  */
-void lgs_send_to_logproc( LGSMSG_TYPE msgtype, const Channel *c, const CmdParams *cmdparams ) 
+void ls_send_to_logproc( LGSMSG_TYPE msgtype, const Channel *c, const CmdParams *cmdparams ) 
 {
 	ChannelLog *cl;
 

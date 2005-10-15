@@ -45,7 +45,7 @@ char *egg_startlog( const ChannelLog *cl )
 
 void egg_joinproc( ChannelLog *chandata, const CmdParams *cmdparams ) 
 {
-	lgs_write_log( chandata, EJOINPROC, egg_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name );
+	ls_write_log( chandata, EJOINPROC, egg_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name );
 }
 
 /* [22:02] Fish( ~Fish@Server-Admin.irc-chat.net ) left #neostats( ha ). */
@@ -53,7 +53,7 @@ void egg_joinproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void egg_partproc( ChannelLog *chandata, const CmdParams *cmdparams ) 
 {
-	lgs_write_log( chandata, EPARTPROC, egg_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name, cmdparams->param );
+	ls_write_log( chandata, EPARTPROC, egg_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name, cmdparams->param );
 }
 
 /* [22:04] <Fish> I think that is it */
@@ -61,12 +61,12 @@ void egg_partproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void egg_msgproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, EMSGPROC, egg_time(), cmdparams->source->name, cmdparams->param );
+	ls_write_log( chandata, EMSGPROC, egg_time(), cmdparams->source->name, cmdparams->param );
 }
 
 void egg_noticeproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, EMSGPROC, egg_time(), cmdparams->source->name, cmdparams->param );
+	ls_write_log( chandata, EMSGPROC, egg_time(), cmdparams->source->name, cmdparams->param );
 }
 
 /* [22:04] Action: Fish waits for the eggdrop to flush its logs now */
@@ -74,7 +74,7 @@ void egg_noticeproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void egg_ctcpaction( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, EACTPROC, egg_time(), cmdparams->source->name, cmdparams->param );
+	ls_write_log( chandata, EACTPROC, egg_time(), cmdparams->source->name, cmdparams->param );
 }
 
 /* [22:03] Fishwaldo( ~Fish@3cbc6b2b.22d996b6.singnet.com.sg ) left irc: Client closed */
@@ -82,7 +82,7 @@ void egg_ctcpaction( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void egg_quitproc( ChannelLog *chandata, const CmdParams *cmdparams ) 
 {
-	lgs_write_log( chandata, EQUITPROC, egg_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->param );	
+	ls_write_log( chandata, EQUITPROC, egg_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->param );	
 }
 
 /* [22:02] Topic changed on #neostats by Fish!~Fish@Server-Admin.irc-chat.net: <LuShes> I'mmmm back!!!! [NeoStats Support] http://www.neostats.net */
@@ -92,9 +92,9 @@ void egg_quitproc( ChannelLog *chandata, const CmdParams *cmdparams )
 void egg_topicproc( ChannelLog *chandata, const CmdParams *cmdparams ) 
 {
 	if( cmdparams->source->user )
-		lgs_write_log( chandata, ETOPICPROC, egg_time(), cmdparams->channel->name, cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->param );
+		ls_write_log( chandata, ETOPICPROC, egg_time(), cmdparams->channel->name, cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->param );
 	else 
-		lgs_write_log( chandata, ENOUSERTOPICPROC, egg_time(), cmdparams->channel->name, cmdparams->source->name, cmdparams->param );
+		ls_write_log( chandata, ENOUSERTOPICPROC, egg_time(), cmdparams->channel->name, cmdparams->source->name, cmdparams->param );
 }
 
 /* [22:02] Fish kicked from #neostats by Fish: Fish */
@@ -102,7 +102,7 @@ void egg_topicproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void egg_kickproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, EKICKPROC, egg_time(), cmdparams->target->name, cmdparams->channel->name, cmdparams->source->name, cmdparams->param ); 
+	ls_write_log( chandata, EKICKPROC, egg_time(), cmdparams->target->name, cmdparams->channel->name, cmdparams->source->name, cmdparams->param ); 
 }
 
 /* [22:02] #NeoStats: mode change '+oa Fish Fish' by SuperSexSquirrel!super@supersexsquirrel.org */
@@ -115,11 +115,11 @@ void egg_modeproc( ChannelLog *chandata, const CmdParams *cmdparams )
 	modebuf = joinbuf( cmdparams->av, cmdparams->ac, 0 );
 	if( cmdparams->source->user )
 	{
-		lgs_write_log( chandata, EMODEPROC, egg_time(), cmdparams->channel->name, modebuf, cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost );
+		ls_write_log( chandata, EMODEPROC, egg_time(), cmdparams->channel->name, modebuf, cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost );
 	}
 	else
 	{
-		lgs_write_log( chandata, ENOUSERMODEPROC, egg_time(), cmdparams->channel->name, modebuf, cmdparams->source->name );
+		ls_write_log( chandata, ENOUSERMODEPROC, egg_time(), cmdparams->channel->name, modebuf, cmdparams->source->name );
 	}	
 }
 
@@ -128,6 +128,6 @@ void egg_modeproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void egg_nickproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, ENICKPROC, egg_time(), cmdparams->param, cmdparams->source->name );
+	ls_write_log( chandata, ENICKPROC, egg_time(), cmdparams->param, cmdparams->source->name );
 }
 

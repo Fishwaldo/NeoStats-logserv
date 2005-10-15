@@ -52,7 +52,7 @@ char *xchat_startlog( const ChannelLog *cl )
 
 void xchat_joinproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, XJOINFMT, xchat_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name );
+	ls_write_log( chandata, XJOINFMT, xchat_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name );
 }
 
 /* Jan 02 17:56:52 <--     DigiGuy( ~b.dole@Oper.irc-chat.net ) has left #neostats( part )*/
@@ -60,7 +60,7 @@ void xchat_joinproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void xchat_partproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, XPARTPROC, xchat_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name, cmdparams->param );
+	ls_write_log( chandata, XPARTPROC, xchat_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name, cmdparams->param );
 }
 
 /* Jan 02 17:25:43 <SecureServ>    Akilling jojo!~jojo@pD9E60152.dip.t-dialin.net for Virus IRCORK */
@@ -69,12 +69,12 @@ void xchat_partproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void xchat_msgproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, XMSGFMT, xchat_time(), cmdparams->source->name, cmdparams->param );
+	ls_write_log( chandata, XMSGFMT, xchat_time(), cmdparams->source->name, cmdparams->param );
 }
 
 void xchat_noticeproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, XMSGFMT, xchat_time(), cmdparams->source->name, cmdparams->param );
+	ls_write_log( chandata, XMSGFMT, xchat_time(), cmdparams->source->name, cmdparams->param );
 }
 
 /* Action: 
@@ -83,7 +83,7 @@ void xchat_noticeproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void xchat_ctcpaction( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, XACTFMT, xchat_time(), cmdparams->source->name, cmdparams->param );
+	ls_write_log( chandata, XACTFMT, xchat_time(), cmdparams->source->name, cmdparams->param );
 }
 
 /* Jan 02 17:47:26 <--     Dirk-Digler has quit( Killed( Fish( get lost ) ) ) */
@@ -91,7 +91,7 @@ void xchat_ctcpaction( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void xchat_quitproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, XQUITFMT, xchat_time(), cmdparams->source->name, cmdparams->param );
+	ls_write_log( chandata, XQUITFMT, xchat_time(), cmdparams->source->name, cmdparams->param );
 }
 
 /* Jan 02 17:48:12 ---     Digi|Away has changed the topic to: FREE PORN - DETAILS INSIDE */
@@ -99,7 +99,7 @@ void xchat_quitproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void xchat_topicproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, XTOPICPROC, xchat_time(), cmdparams->source->name, cmdparams->param );
+	ls_write_log( chandata, XTOPICPROC, xchat_time(), cmdparams->source->name, cmdparams->param );
 }
 
 /* Jan 02 17:27:10 <-- Fish-Away has kicked Dirk-Digler from #neostats( ha ) */
@@ -107,7 +107,7 @@ void xchat_topicproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void xchat_kickproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, XKICKPROC, xchat_time(), cmdparams->source->name, cmdparams->target->name, cmdparams->channel->name, cmdparams->param );
+	ls_write_log( chandata, XKICKPROC, xchat_time(), cmdparams->source->name, cmdparams->target->name, cmdparams->channel->name, cmdparams->param );
 }
 
 /* Jan 02 17:50:32 ---     DigiGuy is now known as Bob */
@@ -115,7 +115,7 @@ void xchat_kickproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void xchat_nickproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, XNICKPROC, xchat_time(), cmdparams->param, cmdparams->source->name );
+	ls_write_log( chandata, XNICKPROC, xchat_time(), cmdparams->param, cmdparams->source->name );
 }
 
 /* Jan 02 17:27:10 ---     SuperSexSquirrel sets modes [#NeoStats +v Dirk-Digler] */
@@ -126,6 +126,6 @@ void xchat_modeproc( ChannelLog *chandata, const CmdParams *cmdparams )
 	char *modebuf;
 	
 	modebuf = joinbuf( cmdparams->av, cmdparams->ac, 0 );
-	lgs_write_log( chandata, XMODEPROC, xchat_time(), cmdparams->source->name, chandata->channame, modebuf );
+	ls_write_log( chandata, XMODEPROC, xchat_time(), cmdparams->source->name, chandata->channame, modebuf );
 	ns_free( modebuf );
 }

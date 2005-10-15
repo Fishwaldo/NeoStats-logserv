@@ -25,15 +25,15 @@
 #define LOGSERV_H
 
 /* Channel Logging Struct. */
-typedef struct CL_ {
+typedef struct ChannelLog {
 	char channame[MAXCHANLEN];
 	Channel *c;
 	FILE *logfile;
 	char filename[MAXPATH];
 	unsigned long flags;
 	char statsurl[MAXPATH];
-	time_t fdopened;
-	int dostat;
+	time_t ts_open;
+	int writecount;
 } ChannelLog;
 
 
@@ -74,11 +74,11 @@ typedef enum {
 typedef void (*log_proc) ( ChannelLog *chandata, const CmdParams *cmdparams );
 
 /* log_procssing.c decl */
-void lgs_send_to_logproc ( LGSMSG_TYPE msgtype, const Channel *c, const CmdParams *cmdparams );
-int lgs_RotateLogs( void * );
-void lgs_close_logs( void );
-void lgs_switch_file( ChannelLog *cl );
-void lgs_write_log( ChannelLog *cl, const char *fmt, ...) __attribute__( ( format( printf,2,3 ) ) );
+void ls_send_to_logproc ( LGSMSG_TYPE msgtype, const Channel *c, const CmdParams *cmdparams );
+int ls_RotateLogs( void * );
+void ls_close_logs( void );
+void ls_switch_file( ChannelLog *cl );
+void ls_write_log( ChannelLog *cl, const char *fmt, ...) __attribute__( ( format( printf,2,3 ) ) );
 
 extern const char *ls_about[];
 extern const char *ls_help_add[];

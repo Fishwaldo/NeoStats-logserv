@@ -59,7 +59,7 @@ char *mirc_startlog( const ChannelLog *cl )
 
 void mirc_joinproc( ChannelLog *chandata, const CmdParams *cmdparams ) 
 {
-	lgs_write_log( chandata, MJOINPROC, mirc_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name );
+	ls_write_log( chandata, MJOINPROC, mirc_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name );
 }
 
 /* [22:07] * DigiGuy has left #neostats */
@@ -67,7 +67,7 @@ void mirc_joinproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void mirc_partproc( ChannelLog *chandata, const CmdParams *cmdparams ) 
 {
-	lgs_write_log( chandata, MPARTPROC, mirc_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name, cmdparams->param );
+	ls_write_log( chandata, MPARTPROC, mirc_time(), cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->channel->name, cmdparams->param );
 }
 
 /* [21:47] <Digi|Away> yes we are feeling nice today */
@@ -75,12 +75,12 @@ void mirc_partproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void mirc_msgproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
+	ls_write_log( chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
 }
 
 void mirc_noticeproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
+	ls_write_log( chandata, MMSGPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
 }
 
 /* [21:47] * Fish does a action for Digi|Away's log */
@@ -88,7 +88,7 @@ void mirc_noticeproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void mirc_ctcpaction( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, MACTPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
+	ls_write_log( chandata, MACTPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
 }
 
 /* [21:49] * DigiGuy has quit IRC( Quit: ha ) */
@@ -96,7 +96,7 @@ void mirc_ctcpaction( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void mirc_quitproc( ChannelLog *chandata, const CmdParams *cmdparams ) 
 {
-	lgs_write_log( chandata, MQUITPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
+	ls_write_log( chandata, MQUITPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
 }
 
 /* [21:48] * Digi|Away changes topic to 'FREE PORN - DETAILS ' */
@@ -104,7 +104,7 @@ void mirc_quitproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void mirc_topicproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, MTOPICPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
+	ls_write_log( chandata, MTOPICPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
 }
 
 /* [21:47] * Dirk-Digler was kicked by Fish( Fish ) */
@@ -112,7 +112,7 @@ void mirc_topicproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void mirc_kickproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, MKICKPROC, mirc_time(), cmdparams->target->name, cmdparams->source->name, cmdparams->param );
+	ls_write_log( chandata, MKICKPROC, mirc_time(), cmdparams->target->name, cmdparams->source->name, cmdparams->param );
 }
 
 /* [21:48] * Fish is now known as Fishy */
@@ -120,7 +120,7 @@ void mirc_kickproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void mirc_nickproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	lgs_write_log( chandata, MNICKPROC, mirc_time(), cmdparams->param, cmdparams->source->name );
+	ls_write_log( chandata, MNICKPROC, mirc_time(), cmdparams->param, cmdparams->source->name );
 }
 
 /* [21:47] * Fish sets mode: +o Dirk-Digler */
@@ -131,7 +131,7 @@ void mirc_modeproc( ChannelLog *chandata, const CmdParams *cmdparams )
 	char *modebuf;
 	
 	modebuf = joinbuf( cmdparams->av, cmdparams->ac, 0 );
-	lgs_write_log( chandata, MMODEPROC, mirc_time(), cmdparams->source->name, modebuf );
+	ls_write_log( chandata, MMODEPROC, mirc_time(), cmdparams->source->name, modebuf );
 	ns_free( modebuf );
 }
 
