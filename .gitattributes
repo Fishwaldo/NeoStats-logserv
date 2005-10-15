@@ -13,8 +13,8 @@
 /RELNOTES -text
 /configure -text
 /configure.in -text
+/help.c -text
 /install-sh -text
-/lgs_help.c -text
 /logdefault.c -text
 /logdefault.h -text
 /logeggdrop.c -text

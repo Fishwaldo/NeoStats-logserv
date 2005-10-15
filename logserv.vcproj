@@ -123,10 +123,7 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\lgs_help.c">
-			</File>
-			<File
-				RelativePath=".\log_processing.c">
+				RelativePath=".\help.c">
 			</File>
 			<File
 				RelativePath=".\logdefault.c">
@@ -136,6 +133,9 @@
 			</File>
 			<File
 				RelativePath=".\logmirc.c">
+			</File>
+			<File
+				RelativePath=".\logprocessing.c">
 			</File>
 			<File
 				RelativePath=".\logserv.c">

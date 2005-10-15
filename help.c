@@ -29,7 +29,7 @@ const char *ls_about[] = {
 	NULL
 };
 
-const char *lgs_help_add[] = {
+const char *ls_help_add[] = {
 	"Add channel to log",
 	"Syntax: \2ADD \37<#channel name> <PUBLIC|PRIVATE> [url]\37\2",
 	"",
@@ -41,7 +41,7 @@ const char *lgs_help_add[] = {
 	NULL
 };
 
-const char *lgs_help_del[] = {
+const char *ls_help_del[] = {
 	"Stop logging channel",
 	"Syntax: \2DEL \37<Channame>\37\2",
 	"",
@@ -50,7 +50,7 @@ const char *lgs_help_del[] = {
 	NULL
 };
 
-const char *lgs_help_list[] = {
+const char *ls_help_list[] = {
 	"List current channel log list",
 	"Syntax: \2LIST\2",
 	"",
@@ -58,7 +58,7 @@ const char *lgs_help_list[] = {
 	NULL
 };
 
-const char *lgs_help_url[] = {
+const char *ls_help_url[] = {
 	"Change channel URL",
 	"Syntax: \2URL \37<url>\37\2",
 	"",
@@ -66,7 +66,7 @@ const char *lgs_help_url[] = {
 	NULL
 };
 
-const char *lgs_help_stats[] = {
+const char *ls_help_stats[] = {
 	"Simple LogServ Stats",
 	"Syntax: \2STATS\2",
 	"",
@@ -74,7 +74,7 @@ const char *lgs_help_stats[] = {
 	NULL
 };
 
-const char *lgs_help_set_logtype[] = {
+const char *ls_help_set_logtype[] = {
 	"\2LOGTYPE\2 <type>",
 	"",
 	"Modifies the logfile format that LogServ uses.",
@@ -88,23 +88,23 @@ const char *lgs_help_set_logtype[] = {
 	NULL
 };
 
-const char *lgs_help_set_logsize[] = {
+const char *ls_help_set_logsize[] = {
 	"\2LOGSIZE\2 <bytes>",
 	"File size in bytes at which a logfile is automatically rotated",
 	NULL
 };
 
-const char *lgs_help_set_logtime[] = {
+const char *ls_help_set_logtime[] = {
 	"\2LOGAGE\2 <seconds> - Specify the age in seconds that we rotate the log file, regardless of log file size",
 	NULL
 };
 
-const char *lgs_help_set_logdir[] = {
+const char *ls_help_set_logdir[] = {
 	"\2LOGDIR\2 <path> - path for log files",
 	NULL
 };
 
-const char *lgs_help_set_savedir[] = {
+const char *ls_help_set_savedir[] = {
 	"\2SAVEDIR\2 <path> - path for save log files",
 	NULL
 };

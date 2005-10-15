@@ -61,11 +61,11 @@ ModuleInfo module_info =
 
 static bot_cmd lgs_commands[]=
 {
-	{"ADD",		lgs_cmd_add ,	3, 	NS_ULEVEL_OPER,	lgs_help_add, 0, NULL, NULL},
-	{"DEL",		lgs_cmd_del,	1, 	NS_ULEVEL_OPER,	lgs_help_del, 0, NULL, NULL},
-	{"LIST",	lgs_cmd_list,	0, 	NS_ULEVEL_OPER,	lgs_help_list, 0, NULL, NULL},
-	{"URL",		lgs_cmd_url,	2, 	NS_ULEVEL_OPER,	lgs_help_url, 0, NULL, NULL},
-	{"STATS",	lgs_cmd_stats,	0, 	NS_ULEVEL_OPER,	lgs_help_stats, 0, NULL, NULL},
+	{"ADD",		lgs_cmd_add ,	3, 	NS_ULEVEL_OPER,	ls_help_add, 0, NULL, NULL},
+	{"DEL",		lgs_cmd_del,	1, 	NS_ULEVEL_OPER,	ls_help_del, 0, NULL, NULL},
+	{"LIST",	lgs_cmd_list,	0, 	NS_ULEVEL_OPER,	ls_help_list, 0, NULL, NULL},
+	{"URL",		lgs_cmd_url,	2, 	NS_ULEVEL_OPER,	ls_help_url, 0, NULL, NULL},
+	{"STATS",	lgs_cmd_stats,	0, 	NS_ULEVEL_OPER,	ls_help_stats, 0, NULL, NULL},
 	NS_CMD_END()
 };
 
@@ -78,7 +78,7 @@ bot_setting lgs_settings[]=
 	3,	
 	NS_ULEVEL_ADMIN,
 	NULL,
-	lgs_help_set_logtype,
+	ls_help_set_logtype,
 	NULL,( void* )1},
 	{"LOGSIZE",		
 	&LogServ.maxlogsize,	
@@ -87,7 +87,7 @@ bot_setting lgs_settings[]=
 	10000000,	
 	NS_ULEVEL_ADMIN,
 	"Bytes",
-	lgs_help_set_logsize,
+	ls_help_set_logsize,
 	NULL,( void* )1000000},
 	{"LOGAGE",		
 	&LogServ.maxopentime,	
@@ -96,7 +96,7 @@ bot_setting lgs_settings[]=
 	TS_ONE_DAY,	
 	NS_ULEVEL_ADMIN,
 	"Seconds",
-	lgs_help_set_logtime ,
+	ls_help_set_logtime ,
 	NULL,( void* )TS_ONE_HOUR},
 	{"LOGDIR",		
 	LogServ.logdir,	
@@ -105,7 +105,7 @@ bot_setting lgs_settings[]=
 	MAXPATH,	
 	NS_ULEVEL_ADMIN,
 	NULL,
-	lgs_help_set_logdir,
+	ls_help_set_logdir,
 	NULL,( void* )"logs/chanlogs"},
 	{"SAVEDIR",	
 	LogServ.savedir,	
@@ -114,7 +114,7 @@ bot_setting lgs_settings[]=
 	MAXPATH,	
 	NS_ULEVEL_ADMIN,
 	NULL,
-	lgs_help_set_savedir,
+	ls_help_set_savedir,
 	NULL,( void* )"chanlogs"},
 	NS_SETTING_END()
 };

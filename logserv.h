@@ -81,16 +81,16 @@ void lgs_switch_file( ChannelLog *cl );
 void lgs_write_log( ChannelLog *cl, const char *fmt, ...) __attribute__( ( format( printf,2,3 ) ) );
 
 extern const char *ls_about[];
-extern const char *lgs_help_add[];
-extern const char *lgs_help_del[];
-extern const char *lgs_help_list[];
-extern const char *lgs_help_url[];
-extern const char *lgs_help_stats[];
-extern const char *lgs_help_set_logtype[];
-extern const char *lgs_help_set_logsize[];
-extern const char *lgs_help_set_logtime[];
-extern const char *lgs_help_set_logdir[];
-extern const char *lgs_help_set_savedir[];
+extern const char *ls_help_add[];
+extern const char *ls_help_del[];
+extern const char *ls_help_list[];
+extern const char *ls_help_url[];
+extern const char *ls_help_stats[];
+extern const char *ls_help_set_logtype[];
+extern const char *ls_help_set_logsize[];
+extern const char *ls_help_set_logtime[];
+extern const char *ls_help_set_logdir[];
+extern const char *ls_help_set_savedir[];
 
 extern char timebuf[TIMEBUFSIZE];
 extern char startlog[BUFSIZE];

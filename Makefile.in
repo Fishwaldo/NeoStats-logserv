@@ -8,7 +8,7 @@ INSTALL_DATA = @INSTALL_DATA@
 DIRECTORY = @DIRINST@/modules/
 INCLUDES = -I@DIRINST@/include/ -I.
 
-SRCS = logserv.c logprocessing.c lgs_help.c logdefault.c logeggdrop.c logmirc.c logxchat.c
+SRCS = logserv.c logprocessing.c help.c logdefault.c logeggdrop.c logmirc.c logxchat.c
 OBJS = ${SRCS:.c=.o}
 TARGET = logserv.so
 DOCS = LogServ.README LogServ.README.html
