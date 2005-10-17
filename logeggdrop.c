@@ -22,8 +22,10 @@
 */
 
 #include "neostats.h"
-#include "logserv.h"  /* LogServ Definitions */
+#include "logserv.h"
+#include "logeggdrop.h"
 
+static char timebuf[TIMEBUFSIZE];
 #define EGGTIME "[%H:%M]"
 
 static char *egg_time( void )
@@ -35,11 +37,14 @@ static char *egg_time( void )
 /* [00:00] --- Fri Jan  2 2004 */
 /* this usually goes at the end of a logfile. Hrm */
 
-char *egg_startlog( const ChannelLog *cl )
+void egg_startlog( ChannelLog *chandata, const CmdParams *cmdparams )
 {
+	static char startlog[BUFSIZE];
+
 	os_strftime( startlog, BUFSIZE, "[%H:%M] --- %a %b %d %Y\n", os_localtime( &me.now ) );
-	return startlog;
+	os_fprintf( chandata->logfile, "%s", startlog );
 }
+
 /* [22:02] Fish( ~Fish@Server-Admin.irc-chat.net ) joined #neostats. */
 #define EJOINPROC "%s %s( %s@%s ) joined %s.\n"
 

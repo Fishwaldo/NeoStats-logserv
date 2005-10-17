@@ -35,16 +35,12 @@
 #define DOSIZE 50
 #endif
 
-
-char timebuf[TIMEBUFSIZE];
-char startlog[BUFSIZE];
-
 log_proc logging_funcs[][LGSMSG_NUMTYPES] =
 {
-	{logserv_joinproc, logserv_partproc, logserv_msgproc, logserv_noticeproc, logserv_ctcpaction, logserv_quitproc, logserv_topicproc, logserv_kickproc, logserv_nickproc, logserv_modeproc},
-	{egg_joinproc, egg_partproc, egg_msgproc, egg_noticeproc, egg_ctcpaction, egg_quitproc, egg_topicproc, egg_kickproc, egg_nickproc, egg_modeproc},
-	{mirc_joinproc, mirc_partproc, mirc_msgproc, mirc_noticeproc, mirc_ctcpaction, mirc_quitproc, mirc_topicproc, mirc_kickproc, mirc_nickproc, mirc_modeproc},
-	{xchat_joinproc, xchat_partproc, xchat_msgproc, xchat_noticeproc, xchat_ctcpaction, xchat_quitproc, xchat_topicproc, xchat_kickproc, xchat_nickproc, xchat_modeproc},
+	{logserv_startlog, logserv_joinproc, logserv_partproc, logserv_msgproc, logserv_noticeproc, logserv_ctcpaction, logserv_quitproc, logserv_topicproc, logserv_kickproc, logserv_nickproc, logserv_modeproc},
+	{egg_startlog, egg_joinproc, egg_partproc, egg_msgproc, egg_noticeproc, egg_ctcpaction, egg_quitproc, egg_topicproc, egg_kickproc, egg_nickproc, egg_modeproc},
+	{mirc_startlog, mirc_joinproc, mirc_partproc, mirc_msgproc, mirc_noticeproc, mirc_ctcpaction, mirc_quitproc, mirc_topicproc, mirc_kickproc, mirc_nickproc, mirc_modeproc},
+	{xchat_startlog, xchat_joinproc, xchat_partproc, xchat_msgproc, xchat_noticeproc, xchat_ctcpaction, xchat_quitproc, xchat_topicproc, xchat_kickproc, xchat_nickproc, xchat_modeproc},
 };
 
 /* @brief Opens the log file, creating directories where necessary
@@ -75,23 +71,7 @@ static int ls_open_log( ChannelLog *cl )
 	}
 	dlog( DEBUG1, "Opened %s for appending", cl->filename );
 	cl->ts_open = me.now;
-	/* write the start out */
-	switch( LogServ.logtype ) {
-		case 0:
-			os_fprintf( cl->logfile, "%s", logserv_startlog( cl ) );
-			break;
-		case 1:
-			os_fprintf( cl->logfile, "%s", egg_startlog( cl ) );
-			break;
-		case 2:
-			os_fprintf( cl->logfile, "%s", mirc_startlog( cl ) );
-			break;
-		case 3:
-			os_fprintf( cl->logfile, "%s", xchat_startlog( cl ) );
-			break;
-		default:
-			nlog( LOG_WARNING, "Unknown LogType" );
-	}
+	logging_funcs[LogServ.logtype][LGSMSG_START]( cl, NULL );
 	return NS_SUCCESS;
 }
 
@@ -240,7 +220,7 @@ void ls_close_logs( void )
  * 
  * Runs through all active opened logfiles only
  */
-int ls_RotateLogs( void *userptr ) 
+int ls_rotate_logs( void *userptr ) 
 {
 	hscan_t hs;
 	hnode_t *hn;

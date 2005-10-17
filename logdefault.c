@@ -22,11 +22,11 @@
 */
 
 #include "neostats.h"
-#include "logserv.h"  /* LogServ Definitions */
+#include "logserv.h"
+#include "logdefault.h"
 
-char *logserv_startlog( const ChannelLog *chandata )
+void logserv_startlog( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	return startlog;
 }
 
 void logserv_joinproc( ChannelLog *chandata, const CmdParams *cmdparams )

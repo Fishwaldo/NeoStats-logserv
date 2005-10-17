@@ -1,5 +1,8 @@
 LogServ ChangeLog
 =============================================================================
+3.0.a3 - Mark (M)
+ - Bug fixes for segfaults. (M)
+
 3.0.a2 - Mark (M)
  - Update settings table to a2 compatible format. (M)
 

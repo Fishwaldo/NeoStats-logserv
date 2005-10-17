@@ -66,11 +66,11 @@ const char *ls_help_url[] = {
 	NULL
 };
 
-const char *ls_help_stats[] = {
+const char *ls_help_status[] = {
 	"Simple LogServ Stats",
-	"Syntax: \2STATS\2",
+	"Syntax: \2STATUS\2",
 	"",
-	"Displays some simple stats about LogServ",
+	"Displays some simple status about LogServ",
 	NULL
 };
 

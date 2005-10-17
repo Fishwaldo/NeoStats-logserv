@@ -24,7 +24,7 @@
 #ifndef LOGDEFAULT_H
 #define LOGDEFAULT_H
 
-char *logserv_startlog( const ChannelLog *cl );
+void logserv_startlog( ChannelLog *chandata, const CmdParams *cmdparams );
 void logserv_joinproc( ChannelLog *chandata, const CmdParams *cmdparams );
 void logserv_partproc( ChannelLog *chandata, const CmdParams *cmdparams );
 void logserv_msgproc( ChannelLog *chandata, const CmdParams *cmdparams );

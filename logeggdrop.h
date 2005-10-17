@@ -24,7 +24,7 @@
 #ifndef LOGEGGDROP_H
 #define LOGEGGDROP_H
 
-char *egg_startlog( const ChannelLog *cl );
+void egg_startlog( ChannelLog *chandata, const CmdParams *cmdparams );
 void egg_joinproc( ChannelLog *chandata, const CmdParams *cmdparams );
 void egg_partproc( ChannelLog *chandata, const CmdParams *cmdparams );
 void egg_msgproc( ChannelLog *chandata, const CmdParams *cmdparams );

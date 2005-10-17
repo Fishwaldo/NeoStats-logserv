@@ -24,7 +24,7 @@
 #ifndef LOGXCHAT_H
 #define LOGXCHAT_H
 
-char *xchat_startlog( const ChannelLog *cl );
+void xchat_startlog( ChannelLog *chandata, const CmdParams *cmdparams );
 void xchat_joinproc( ChannelLog *chandata, const CmdParams *cmdparams );
 void xchat_partproc( ChannelLog *chandata, const CmdParams *cmdparams );
 void xchat_msgproc( ChannelLog *chandata, const CmdParams *cmdparams );

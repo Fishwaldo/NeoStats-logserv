@@ -22,8 +22,10 @@
 */
 
 #include "neostats.h"
-#include "logserv.h"  /* LogServ Definitions */
+#include "logserv.h"
+#include "logmirc.h"
 
+static char timebuf[TIMEBUFSIZE];
 #define MIRCTIME "[%H:%M]"
 
 static char *mirc_time( void )
@@ -41,17 +43,17 @@ static char *mirc_time( void )
 
 #define MSTARTLOG "Session Start: %s\nSession Ident: %s\n%s * Now talking in %s\n%s * Topic is '%s'\n%s * Set by %s on %s\n"
 
-char *mirc_startlog( const ChannelLog *cl )
+void mirc_startlog( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	char timebuf2[TIMEBUFSIZE];
-	char timebuf3[TIMEBUFSIZE];
+	static char startlog[BUFSIZE];
+	static char timebuf2[TIMEBUFSIZE];
+	static char timebuf3[TIMEBUFSIZE];
 	
 	os_strftime( timebuf, TIMEBUFSIZE, "%a %b %d %H:%M:%S %Y", os_localtime( &me.now ) );
 	os_strftime( timebuf2, TIMEBUFSIZE, "[%H:%M]", os_localtime( &me.now ) );
-	os_strftime( timebuf3, TIMEBUFSIZE, "%a %b %d %H:%M:%S", os_localtime( &cl->c->topictime ) );
-	ircsnprintf( startlog, BUFSIZE, MSTARTLOG, timebuf, cl->channame, timebuf2, cl->channame, timebuf2, cl->c->topic[0] != '0' ? cl->c->topic : "", timebuf2, cl->c->topicowner[0] != '0' ? cl->c->topicowner: "", timebuf3 );
-
-	return startlog;
+	os_strftime( timebuf3, TIMEBUFSIZE, "%a %b %d %H:%M:%S", os_localtime( &chandata->c->topictime ) );
+	ircsnprintf( startlog, BUFSIZE, MSTARTLOG, timebuf, chandata->channame, timebuf2, chandata->channame, timebuf2, chandata->c->topic[0] != '0' ? chandata->c->topic : "", timebuf2, chandata->c->topicowner[0] != '0' ? chandata->c->topicowner: "", timebuf3 );
+	os_fprintf( chandata->logfile, "%s", startlog );
 }
 
 /* [21:47] * Dirk-Digler has joined #neostats */

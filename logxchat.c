@@ -22,10 +22,12 @@
 */
 
 #include "neostats.h"
-#include "logserv.h"  /* LogServ Definitions */
+#include "logserv.h"
+#include "logxchat.h"
 
 /* XCHAT FORMAT LOGGING BELOW */
 
+static char timebuf[TIMEBUFSIZE];
 #define XCHATTIME "%b %d %H:%M:%S"
 
 static char *xchat_time( void )
@@ -38,12 +40,14 @@ static char *xchat_time( void )
  */
 #define XSTARTLOG "**** BEGIN LOGGING AT %s\n\n"
  
-char *xchat_startlog( const ChannelLog *cl )
+void xchat_startlog( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	char tmbuf[TIMEBUFSIZE];
+	static char startlog[BUFSIZE];
+	static char tmbuf[TIMEBUFSIZE];
+	
 	os_strftime( tmbuf, TIMEBUFSIZE, "%a %b %d %H:%M:%S %Y", os_localtime( &me.now ) );
 	ircsnprintf( startlog, BUFSIZE, XSTARTLOG, tmbuf );
-	return startlog;
+	os_fprintf( chandata->logfile, "%s", startlog );
 }
 
 

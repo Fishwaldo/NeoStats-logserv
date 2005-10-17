@@ -56,7 +56,8 @@ struct LogServ {
 extern hash_t *lschannelhash;
 
 typedef enum {
-	LGSMSG_JOIN=0,
+	LGSMSG_START = 0,
+	LGSMSG_JOIN,
 	LGSMSG_PART,
 	LGSMSG_MSG,
 	LGSMSG_NOTICE,
@@ -75,7 +76,7 @@ typedef void (*log_proc) ( ChannelLog *chandata, const CmdParams *cmdparams );
 
 /* log_procssing.c decl */
 void ls_send_to_logproc ( LGSMSG_TYPE msgtype, const Channel *c, const CmdParams *cmdparams );
-int ls_RotateLogs( void * );
+int ls_rotate_logs( void * );
 void ls_close_logs( void );
 void ls_switch_file( ChannelLog *cl );
 void ls_write_log( ChannelLog *cl, const char *fmt, ...) __attribute__( ( format( printf,2,3 ) ) );
@@ -85,14 +86,11 @@ extern const char *ls_help_add[];
 extern const char *ls_help_del[];
 extern const char *ls_help_list[];
 extern const char *ls_help_url[];
-extern const char *ls_help_stats[];
+extern const char *ls_help_status[];
 extern const char *ls_help_set_logtype[];
 extern const char *ls_help_set_logsize[];
 extern const char *ls_help_set_logtime[];
 extern const char *ls_help_set_logdir[];
 extern const char *ls_help_set_savedir[];
-
-extern char timebuf[TIMEBUFSIZE];
-extern char startlog[BUFSIZE];
 
 #endif

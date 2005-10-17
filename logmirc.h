@@ -24,7 +24,7 @@
 #ifndef LOGMIRC_H
 #define LOGMIRC_H
 
-char *mirc_startlog( const ChannelLog *cl );
+void mirc_startlog( ChannelLog *chandata, const CmdParams *cmdparams );
 void mirc_joinproc( ChannelLog *chandata, const CmdParams *cmdparams );
 void mirc_partproc( ChannelLog *chandata, const CmdParams *cmdparams );
 void mirc_msgproc( ChannelLog *chandata, const CmdParams *cmdparams );
