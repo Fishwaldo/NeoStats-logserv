@@ -356,7 +356,6 @@ static int ls_cmd_add( const CmdParams *cmdparams )
 		ls_join_logged_channel( c, cl ); 
 		irc_chanprivmsg( ls_bot, cl->channame, "%s activated logging on %s", cmdparams->source->name, cl->channame );
 	}
-	nlog( LOG_NOTICE, "%s activated logging on %s", cmdparams->source->name, cl->channame );
 	irc_prefmsg( ls_bot, cmdparams->source, "Activated logging on %s", cl->channame );
 	CommandReport( ls_bot, "%s activated logging on %s", cmdparams->source->name, cl->channame );
 	return NS_SUCCESS;
