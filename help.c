@@ -43,7 +43,7 @@ const char *ls_help_add[] = {
 
 const char *ls_help_del[] = {
 	"Stop logging channel",
-	"Syntax: \2DEL \37<Channame>\37\2",
+	"Syntax: \2DEL \37<#channel name>\37\2",
 	"",
 	"Deletes a logged channel from LogServ",
 	"Requires the channel name",
@@ -60,7 +60,7 @@ const char *ls_help_list[] = {
 
 const char *ls_help_url[] = {
 	"Change channel URL",
-	"Syntax: \2URL \37<url>\37\2",
+	"Syntax: \2URL \37<#channel name> <url>\37\2",
 	"",
 	"Modifies the URL for the stats on that channel",
 	NULL
