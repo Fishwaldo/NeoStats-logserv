@@ -84,7 +84,8 @@ static int ls_open_log( ChannelLog *cl )
 
 static void ls_close_log( ChannelLog *cl )
 {
-	os_fclose( cl->logfile );
+	if( cl->logfile )
+		os_fclose( cl->logfile );
 	cl->logfile = NULL;
 	cl->ts_open = 0;
 }
