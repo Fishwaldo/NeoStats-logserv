@@ -48,7 +48,7 @@ static int ls_event_nick( const CmdParams *cmdparams );
 static int ls_event_cmode( const CmdParams *cmdparams );
 
 /** Copyright info */
-const char *ls_copyright[] =
+static const char *ls_copyright[] =
 {
 	"Copyright (c) 1999-2005, NeoStats",
 	"http://www.neostats.net/",
@@ -163,7 +163,7 @@ static int LoadLogChannel( void *data, int size )
 	return NS_FALSE;
 }
 
-void LoadLogChannels( void )
+static void LoadLogChannels( void )
 {
 	DBAFetchRows( "Channel", LoadLogChannel );
 }
