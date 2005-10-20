@@ -25,6 +25,7 @@
 #include MODULECONFIG
 #include "logserv.h"
 
+LogServcfg LogServ;
 hash_t *lschannelhash;
 static Bot *ls_bot;
 
@@ -80,7 +81,7 @@ static bot_cmd ls_commands[]=
 	NS_CMD_END()
 };
 
-bot_setting ls_settings[]=
+static bot_setting ls_settings[]=
 {
 	{"LOGTYPE",	&LogServ.logtype, SET_TYPE_INT,	1, 3, NS_ULEVEL_ADMIN, NULL, ls_help_set_logtype, NULL, ( void * )1},
 	{"LOGSIZE",	&LogServ.maxlogsize, SET_TYPE_INT, 0, 10000000, NS_ULEVEL_ADMIN, "Bytes", ls_help_set_logsize, NULL, ( void * )1000000},

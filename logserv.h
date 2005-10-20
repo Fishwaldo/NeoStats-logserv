@@ -38,19 +38,19 @@ typedef struct ChannelLog {
 
 
 /* settings for LogServ */
-struct LogServ {
+typedef struct LogServcfg {
 	int logtype;
 	char logdir[MAXPATH];
 	char savedir[MAXPATH];
 	long maxlogsize;
 	long maxopentime;
-} LogServ;
+} LogServcfg;
+
+extern LogServcfg LogServ;
 
 /* Definitions for flags */
-#define LGSFDOPENED 0x1
-#define LGSFDNEEDFLUSH 0x2
-#define LGSPUBSTATS 0x4
-#define LGSACTIVE 0x8
+#define LGSPUBSTATS 0x1
+#define LGSACTIVE 0x2
 
 /* the hash that stores the monitored channels */
 extern hash_t *lschannelhash;

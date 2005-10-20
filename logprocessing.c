@@ -35,7 +35,7 @@
 #define DOSIZE 50
 #endif
 
-log_proc logging_funcs[][LGSMSG_NUMTYPES] =
+static log_proc logging_funcs[][LGSMSG_NUMTYPES] =
 {
 	{logserv_startlog, logserv_joinproc, logserv_partproc, logserv_msgproc, logserv_noticeproc, logserv_ctcpaction, logserv_quitproc, logserv_topicproc, logserv_kickproc, logserv_nickproc, logserv_modeproc},
 	{egg_startlog, egg_joinproc, egg_partproc, egg_msgproc, egg_noticeproc, egg_ctcpaction, egg_quitproc, egg_topicproc, egg_kickproc, egg_nickproc, egg_modeproc},
