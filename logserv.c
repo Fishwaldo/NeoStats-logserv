@@ -271,11 +271,11 @@ static int ls_cmd_add( const CmdParams *cmdparams )
 	}
 	cl = ns_calloc( sizeof( ChannelLog ) );
 	strlcpy( cl->channame, cmdparams->av[0], MAXCHANLEN );
-	if( !ircstrcasecmp( cmdparams->av[1], "Public" ) )
+	if( ircstrcasecmp( cmdparams->av[1], "Public" ) == 0 )
 	{
 		cl->flags |= LGSPUBSTATS;
 	}
-	else if( !ircstrcasecmp( cmdparams->av[1], "Private" ) )
+	else if( ircstrcasecmp( cmdparams->av[1], "Private" ) == 0 )
 	{
 		cl->flags &= ~LGSPUBSTATS;
 	}
