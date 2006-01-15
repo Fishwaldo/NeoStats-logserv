@@ -3,13 +3,12 @@
 /COPYING -text
 /ChangeLog -text
 /LICENSE -text
-/LogServ.README -text
-/LogServ.README.html -text
-/LogServ.xml -text
 /Makefile.in -text
 /NEWS -text
 /OnisDoLogs.sh -text
 /README.LogServ -text
+/README.LogServ.html -text
+/README.LogServ.xml -text
 /RELNOTES -text
 /configure -text
 /configure.in -text
