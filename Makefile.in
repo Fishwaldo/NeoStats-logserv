@@ -11,7 +11,7 @@ INCLUDES = -I@DIRINST@/include/ -I.
 SRCS = logserv.c logprocessing.c help.c logdefault.c logeggdrop.c logmirc.c logxchat.c
 OBJS = ${SRCS:.c=.o}
 TARGET = logserv.so
-DOCS = LogServ.README LogServ.README.html
+DOCS = README.LogServ README.LogServ.html
 DATA =
 SCRIPTS = OnisDoLogs.sh onisconfig
 DISTFILES = $(SRCS) $(DOCS) $(SCRIPTS) *.in configure install-sh ChangeLog *.h LICENSE RELNOTES logserv.vcproj modconfigwin32.h
