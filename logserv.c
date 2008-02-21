@@ -73,7 +73,7 @@ ModuleInfo module_info =
 
 static bot_cmd ls_commands[]=
 {
-	{"ADD",		ls_cmd_add,		3, 	NS_ULEVEL_OPER,	ls_help_add, 0, NULL, NULL},
+	{"ADD",		ls_cmd_add,		2, 	NS_ULEVEL_OPER,	ls_help_add, 0, NULL, NULL},
 	{"DEL",		ls_cmd_del,		1, 	NS_ULEVEL_OPER,	ls_help_del, 0, NULL, NULL},
 	{"LIST",	ls_cmd_list,	0, 	NS_ULEVEL_OPER,	ls_help_list, 0, NULL, NULL},
 	{"URL",		ls_cmd_url,		2, 	NS_ULEVEL_OPER,	ls_help_url, 0, NULL, NULL},
