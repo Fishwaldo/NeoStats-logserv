@@ -2,7 +2,7 @@
 LANG=C
 # Channel log Directory. Where Logfiles are stored. Only need to change this
 #if you installed neostats into a different prefix other than NeoStats
-chanlogs="$HOME/NeoStats/ChanLogs/"
+chanlogs="$HOME/NeoStats3.0/ChanLogs/"
 
 # Onis Installation Path
 onisinstall="$HOME/onis-0.4.9/" 
