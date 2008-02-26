@@ -106,7 +106,11 @@ void mirc_quitproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void mirc_topicproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	ls_write_log( chandata, MTOPICPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
+	if (cmdparams->source) {
+		ls_write_log( chandata, MTOPICPROC, mirc_time(), cmdparams->source->name, cmdparams->param );
+	} else {
+		ls_write_log( chandata, MTOPICPROC, mirc_time(), cmdparams->channel->topicowner, cmdparams->param );
+	}		
 }
 
 /* [21:47] * Dirk-Digler was kicked by Fish( Fish ) */

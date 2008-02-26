@@ -103,7 +103,11 @@ void xchat_quitproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void xchat_topicproc( ChannelLog *chandata, const CmdParams *cmdparams )
 {
-	ls_write_log( chandata, XTOPICPROC, xchat_time(), cmdparams->source->name, cmdparams->param );
+	if (cmdparams->source) {
+		ls_write_log( chandata, XTOPICPROC, xchat_time(), cmdparams->source->name, cmdparams->param );
+	} else {
+		ls_write_log( chandata, XTOPICPROC, xchat_time(), cmdparams->channel->topicowner, cmdparams->param );
+	}		
 }
 
 /* Jan 02 17:27:10 <-- Fish-Away has kicked Dirk-Digler from #neostats( ha ) */

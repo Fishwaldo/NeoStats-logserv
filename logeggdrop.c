@@ -96,10 +96,10 @@ void egg_quitproc( ChannelLog *chandata, const CmdParams *cmdparams )
 
 void egg_topicproc( ChannelLog *chandata, const CmdParams *cmdparams ) 
 {
-	if( cmdparams->source->user )
+	if( cmdparams->source)
 		ls_write_log( chandata, ETOPICPROC, egg_time(), cmdparams->channel->name, cmdparams->source->name, cmdparams->source->user->username, cmdparams->source->user->vhost, cmdparams->param );
 	else 
-		ls_write_log( chandata, ENOUSERTOPICPROC, egg_time(), cmdparams->channel->name, cmdparams->source->name, cmdparams->param );
+		ls_write_log( chandata, ENOUSERTOPICPROC, egg_time(), cmdparams->channel->name, cmdparams->channel->topicowner, cmdparams->param );
 }
 
 /* [22:02] Fish kicked from #neostats by Fish: Fish */

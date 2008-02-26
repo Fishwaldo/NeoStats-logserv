@@ -16,7 +16,7 @@ DIRINST=~/NeoStats3.0/
 AC_PREFIX_DEFAULT(~/NeoStats3.0/)
 AM_INIT_AUTOMAKE($MODPACKAGE, $VERSION)
 #AM_INIT_AUTOMAKE("","")
-CFLAGS="$CFLAGS -O2 -fno-strict-aliasing"
+CFLAGS="$CFLAGS -g -O2 -fno-strict-aliasing"
 
 dnl Checks for programs.
 AC_PROG_CC

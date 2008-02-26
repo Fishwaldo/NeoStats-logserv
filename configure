@@ -2406,7 +2406,7 @@ am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
 
 
 #AM_INIT_AUTOMAKE("","")
-CFLAGS="$CFLAGS -O2 -fno-strict-aliasing"
+CFLAGS="$CFLAGS -g -O2 -fno-strict-aliasing"
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
