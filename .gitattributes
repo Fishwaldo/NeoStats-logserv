@@ -3,6 +3,7 @@
 /COPYING -text
 /ChangeLog -text
 /LICENSE -text
+/Makefile.am -text
 /Makefile.in -text
 /NEWS -text
 /OnisDoLogs.sh -text
@@ -10,6 +11,7 @@
 /README.LogServ.html -text
 /README.LogServ.xml -text
 /RELNOTES -text
+/aclocal.m4 -text
 /configure -text
 /configure.in -text
 /help.c -text
