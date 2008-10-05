@@ -2,6 +2,7 @@ LogServ ChangeLog
 =============================================================================
 3.0.a4 - Fish (F)
  - Fix Bug LS-11 make install failure
+ - make sure bot uses servicescmode when joining channels
 
 3.0.a3 - Mark (M)
  - Bug fixes for segfaults. (M)

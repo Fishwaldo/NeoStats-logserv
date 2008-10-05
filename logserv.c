@@ -133,7 +133,7 @@ static void ls_save_channel_data( ChannelLog *cl )
 
 static void ls_join_logged_channel( Channel *c, ChannelLog *cl )
 {
-	if( irc_join( ls_bot, cl->channame, 0 ) == NS_SUCCESS )
+	if( irc_join( ls_bot, cl->channame, me.servicescmode ) == NS_SUCCESS )
 	{
 		cl->flags |= LGSACTIVE;
 		nlog( LOG_NOTICE, "Activated logging on %s", cl->channame );
